@@ -1,0 +1,25 @@
+# 安装 pre-commit: pip install pre-commit 或 brew install pre-commit (参见 https://pre-commit.com/#install)
+# 安装触发器: pre-commit install
+
+# https://pre-commit.com/#regular-expressions
+exclude: ^assets/docs
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: 77c7147
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+  - repo: https://github.com/golangci/golangci-lint
+    rev: ad4a6b2
+    hooks:
+      - id: golangci-lint
+        name: golangci-lint
+        description: Fast linters runner for Go. Note that only modified files are linted, so linters like 'unused' that need to scan all files won't work as expected.
+        entry: golangci-lint run --new-from-rev HEAD --fix
+        types: [ go ]
+        language: golang
+        require_serial: true
+        pass_filenames: false
