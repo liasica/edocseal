@@ -7,6 +7,7 @@ package internal
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/liasica/edocseal/internal"
 	"github.com/liasica/edocseal/internal/g"
 )
 
@@ -20,6 +21,11 @@ func RunCommand() {
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
 			// 加载配置文件
 			g.LoadConfig(configFile)
+
+			// 初始化
+			internal.Boot()
+		},
+		Run: func(_ *cobra.Command, _ []string) {
 		},
 	}
 

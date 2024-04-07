@@ -5,8 +5,6 @@
 package g
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,28 +13,36 @@ import (
 	"github.com/spf13/viper"
 )
 
-var cfg *Config
+var (
+	cfg  *Config
+	path string
+)
 
 type Config struct {
 	// 根证书和私钥
-	Root *Certificate
-
-	// 配置目录
-	Path string
+	RootCertificate struct {
+		Certificate string
+		PrivateKey  string
+	}
 
 	// 日志配置
 	Logger struct {
-		// 是否输出至控制台
-		Console bool
-		// 是否输出至Redis
-		Redis bool
+		Console  bool   // 是否输出至控制台
+		Redis    bool   // 是否输出至Redis
+		RedisKey string // Redis输出key
 	}
-}
 
-// Certificate 证书配置
-type Certificate struct {
-	Certificate *x509.Certificate
-	PrivateKey  *rsa.PrivateKey
+	// RPC配置
+	RPC struct {
+		Bind string // 绑定地址
+	}
+
+	// Redis配置
+	Redis struct {
+		Addr     string // 地址
+		Password string // 密码
+		DB       int    // 数据库
+	}
 }
 
 func readConfig() (err error) {
@@ -68,7 +74,7 @@ func LoadConfig(configFile string) {
 		os.Exit(1)
 	}
 
-	cfg.Path = filepath.Dir(configFile)
+	path = filepath.Dir(configFile)
 
 	// 监听配置文件变动后重载
 	viper.OnConfigChange(func(in fsnotify.Event) {
@@ -79,17 +85,12 @@ func LoadConfig(configFile string) {
 	viper.WatchConfig()
 }
 
-// GetRootCertificate 获取根证书
-func GetRootCertificate() *x509.Certificate {
-	return cfg.Root.Certificate
-}
-
-// GetRootPrivateKey 获取根证书私钥
-func GetRootPrivateKey() *rsa.PrivateKey {
-	return cfg.Root.PrivateKey
-}
-
 // GetConfigPath 获取配置目录
 func GetConfigPath() string {
-	return cfg.Path
+	return path
+}
+
+// GetRPCBind 获取RPC绑定地址
+func GetRPCBind() string {
+	return cfg.RPC.Bind
 }
