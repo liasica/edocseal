@@ -29,13 +29,13 @@ message ContractTemplateResponse {
 // 创建合同请求
 message ContractCreateRequest{
   string template = 1; // 合同模板编号
-  string sn = 2; // 合同编号，合同编号需要保持唯一值
+  map<string, string> values = 3; // 合同模板字段，key为字段名，value为字段值，勾选选中值为 "On"
 }
 
 // 创建合同响应
 message ContractCreateResponse{
   string url = 1; // 创建合同合同文件地址
-  map<string, string> values = 2; // 合同模板字段，key为字段名，value为字段值，勾选选中值为 "On"
+  string sn = 2; // 合同编号
 }
 
 message ContractSignEntity{
