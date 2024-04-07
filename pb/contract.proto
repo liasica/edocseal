@@ -7,6 +7,10 @@ package pb;
 service Contract {
   // 新增模板
   rpc template(ContractTemplateRequest) returns (ContractTemplateResponse) {}
+
+  // 预填充
+  rpc fill(ContractFillRequest) returns (ContractFillResponse) {}
+
   // 合同签署
   rpc sign(ContractSignRequest) returns (ContractSignResponse) {}
 }
@@ -19,6 +23,16 @@ message ContractTemplateRequest{
 // 新增模板响应
 message ContractTemplateResponse {
   string template = 1; // 合同模板编号
+}
+
+// 预填充请求
+message ContractFillRequest{
+  string template = 1; // 合同模板编号
+}
+
+// 预填充响应
+message ContractFillResponse{
+  string url = 1; // 预填充合同文件地址
 }
 
 // 合同签署请求
