@@ -8,16 +8,17 @@ service Contract {
   // 新增模板
   rpc template(ContractTemplateRequest) returns (ContractTemplateResponse) {}
 
-  // 预填充
-  rpc fill(ContractFillRequest) returns (ContractFillResponse) {}
+  // 创建合同
+  rpc create(ContractCreateRequest) returns (ContractCreateResponse) {}
 
   // 合同签署
   rpc sign(ContractSignRequest) returns (ContractSignResponse) {}
 }
 
-//新增模板请求
+// 新增模板请求
 message ContractTemplateRequest{
   string url = 1; // 合同模板文件地址
+  repeated string fields = 2; // 合同模板字段
 }
 
 // 新增模板响应
@@ -25,41 +26,39 @@ message ContractTemplateResponse {
   string template = 1; // 合同模板编号
 }
 
-// 预填充请求
-message ContractFillRequest{
+// 创建合同请求
+message ContractCreateRequest{
   string template = 1; // 合同模板编号
+  string sn = 2; // 合同编号，合同编号需要保持唯一值
 }
 
-// 预填充响应
-message ContractFillResponse{
-  string url = 1; // 预填充合同文件地址
+// 创建合同响应
+message ContractCreateResponse{
+  string url = 1; // 创建合同合同文件地址
+  map<string, string> values = 2; // 合同模板字段，key为字段名，value为字段值，勾选选中值为 "On"
+}
+
+message ContractSignEntity{
+  string seal = 1; // 签章图片，BASE64编码
+  string name = 2; // 签署人
+  string province = 3; // 省份
+  string city = 4; // 城市
+  string address = 5; // 地址
+  string phone = 6; // 手机号
+  string idcard = 7; // 身份证号
 }
 
 // 合同签署请求
 // 个签属性和团签属性只能二选一（需要进行限制判定）
 // 目前未做整体字段实现，先用sn字段测试
 message ContractSignRequest{
-  string template = 1; // 合同模板编号
-  string sn = 2; // 合同编号
-  //  string name = 3; // 骑手姓名
-  //  string idcard = 4; // 身份证号
-  //  string address = 5; // 户口地址
-  //  string phone = 6; // 骑手电话
-  //  string city = 7; // 城市
-  //  string rider_sign = 8; // 骑手签名
-  //  string rider_contact = 9; // 骑手紧急联系人
-  //  string date = 10; // 签署日期
-  //  ContractSignPlan plan = 11; // 个签属性
-  //  ContractSignEnterprise enterprise = 12; // 团签属性
+  string sn = 1; // 合同编号
+  ContractSignEntity sign = 2; // 签署人
 }
-
-// 个签属性，暂未实现
-message ContractSignPlan {}
-
-// 团签属性，暂未实现
-message ContractSignEnterprise {}
 
 // 合同签署响应
 message ContractSignResponse{
-  string file = 1; // 已签署合同文件地址
+  string status = 1; // 签署状态 SUCCESS:成功，FAIL:失败
+  string file = 2; // 已签署合同文件地址
+  string message = 3; // 其他消息，例如错误消息，成功时为空
 }
