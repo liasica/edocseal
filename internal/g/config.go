@@ -18,12 +18,17 @@ var (
 	path string
 )
 
+type CertificatePath struct {
+	Certificate string
+	PrivateKey  string
+}
+
 type Config struct {
-	// 根证书和私钥
-	RootCertificate struct {
-		Certificate string
-		PrivateKey  string
-	}
+	// 根证书和私钥，用于签发证书
+	RootCertificate CertificatePath
+
+	// 企业证书，用于签署协议
+	EnterpriseCertificate CertificatePath
 
 	// 日志配置
 	Logger struct {

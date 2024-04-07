@@ -15,13 +15,13 @@ func Boot() {
 	zap.ReplaceGlobals(g.NewZap())
 
 	// 初始化证书
-	g.NewCertificate()
+	rootCrt, entCrt := g.NewCertificate()
 
 	zap.L().Info(
 		"edocseal 初始化完成成功",
 		zap.String("cfgPath", g.GetConfigPath()),
 		zap.String("rpcBind", g.GetRPCBind()),
-		zap.Bool("rootCA", g.GetRootCertificate() != nil),
-		zap.Bool("rootPrivateKey", g.GetRootPrivateKey() != nil),
+		zap.Bool("rootCrt", rootCrt.GetCertificate() != nil && rootCrt.GetPrivateKey() != nil),
+		zap.Bool("entCrt", entCrt.GetCertificate() != nil && entCrt.GetPrivateKey() != nil),
 	)
 }

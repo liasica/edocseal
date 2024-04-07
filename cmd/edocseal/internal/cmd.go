@@ -33,6 +33,7 @@ func RunCommand() {
 
 	cmd.AddCommand(
 		certificateCommand(),
+		serverCommand(),
 	)
 
 	_ = cmd.Execute()

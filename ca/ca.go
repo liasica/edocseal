@@ -16,7 +16,7 @@ import (
 	"time"
 )
 
-const DefaultPrivateKeyBits = 4096
+const DefaultPrivateKeyBits = 2048
 
 type BlocType int
 
@@ -137,15 +137,18 @@ func LoadCertificateFromFile(path string) (crt *x509.Certificate, err error) {
 }
 
 // CreateInterCertificate 签发中级证书
-func CreateInterCertificate(dns string, priKey *rsa.PrivateKey, subject pkix.Name, ca *x509.Certificate) (interCrt, interKey []byte, err error) {
+func CreateInterCertificate(dns string, priKey *rsa.PrivateKey, ca *x509.Certificate, subject pkix.Name) (interCrt, interKey []byte, serial *big.Int, err error) {
 	// 生成中级证书密钥对
 	key := GenerateRsaPrivateKey()
+
+	// 生成随机数
+	serial = big.NewInt(mr.Int63())
 
 	// 证书请求
 	certificate := x509.Certificate{
 		Subject:               subject,
 		DNSNames:              []string{dns},
-		SerialNumber:          big.NewInt(mr.Int63()),
+		SerialNumber:          serial,
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(1, 0, 0),
 		BasicConstraintsValid: true,

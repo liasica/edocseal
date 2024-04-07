@@ -9,6 +9,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"fmt"
+	"math/big"
 	"os"
 	"path/filepath"
 	"strings"
@@ -24,19 +25,21 @@ func certificateCommand() *cobra.Command {
 		Short: "密钥和证书管理",
 	}
 
-	cmd.AddCommand(certificateGenerateCommand())
+	cmd.AddCommand(certificateRootCommand())
+	cmd.AddCommand(certificateInertCommand())
 	return cmd
 }
 
-func certificateGenerateCommand() *cobra.Command {
+func certificateRootCommand() *cobra.Command {
 	var (
 		path     string
 		override bool
 	)
 
 	cmd := &cobra.Command{
-		Use:   "generate",
-		Short: "生成密钥和证书",
+		Use:               "root",
+		Short:             "生成根密钥和证书",
+		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		Run: func(cmd *cobra.Command, args []string) {
 			// 根证书私钥
 			privateKeyPath := filepath.Join(path, "rootPrivateKey.pem")
@@ -57,13 +60,13 @@ func certificateGenerateCommand() *cobra.Command {
 
 				if !override {
 					fmt.Println("密钥和证书已存在，如需重新生成请使用 -o 参数")
-					return
+					os.Exit(1)
 				}
 			}
 
 			// 生成密钥并保存
 			priKey := ca.GenerateRsaPrivateKey()
-			err := os.WriteFile(privateKeyPath, ca.PEMEncoding(x509.MarshalPKCS1PrivateKey(priKey), ca.BlocTypePrivateKey), 0644)
+			err := ca.SaveToFile(privateKeyPath, x509.MarshalPKCS1PrivateKey(priKey), ca.BlocTypePrivateKey)
 			if err != nil {
 				fmt.Printf("密钥保存失败：%s", err)
 				os.Exit(1)
@@ -83,7 +86,7 @@ func certificateGenerateCommand() *cobra.Command {
 				fmt.Printf("生成根证书失败：%s", err)
 				os.Exit(1)
 			}
-			err = os.WriteFile(rootCertPath, ca.PEMEncoding(rootCertificate, ca.BlocTypeCertificate), 0644)
+			err = ca.SaveToFile(rootCertPath, rootCertificate, ca.BlocTypeCertificate)
 			if err != nil {
 				fmt.Printf("根证书保存失败：%s", err)
 				os.Exit(1)
@@ -93,6 +96,96 @@ func certificateGenerateCommand() *cobra.Command {
 
 	cmd.Flags().StringVarP(&path, "path", "p", "config", "生成的密钥和证书存放路径")
 	cmd.Flags().BoolVarP(&override, "override", "o", false, "是否覆盖已有密钥和证书")
+
+	return cmd
+}
+
+func certificateInertCommand() *cobra.Command {
+	var (
+		path               string
+		province           string
+		locality           string
+		organization       string
+		organizationalUnit string
+		commonName         string
+		dns                string
+	)
+
+	cmd := &cobra.Command{
+		Use:               "inter",
+		Short:             "签发中间证书",
+		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
+		Run: func(cmd *cobra.Command, args []string) {
+			// 根证书私钥
+			rootPrivateKeyPath := filepath.Join(path, "rootPrivateKey.pem")
+			// 根证书
+			rootCertPath := filepath.Join(path, "rootCA.crt")
+
+			// 判断是否存在密钥和证书
+			if !fileExists(rootPrivateKeyPath) || !fileExists(rootCertPath) {
+				fmt.Println("根证书不存在，请先执行 certificate root 命令生成根证书")
+				os.Exit(1)
+			}
+
+			// 加载根证书和私钥
+			rootPrikey, err := ca.LoadPrivateKeyFromFile(rootPrivateKeyPath)
+			if err != nil {
+				fmt.Printf("加载根证书私钥失败：%s", err)
+				os.Exit(1)
+			}
+
+			var rootCa *x509.Certificate
+			rootCa, err = ca.LoadCertificateFromFile(rootCertPath)
+			if err != nil {
+				fmt.Printf("加载根证书失败：%s", err)
+				os.Exit(1)
+			}
+
+			// 签发证书并保存
+			var (
+				interCrt, interKey []byte
+				serial             *big.Int
+			)
+			interCrt, interKey, serial, err = ca.CreateInterCertificate(dns, rootPrikey, rootCa, pkix.Name{
+				Country:            []string{"中国"},               // 国家
+				Province:           []string{province},           // 省份
+				Locality:           []string{locality},           // 城市
+				Organization:       []string{organization},       // 证书持有者组织名称
+				OrganizationalUnit: []string{organizationalUnit}, // 证书持有者组织唯一标识
+				CommonName:         commonName,                   // 证书持有者通用名，需保持唯一，否则验证会失败
+			})
+			if err != nil {
+				fmt.Printf("签发证书失败：%s", err)
+				return
+			}
+
+			sn := serial.String()
+
+			// 保存密钥
+			err = ca.SaveToFile(filepath.Join(path, sn+".pem"), interKey, ca.BlocTypePrivateKey)
+			if err != nil {
+				fmt.Printf("密钥保存失败：%s", err)
+				os.Exit(1)
+			}
+
+			// 保存证书
+			err = ca.SaveToFile(filepath.Join(path, sn+".crt"), interCrt, ca.BlocTypeCertificate)
+			if err != nil {
+				fmt.Printf("证书保存失败：%s", err)
+				os.Exit(1)
+			}
+
+			fmt.Printf("证书签发成功，证书序列号：%s\n", sn)
+		},
+	}
+
+	cmd.Flags().StringVarP(&path, "path", "p", "config", "生成的密钥和证书存放路径")
+	cmd.Flags().StringVar(&province, "province", "北京市", "省份")
+	cmd.Flags().StringVar(&locality, "locality", "东城区", "城市")
+	cmd.Flags().StringVar(&organization, "organization", "张三", "证书持有者组织名称")
+	cmd.Flags().StringVar(&organizationalUnit, "organizationalUnit", "ZhangSan", "证书持有者组织唯一标识")
+	cmd.Flags().StringVar(&commonName, "commonName", "ZhangSan CA", "证书持有者通用名")
+	cmd.Flags().StringVar(&dns, "dns", "liasica.com", "证书域名")
 
 	return cmd
 }

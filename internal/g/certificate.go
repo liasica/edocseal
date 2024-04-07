@@ -11,7 +11,10 @@ import (
 	"github.com/liasica/edocseal/ca"
 )
 
-var certificate *Certificate
+var (
+	rootCrt *Certificate
+	entCrt  *Certificate
+)
 
 // Certificate 证书配置
 type Certificate struct {
@@ -19,33 +22,49 @@ type Certificate struct {
 	privateKey  *rsa.PrivateKey
 }
 
-// NewCertificate 初始化证书
-func NewCertificate() *Certificate {
-	if cfg.RootCertificate.Certificate == "" || cfg.RootCertificate.PrivateKey == "" {
+// NewCertificate 获取证书
+func NewCertificate() (root *Certificate, ent *Certificate) {
+	if rootCrt == nil {
+		rootCrt = loadCertificate(cfg.RootCertificate)
+	}
+	if entCrt == nil {
+		entCrt = loadCertificate(cfg.EnterpriseCertificate)
+	}
+
+	return rootCrt, entCrt
+}
+
+// 加载证书
+func loadCertificate(path CertificatePath) *Certificate {
+	if path.Certificate == "" || path.PrivateKey == "" {
 		return nil
 	}
 	// 加载根证书和私钥
-	priKey, _ := ca.LoadPrivateKeyFromFile(cfg.RootCertificate.PrivateKey)
-	rootCa, _ := ca.LoadCertificateFromFile(cfg.RootCertificate.Certificate)
-	certificate = &Certificate{
+	priKey, _ := ca.LoadPrivateKeyFromFile(path.PrivateKey)
+	rootCa, _ := ca.LoadCertificateFromFile(path.Certificate)
+	return &Certificate{
 		certificate: rootCa,
 		privateKey:  priKey,
 	}
-	return certificate
 }
 
-// GetRootCertificate 获取根证书
-func GetRootCertificate() *x509.Certificate {
-	if certificate == nil {
-		return nil
-	}
-	return certificate.certificate
+// IsValid 判断证书是否有效
+func (crt *Certificate) IsValid() bool {
+	return crt != nil && crt.certificate != nil && crt.privateKey != nil
 }
 
-// GetRootPrivateKey 获取根证书私钥
-func GetRootPrivateKey() *rsa.PrivateKey {
-	if certificate == nil {
+// GetCertificate 获取证书
+func (crt *Certificate) GetCertificate() *x509.Certificate {
+	if crt == nil || crt.certificate == nil || crt.privateKey == nil {
 		return nil
 	}
-	return certificate.privateKey
+	return crt.certificate
+}
+
+// GetPrivateKey 获取证书私钥
+func (crt *Certificate) GetPrivateKey() *rsa.PrivateKey {
+	if crt == nil || crt.certificate == nil || crt.privateKey == nil {
+		return nil
+	}
+	return crt.privateKey
 }
