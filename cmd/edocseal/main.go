@@ -7,6 +7,5 @@ package main
 import "github.com/liasica/edocseal/cmd/edocseal/internal"
 
 func main() {
-
 	internal.RunCommand()
 }

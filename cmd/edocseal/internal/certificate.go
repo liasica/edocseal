@@ -10,6 +10,7 @@ import (
 	"crypto/x509/pkix"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -37,10 +38,10 @@ func certificateGenerateCommand() *cobra.Command {
 		Use:   "generate",
 		Short: "生成密钥和证书",
 		Run: func(cmd *cobra.Command, args []string) {
-			var (
-				privateKeyPath = path + "/rootPrivateKey.pem" // 根证书私钥
-				rootCertPath   = path + "/rootCA.crt"         // 根证书
-			)
+			// 根证书私钥
+			privateKeyPath := filepath.Join(path, "rootPrivateKey.pem")
+			// 根证书
+			rootCertPath := filepath.Join(path, "rootCA.crt")
 
 			// 判断是否存在密钥和证书
 			if !override && (fileExists(privateKeyPath) || fileExists(rootCertPath)) {
@@ -90,8 +91,8 @@ func certificateGenerateCommand() *cobra.Command {
 		},
 	}
 
-	cmd.PersistentFlags().StringVarP(&path, "path", "p", "config", "生成的密钥和证书存放路径")
-	cmd.PersistentFlags().BoolVarP(&override, "override", "o", false, "是否覆盖已有密钥和证书")
+	cmd.Flags().StringVarP(&path, "path", "p", "config", "生成的密钥和证书存放路径")
+	cmd.Flags().BoolVarP(&override, "override", "o", false, "是否覆盖已有密钥和证书")
 
 	return cmd
 }

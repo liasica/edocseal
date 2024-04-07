@@ -4,16 +4,26 @@
 
 package internal
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+
+	"github.com/liasica/edocseal/internal/g"
+)
 
 func RunCommand() {
+	var configFile string
+
 	cmd := &cobra.Command{
 		Use:               "edocseal",
 		Short:             "电子签名控制台",
 		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		PersistentPreRun: func(_ *cobra.Command, _ []string) {
+			// 加载配置文件
+			g.LoadConfig(configFile)
 		},
 	}
+
+	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", "config/config.yaml", "配置文件")
 
 	cmd.AddCommand(
 		certificateCommand(),
