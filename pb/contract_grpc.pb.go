@@ -19,13 +19,17 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Contract_Sign_FullMethodName = "/pb.Contract/Sign"
+	Contract_Template_FullMethodName = "/pb.Contract/template"
+	Contract_Sign_FullMethodName     = "/pb.Contract/sign"
 )
 
 // ContractClient is the client API for Contract service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ContractClient interface {
+	// 新增模板
+	Template(ctx context.Context, in *ContractTemplateRequest, opts ...grpc.CallOption) (*ContractTemplateResponse, error)
+	// 合同签署
 	Sign(ctx context.Context, in *ContractSignRequest, opts ...grpc.CallOption) (*ContractSignResponse, error)
 }
 
@@ -35,6 +39,15 @@ type contractClient struct {
 
 func NewContractClient(cc grpc.ClientConnInterface) ContractClient {
 	return &contractClient{cc}
+}
+
+func (c *contractClient) Template(ctx context.Context, in *ContractTemplateRequest, opts ...grpc.CallOption) (*ContractTemplateResponse, error) {
+	out := new(ContractTemplateResponse)
+	err := c.cc.Invoke(ctx, Contract_Template_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *contractClient) Sign(ctx context.Context, in *ContractSignRequest, opts ...grpc.CallOption) (*ContractSignResponse, error) {
@@ -50,6 +63,9 @@ func (c *contractClient) Sign(ctx context.Context, in *ContractSignRequest, opts
 // All implementations must embed UnimplementedContractServer
 // for forward compatibility
 type ContractServer interface {
+	// 新增模板
+	Template(context.Context, *ContractTemplateRequest) (*ContractTemplateResponse, error)
+	// 合同签署
 	Sign(context.Context, *ContractSignRequest) (*ContractSignResponse, error)
 	mustEmbedUnimplementedContractServer()
 }
@@ -58,6 +74,9 @@ type ContractServer interface {
 type UnimplementedContractServer struct {
 }
 
+func (UnimplementedContractServer) Template(context.Context, *ContractTemplateRequest) (*ContractTemplateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Template not implemented")
+}
 func (UnimplementedContractServer) Sign(context.Context, *ContractSignRequest) (*ContractSignResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sign not implemented")
 }
@@ -72,6 +91,24 @@ type UnsafeContractServer interface {
 
 func RegisterContractServer(s grpc.ServiceRegistrar, srv ContractServer) {
 	s.RegisterService(&Contract_ServiceDesc, srv)
+}
+
+func _Contract_Template_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContractTemplateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ContractServer).Template(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Contract_Template_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ContractServer).Template(ctx, req.(*ContractTemplateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _Contract_Sign_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -100,7 +137,11 @@ var Contract_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ContractServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "Sign",
+			MethodName: "template",
+			Handler:    _Contract_Template_Handler,
+		},
+		{
+			MethodName: "sign",
 			Handler:    _Contract_Sign_Handler,
 		},
 	},
