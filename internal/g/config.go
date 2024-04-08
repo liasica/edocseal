@@ -24,6 +24,11 @@ type CertificatePath struct {
 }
 
 type Config struct {
+	// 模板配置
+	Template struct {
+		Path string // 模板路径
+	}
+
 	// 根证书和私钥，用于签发证书
 	RootCertificate CertificatePath
 
