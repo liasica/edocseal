@@ -8,8 +8,31 @@ import (
 	"log"
 
 	"github.com/benoitkugler/pdf/formfill"
+	"github.com/benoitkugler/pdf/model"
 	"github.com/benoitkugler/pdf/reader"
 )
+
+// ParsePdfFields 解析PDF文件中待填充字段
+func ParsePdfFields(path string) (fields map[string]model.Rectangle, err error) {
+	var doc model.Document
+	doc, _, err = reader.ParsePDFFile(path, reader.Options{})
+	if err != nil {
+		return
+	}
+
+	fields = make(map[string]model.Rectangle)
+
+	// 获取所有字段
+	for _, field := range doc.Catalog.AcroForm.Flatten() {
+		t := field.Field.T
+
+		if len(field.Field.Widgets) > 0 {
+			fields[t] = field.Field.Widgets[0].Rect
+		}
+	}
+
+	return
+}
 
 func Sign() {
 	doc, _, err := reader.ParsePDFFile("input.pdf", reader.Options{})
