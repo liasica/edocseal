@@ -81,7 +81,7 @@ func PEMEncoding(key []byte, blockType BlocType) []byte {
 	case BlocTypePublicKey:
 		keyType = "PUBLIC KEY"
 	case BlocTypePrivateKey:
-		keyType = "RSA PRIVATE"
+		keyType = "PRIVATE KEY"
 	case BlocTypeCertificateRequest:
 		keyType = "CERTIFICATE REQUEST"
 	case BlocTypeCertificate:
@@ -107,7 +107,13 @@ func SaveToFile(path string, b []byte, blockType BlocType) error {
 // ParsePrivateKey 解析私钥
 func ParsePrivateKey(b []byte) (priKey *rsa.PrivateKey, err error) {
 	block, _ := pem.Decode(b)
-	return x509.ParsePKCS1PrivateKey(block.Bytes)
+	var k any
+	k, err = x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return
+	}
+	priKey = k.(*rsa.PrivateKey)
+	return
 }
 
 // LoadPrivateKeyFromFile 从文件加载私钥
@@ -164,6 +170,6 @@ func CreateInterCertificate(dns string, priKey *rsa.PrivateKey, ca *x509.Certifi
 		return
 	}
 
-	interKey = x509.MarshalPKCS1PrivateKey(key)
+	interKey, _ = x509.MarshalPKCS8PrivateKey(key)
 	return
 }

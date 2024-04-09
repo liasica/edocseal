@@ -16,8 +16,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/ca"
 )
+
+type Certificate struct{}
 
 func certificateCommand() *cobra.Command {
 	cmd := &cobra.Command{
@@ -25,12 +28,13 @@ func certificateCommand() *cobra.Command {
 		Short: "密钥和证书管理",
 	}
 
-	cmd.AddCommand(certificateRootCommand())
-	cmd.AddCommand(certificateInertCommand())
+	cert := new(Certificate)
+	cmd.AddCommand(cert.root())
+	cmd.AddCommand(cert.inert())
 	return cmd
 }
 
-func certificateRootCommand() *cobra.Command {
+func (*Certificate) root() *cobra.Command {
 	var (
 		path     string
 		override bool
@@ -47,7 +51,7 @@ func certificateRootCommand() *cobra.Command {
 			rootCertPath := filepath.Join(path, "rootCA.crt")
 
 			// 判断是否存在密钥和证书
-			if !override && (fileExists(privateKeyPath) || fileExists(rootCertPath)) {
+			if !override && (edocseal.FileExists(privateKeyPath) || edocseal.FileExists(rootCertPath)) {
 				reader := bufio.NewReader(os.Stdin)
 				fmt.Print("密钥和证书已存在，是否覆盖？(Y/n): ")
 
@@ -66,7 +70,8 @@ func certificateRootCommand() *cobra.Command {
 
 			// 生成密钥并保存
 			priKey := ca.GenerateRsaPrivateKey()
-			err := ca.SaveToFile(privateKeyPath, x509.MarshalPKCS1PrivateKey(priKey), ca.BlocTypePrivateKey)
+			k, _ := x509.MarshalPKCS8PrivateKey(priKey)
+			err := ca.SaveToFile(privateKeyPath, k, ca.BlocTypePrivateKey)
 			if err != nil {
 				fmt.Printf("密钥保存失败：%s", err)
 				os.Exit(1)
@@ -100,7 +105,7 @@ func certificateRootCommand() *cobra.Command {
 	return cmd
 }
 
-func certificateInertCommand() *cobra.Command {
+func (*Certificate) inert() *cobra.Command {
 	var (
 		path               string
 		province           string
@@ -122,7 +127,7 @@ func certificateInertCommand() *cobra.Command {
 			rootCertPath := filepath.Join(path, "rootCA.crt")
 
 			// 判断是否存在密钥和证书
-			if !fileExists(rootPrivateKeyPath) || !fileExists(rootCertPath) {
+			if !edocseal.FileExists(rootPrivateKeyPath) || !edocseal.FileExists(rootCertPath) {
 				fmt.Println("根证书不存在，请先执行 certificate root 命令生成根证书")
 				os.Exit(1)
 			}
@@ -188,9 +193,4 @@ func certificateInertCommand() *cobra.Command {
 	cmd.Flags().StringVar(&dns, "dns", "liasica.com", "证书域名")
 
 	return cmd
-}
-
-func fileExists(path string) bool {
-	_, err := os.Stat(path)
-	return err == nil
 }

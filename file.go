@@ -12,21 +12,37 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"go.uber.org/zap/buffer"
 )
 
-// DownloadFile 下载文件
-func DownloadFile(url, dir string) (err error, sn string) {
-	// 判定文件夹是否存在，不存在则创建
+// CreateDirectory 文件夹创建
+func CreateDirectory(dir string) (err error) {
 	_, err = os.Stat(dir)
 	if os.IsNotExist(err) {
-		err = os.MkdirAll(dir, os.ModePerm)
-		if err != nil {
-			return
-		}
+		return os.MkdirAll(dir, os.ModePerm)
 	}
+	return
+}
 
+// FileExists 文件是否存在
+func FileExists(path string) bool {
+	_, err := os.Stat(path)
+	return err == nil
+}
+
+// FileNameWithoutExtension 获取文件名
+func FileNameWithoutExtension(fileName string) string {
+	fileName = filepath.Base(fileName)
+	if pos := strings.LastIndexByte(fileName, '.'); pos != -1 {
+		return fileName[:pos]
+	}
+	return fileName
+}
+
+// DownloadFile 下载文件
+func DownloadFile(url, dir string) (err error, sn, path string) {
 	var resp *http.Response
 	resp, err = http.Get(url)
 	if err != nil {
@@ -38,7 +54,7 @@ func DownloadFile(url, dir string) (err error, sn string) {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("文档请求失败，StatusCode = %s", resp.Status), ""
+		return fmt.Errorf("文档请求失败，StatusCode = %s", resp.Status), "", ""
 	}
 
 	// 获取文件md5
@@ -54,6 +70,55 @@ func DownloadFile(url, dir string) (err error, sn string) {
 	ext := filepath.Ext(url)
 
 	// 存储文件
-	err = os.WriteFile(dir+"/"+sn+ext, buf.Bytes(), os.ModePerm)
+	path = dir + "/" + sn + ext
+	err = os.WriteFile(path, buf.Bytes(), os.ModePerm)
 	return
+}
+
+// FileMd5 文件md5
+func FileMd5(path string) (string, error) {
+	file, err := os.Open(path)
+	if err != nil {
+		return "", err
+	}
+	defer func(file *os.File) {
+		_ = file.Close()
+	}(file)
+
+	hash := md5.New()
+	if _, err = io.Copy(hash, file); err != nil {
+		return "", err
+	}
+
+	return hex.EncodeToString(hash.Sum(nil)), nil
+}
+
+// FileCopy 文件复制
+func FileCopy(src, dst string) (int64, error) {
+	sourceFileStat, err := os.Stat(src)
+	if err != nil {
+		return 0, err
+	}
+
+	if !sourceFileStat.Mode().IsRegular() {
+		return 0, fmt.Errorf("%s is not a regular file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return 0, err
+	}
+	defer func(source *os.File) {
+		_ = source.Close()
+	}(source)
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return 0, err
+	}
+	defer func(destination *os.File) {
+		_ = destination.Close()
+	}(destination)
+	nBytes, err := io.Copy(destination, source)
+	return nBytes, err
 }

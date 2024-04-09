@@ -24,9 +24,13 @@ type CertificatePath struct {
 }
 
 type Config struct {
-	// 模板配置
-	Template struct {
-		Path string // 模板路径
+	// 企业签章图片
+	Seal string
+
+	// 目录配置
+	Dir struct {
+		Template string // 模板目录
+		Runtime  string // 运行时目录
 	}
 
 	// 根证书和私钥，用于签发证书
@@ -63,11 +67,21 @@ func readConfig() (err error) {
 	}
 
 	cfg = &Config{}
-	return viper.Unmarshal(cfg)
+	err = viper.Unmarshal(cfg)
+	if err != nil {
+		return
+	}
+
+	// 获取签章完整路径
+	cfg.Seal, err = filepath.Abs(cfg.Seal)
+
+	return
 }
 
 // LoadConfig 加载配置文件
 func LoadConfig(configFile string) {
+	path = filepath.Dir(configFile)
+
 	// 判定配置文件是否存在
 	_, err := os.Stat(configFile)
 	if err != nil {
@@ -84,8 +98,6 @@ func LoadConfig(configFile string) {
 		os.Exit(1)
 	}
 
-	path = filepath.Dir(configFile)
-
 	// 监听配置文件变动后重载
 	viper.OnConfigChange(func(in fsnotify.Event) {
 		fmt.Println("配置文件变动，重新加载")
@@ -93,6 +105,11 @@ func LoadConfig(configFile string) {
 	})
 
 	viper.WatchConfig()
+}
+
+// GetSeal 获取企业签章图片
+func GetSeal() string {
+	return cfg.Seal
 }
 
 // GetConfigPath 获取配置目录
@@ -103,4 +120,14 @@ func GetConfigPath() string {
 // GetRPCBind 获取RPC绑定地址
 func GetRPCBind() string {
 	return cfg.RPC.Bind
+}
+
+// GetTemplateDir 获取模板路径
+func GetTemplateDir() string {
+	return cfg.Dir.Template
+}
+
+// GetRuntimeDir 获取运行时目录
+func GetRuntimeDir() string {
+	return cfg.Dir.Runtime
 }

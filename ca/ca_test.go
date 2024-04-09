@@ -8,6 +8,9 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/pem"
+	"fmt"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,7 +18,8 @@ import (
 
 func TestGenerateRootCertificate(t *testing.T) {
 	priKey := GenerateRsaPrivateKey()
-	pb := PEMEncoding(x509.MarshalPKCS1PrivateKey(priKey), BlocTypePrivateKey)
+	pkcs8, _ := x509.MarshalPKCS8PrivateKey(priKey)
+	pb := PEMEncoding(pkcs8, BlocTypePrivateKey)
 	rootCertificate, err := GenerateRootCertificate(priKey, pkix.Name{
 		Country:            []string{"中国"},          // 国家
 		Province:           []string{"北京市"},         // 省份
@@ -57,4 +61,19 @@ func TestGenerateRootCertificate(t *testing.T) {
 	p2, err = ParsePrivateKey(pb)
 	require.NoError(t, err)
 	require.Equal(t, priKey, p2)
+}
+
+func TestParse(t *testing.T) {
+	// Read the bytes of the PEM file, e.g. id_rsa
+	pemData, e := os.ReadFile("../config/rootPrivateKey.pem")
+	if e != nil {
+		return
+	}
+
+	// Use the PEM decoder and parse the private key
+	pemBlock, _ := pem.Decode(pemData)
+	priv, e := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
+
+	// Public key can be obtained through priv.PublicKey
+	fmt.Println(priv, e)
 }

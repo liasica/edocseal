@@ -4,7 +4,18 @@
 # 136
 pyhanko sign addfields --field -1/70,320,206,456/AUR-SIGN input.pdf input-s.pdf
 pyhanko sign addsig --field AUR-SIGN pemder --key privkey.pem --cert cert.pem --no-pass input-s.pdf output.pdf
+pyhanko sign addsig --field AUR-SIGN pemder --key cakey.pem --cert ca.pem --no-pass input-s.pdf output.pdf
 ```
+
+```shell
+# qpdf
+qpdf form.pdf --json > x.json # .acroform.fields
+qpdf form.pdf --update-from-json=x.json x.pdf
+```
+
+### 尺寸
+ - 公章尺寸: 125 × 125
+ - 签名尺寸: 75 × 75
 
 ### 参考文档
 - [pyHanko](https://github.com/MatthiasValvekens/pyHanko)
