@@ -55,7 +55,7 @@ func Template() *cobra.Command {
 			}
 
 			// 模板数据
-			var fields []model.TemplateField
+			fields := make(map[string]model.TemplateField)
 			for _, field := range form.Acroform.Fields {
 				m := form.Objects[1]["obj:"+field.Annotation.Object]
 				mb, _ := jsoniter.Marshal(m)
@@ -70,20 +70,25 @@ func Template() *cobra.Command {
 					data.Value.Rect[2],
 					data.Value.Rect[3],
 				)
-				fields = append(fields, model.TemplateField{
-					Name: field.Fullname,
+				if _, ok := fields[field.Fullname]; ok {
+					fmt.Printf("字段重复: %s\n", field.Fullname)
+					os.Exit(1)
+				}
+
+				fields[field.Fullname] = model.TemplateField{
+					Page: field.Pageposfrom1,
 					Type: getFiledType(field.Fieldtype),
-					Rectangle: model.TemplateRectangle{
-						LeftBottom: [2]float64{
-							data.Value.Rect[0],
-							data.Value.Rect[1],
+					Rectangle: &model.TemplateRectangle{
+						LeftBottom: model.Coordinate{
+							X: data.Value.Rect[0],
+							Y: data.Value.Rect[1],
 						},
-						RightTop: [2]float64{
-							data.Value.Rect[2],
-							data.Value.Rect[3],
+						RightTop: model.Coordinate{
+							X: data.Value.Rect[2],
+							Y: data.Value.Rect[3],
 						},
 					},
-				})
+				}
 			}
 
 			// 存储模板配置

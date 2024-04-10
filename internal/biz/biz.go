@@ -11,51 +11,16 @@ import (
 	"sync"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/signintech/pdft"
 
 	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/internal/g"
 	"github.com/liasica/edocseal/internal/model"
 )
 
-const (
-	FontSong = "Song"
-)
-
 var (
 	// 模板配置列表
 	templates sync.Map
-
-	// 字体列表
-	fontlist = []string{
-		FontSong,
-	}
 )
-
-var fonts sync.Map
-
-// LoadFonts 加载所有字体
-func LoadFonts(path string) error {
-	for _, f := range fontlist {
-		file := filepath.Join(path, f+".ttf")
-		// 读取字体
-		name := edocseal.FileNameWithoutExtension(file)
-		data, err := pdft.PDFParseFont(file, name)
-		if err != nil {
-			return err
-		}
-		fonts.Store(name, data)
-	}
-	return nil
-}
-
-// AddFonts 添加所有字体
-func AddFonts(ft *pdft.PDFt) {
-	fonts.Range(func(key, value any) bool {
-		_ = ft.AddFontFromData(key.(string), value.(*pdft.PDFFontData))
-		return true
-	})
-}
 
 // GetTemplate 根据ID返回模板路径以及配置
 func GetTemplate(id string) (*model.TemplateData, error) {
@@ -88,4 +53,11 @@ func loadTemplateConfig(id string) (*model.TemplateData, error) {
 	_ = jsoniter.Unmarshal(b, &data.Fields)
 
 	return data, nil
+}
+
+func oss() (ao *edocseal.AliyunOss, url string, err error) {
+	cfg := g.GetAliyunOss()
+	ao, err = edocseal.NewAliyunOss(cfg.AccessKeyId, cfg.AccessKeySecret, cfg.Endpoint, cfg.Bucket)
+	url = cfg.Url
+	return
 }

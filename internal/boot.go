@@ -24,6 +24,10 @@ func Boot() {
 	if err != nil {
 		zap.L().Fatal("创建运行时目录失败", zap.Error(err))
 	}
+	err = edocseal.CreateDirectory(g.GetDocumentDir())
+	if err != nil {
+		zap.L().Fatal("文档目录创建失败", zap.Error(err))
+	}
 
 	// 初始化证书
 	rootCrt, entCrt := g.NewCertificate()

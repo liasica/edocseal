@@ -13,21 +13,36 @@ const (
 	TemplateFieldTypeSignature TemplateFieldType = "signature" // 签名
 )
 
+type Coordinate struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+}
+
 type TemplateRectangle struct {
-	LeftBottom [2]float64 `json:"lb,omitempty"` // 左下角坐标 (x,y)
-	RightTop   [2]float64 `json:"rt,omitempty"` // 右上角坐标 (x,y)
+	LeftBottom Coordinate `json:"lb,omitempty"` // 左下角坐标 (x,y)
+	RightTop   Coordinate `json:"rt,omitempty"` // 右上角坐标 (x,y)
+}
+
+// Width 获取宽度
+func (rect *TemplateRectangle) Width() float64 {
+	return rect.RightTop.X - rect.LeftBottom.X
+}
+
+// Height 获取高度
+func (rect *TemplateRectangle) Height() float64 {
+	return rect.RightTop.Y - rect.LeftBottom.Y
 }
 
 // TemplateField 模板字段
 type TemplateField struct {
-	Name        string            `json:"name,omitempty"`        // 字段名称
-	Description string            `json:"description,omitempty"` // 字段描述
-	Type        TemplateFieldType `json:"type,omitempty"`        // 字段类型
-	Rectangle   TemplateRectangle `json:"rectangle,omitempty"`   // 字段位置
+	Page        int                `json:"page"`                  // 页码，从1开始
+	Description string             `json:"description,omitempty"` // 字段描述
+	Type        TemplateFieldType  `json:"type,omitempty"`        // 字段类型
+	Rectangle   *TemplateRectangle `json:"rectangle,omitempty"`   // 字段位置
 }
 
 // TemplateData 模板数据
 type TemplateData struct {
-	Path   string          `json:"path"`
-	Fields []TemplateField `json:"fields"`
+	Path   string                   `json:"path"`
+	Fields map[string]TemplateField `json:"fields"`
 }

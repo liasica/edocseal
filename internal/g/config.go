@@ -23,6 +23,14 @@ type CertificatePath struct {
 	PrivateKey  string
 }
 
+type AliyunOss struct {
+	AccessKeyId     string
+	AccessKeySecret string
+	Bucket          string
+	Endpoint        string
+	Url             string
+}
+
 type Config struct {
 	// 企业签章图片
 	Seal string
@@ -31,6 +39,7 @@ type Config struct {
 	Dir struct {
 		Template string // 模板目录
 		Runtime  string // 运行时目录
+		Document string // 文档目录
 	}
 
 	// 根证书和私钥，用于签发证书
@@ -56,6 +65,10 @@ type Config struct {
 		Addr     string // 地址
 		Password string // 密码
 		DB       int    // 数据库
+	}
+
+	Aliyun struct {
+		Oss AliyunOss
 	}
 }
 
@@ -130,4 +143,14 @@ func GetTemplateDir() string {
 // GetRuntimeDir 获取运行时目录
 func GetRuntimeDir() string {
 	return cfg.Dir.Runtime
+}
+
+// GetDocumentDir 获取文档目录
+func GetDocumentDir() string {
+	return cfg.Dir.Document
+}
+
+// GetAliyunOss 获取阿里云OSS配置
+func GetAliyunOss() AliyunOss {
+	return cfg.Aliyun.Oss
 }

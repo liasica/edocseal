@@ -94,31 +94,37 @@ func FileMd5(path string) (string, error) {
 }
 
 // FileCopy 文件复制
-func FileCopy(src, dst string) (int64, error) {
+func FileCopy(src, dst string) error {
 	sourceFileStat, err := os.Stat(src)
 	if err != nil {
-		return 0, err
+		return err
 	}
 
 	if !sourceFileStat.Mode().IsRegular() {
-		return 0, fmt.Errorf("%s is not a regular file", src)
+		return fmt.Errorf("%s is not a regular file", src)
 	}
 
-	source, err := os.Open(src)
+	var (
+		source      *os.File
+		destination *os.File
+	)
+
+	source, err = os.Open(src)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer func(source *os.File) {
 		_ = source.Close()
 	}(source)
 
-	destination, err := os.Create(dst)
+	destination, err = os.Create(dst)
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer func(destination *os.File) {
 		_ = destination.Close()
 	}(destination)
-	nBytes, err := io.Copy(destination, source)
-	return nBytes, err
+	_, err = io.Copy(destination, source)
+
+	return err
 }

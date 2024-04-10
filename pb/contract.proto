@@ -29,7 +29,7 @@ message ContractCreateRequest {
 // 创建合同响应
 message ContractCreateResponse {
   string url = 1; // 创建合同合同文件地址
-  string sn = 2; // 合同编号
+  string doc_id = 2; // 待签约文档编号
 }
 
 // 合同签署主体
@@ -53,11 +53,10 @@ message ContractSignEntity {
 
 // 合同签署请求
 // 个签属性和团签属性只能二选一（需要进行限制判定）
-// 目前未做整体字段实现，先用sn字段测试
 message ContractSignRequest {
-  string sn = 1; // 合同编号
+  string doc_id = 1; // 待签约文档编号
   ContractSignEntity enterprise = 2; // 企业签署人
-  repeated ContractSignEntity personal = 3; // 个人签署人
+  ContractSignEntity personal = 3; // 个人签署人
 }
 
 // 合同签署响应

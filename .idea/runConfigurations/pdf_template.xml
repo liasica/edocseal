@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="pdf template" type="GoApplicationRunConfiguration" factoryName="Go Application">
+    <module name="edocseal" />
+    <working_directory value="$PROJECT_DIR$" />
+    <parameters value="template templates/81f52261d44e5dfc756a86ebae720285.pdf -t runtime/input-s/form.pdf" />
+    <kind value="PACKAGE" />
+    <package value="github.com/liasica/edocseal/cmd/edocpdf" />
+    <directory value="$PROJECT_DIR$" />
+    <filePath value="$PROJECT_DIR$/cmd/edocpdf/main.go" />
+    <method v="2" />
+  </configuration>
+</component>
