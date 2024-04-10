@@ -42,6 +42,11 @@ type Config struct {
 		Document string // 文档目录
 	}
 
+	// 文档配置
+	Document struct {
+		BucketPath string // OSS存储路径
+	}
+
 	// 根证书和私钥，用于签发证书
 	RootCertificate CertificatePath
 
@@ -118,6 +123,10 @@ func LoadConfig(configFile string) {
 	})
 
 	viper.WatchConfig()
+}
+
+func GetConfig() *Config {
+	return cfg
 }
 
 // GetSeal 获取企业签章图片

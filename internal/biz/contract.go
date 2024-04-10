@@ -105,6 +105,9 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	return
 }
 
+// SignDocument 文档签约
+func SignDocument() {}
+
 // UploadDocument 上传至阿里云
 func UploadDocument(path string, b []byte) (url string, err error) {
 	// 获取OSS配置

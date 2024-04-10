@@ -18,8 +18,7 @@ type ContractService struct {
 }
 
 // Create 创建合同
-func (*ContractService) Create(context.Context, *pb.ContractCreateRequest) (*pb.ContractCreateResponse, error) {
-
+func (*ContractService) Create(ctx context.Context, req *pb.ContractCreateRequest) (*pb.ContractCreateResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
 }
 

@@ -1,5 +1,13 @@
 
-### 常用指令
+### 签名
+
+#### 依赖
+```shell
+pip install 'urllib3<2.0'
+pip install pyHanko
+pip install 'pyHanko[pkcs11,image-support,opentype,xmp,opentype,image-support]'
+```
+
 ```shell
 # 136
 pyhanko sign addfields --field -1/70,320,206,456/AUR-SIGN --field -1/242,343,317,419/RIDER-SIGN input.pdf input-s.pdf
