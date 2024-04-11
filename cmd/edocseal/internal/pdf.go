@@ -101,17 +101,18 @@ func templateCommand() *cobra.Command {
 
 			// 判定是否有签名字段
 			if _, ok := fields[model.EntSignField]; !ok {
-				fmt.Printf("模板没有签名字段: %s", model.EntSignField)
+				fmt.Printf("模板没有签名字段: %s\n", model.EntSignField)
 				os.Exit(1)
 			}
 			if _, ok := fields[model.PersonalSignField]; !ok {
-				fmt.Printf("模板没有签名字段: %s", model.PersonalSignField)
+				fmt.Printf("模板没有签名字段: %s\n", model.PersonalSignField)
 				os.Exit(1)
 			}
 
 			// 存储模板配置
 			json, _ := jsoniter.MarshalIndent(fields, "", "  ")
 			_ = os.WriteFile(filepath.Join(path, fmt.Sprintf("%s.json", id)), json, 0755)
+			fmt.Println("完成模板创建")
 		},
 	}
 
