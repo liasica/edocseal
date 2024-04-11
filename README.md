@@ -1,3 +1,7 @@
+### 生成模板
+```shell
+edocseal template templates/原始模板.pdf -t runtime/模板表单.pdf
+```
 
 ### 签名
 
