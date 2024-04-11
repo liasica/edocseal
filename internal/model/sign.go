@@ -5,6 +5,7 @@
 package model
 
 type Sign struct {
+	TemplateID string      `json:"templateId"`
 	InFile     string      `json:"in_file"`
 	OutFile    string      `json:"out_file"`
 	Signatures []Signature `json:"signatures"`

@@ -18,7 +18,7 @@ func Boot() {
 	zap.ReplaceGlobals(g.NewZap())
 
 	// 验证signer version
-	b, err := edocseal.Exec(g.GetSigner(), "version")
+	b, err := edocseal.Exec(g.GetSigner(), "--version")
 	if err != nil {
 		zap.L().Fatal("Python环境未安装或配置错误")
 		os.Exit(1)

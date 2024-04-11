@@ -15,8 +15,3 @@ type DocumentPaths struct {
 	Cert             string // 证书路径
 	Key              string // 私钥路径
 }
-
-type DocumentConfig struct {
-	TemplateID string      `json:"templateId"` // 模板ID
-	Signatures []Signature `json:"signatures"` // 签名配置
-}

@@ -7,7 +7,6 @@ package biz
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"os"
 
 	jsoniter "github.com/json-iterator/go"
@@ -103,8 +102,10 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	}
 
 	// 保存配置
-	sb, _ := jsoniter.Marshal(model.DocumentConfig{
+	sb, _ := jsoniter.Marshal(&model.Sign{
 		TemplateID: templateId,
+		InFile:     paths.UnSignedDocument,
+		OutFile:    paths.SignedDocument,
 		Signatures: []model.Signature{
 			{
 				Field: entSignField,
@@ -148,40 +149,17 @@ func SignDocument(req *pb.ContractSignRequest) (err error) {
 		return
 	}
 
-	// 获取签名字段配置
-	var (
-		cfg model.DocumentConfig
-		cb  []byte
-	)
-	cb, err = os.ReadFile(paths.Config)
-	if err != nil {
-		return
-	}
-	err = jsoniter.Unmarshal(cb, &cfg)
-	if err != nil {
-		return
-	}
-
 	// 获取证书
 	err = RequestCertificae(paths, req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
 	if err != nil {
 		return
 	}
 
-	// 合同加签
-	sign := &model.Sign{
-		InFile:     paths.UnSignedDocument,
-		OutFile:    paths.SignedDocument,
-		Signatures: cfg.Signatures,
-	}
-
 	// 调用签名
 	var out []byte
-	argument, _ := jsoniter.MarshalToString(sign)
-	argument = fmt.Sprintf("'%s'", argument)
-	out, err = edocseal.Exec(g.GetSigner(), argument)
+	out, err = edocseal.Exec(g.GetSigner(), "--config", paths.Config)
 	if err != nil {
-		zap.L().Error("签名失败", zap.Error(err), zap.Reflect("payload", req), zap.String("argument", argument), zap.String("output", string(out)))
+		zap.L().Error("签名失败", zap.Error(err), zap.Reflect("payload", req), zap.String("output", string(out)))
 		return err
 	}
 	zap.L().Info("签名成功", zap.String("docId", req.DocId))
