@@ -92,12 +92,12 @@ func Template() *cobra.Command {
 			}
 
 			// 判定是否有签名字段
-			if _, ok := fields["entSign"]; !ok {
-				fmt.Println("模板没有签名字段: entSign")
+			if _, ok := fields[model.EntSignField]; !ok {
+				fmt.Printf("模板没有签名字段: %s", model.EntSignField)
 				os.Exit(1)
 			}
-			if _, ok := fields["riderSign"]; !ok {
-				fmt.Println("模板没有签名字段: riderSign")
+			if _, ok := fields[model.PersonalSignField]; !ok {
+				fmt.Printf("模板没有签名字段: %s", model.PersonalSignField)
 				os.Exit(1)
 			}
 

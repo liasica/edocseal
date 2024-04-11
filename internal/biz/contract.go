@@ -20,11 +20,6 @@ import (
 	"github.com/liasica/edocseal/pb"
 )
 
-const (
-	entSignField   = "entSign"
-	riderSignField = "riderSign"
-)
-
 // CreateDocument 根据模板创建待签约文档
 func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) (b []byte, docId string, err error) {
 	// 获取模板和配置
@@ -108,18 +103,18 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		OutFile:    paths.SignedDocument,
 		Signatures: []model.Signature{
 			{
-				Field: entSignField,
+				Field: model.EntSignField,
 				Image: g.GetSeal(),
 				Key:   g.GetPrivateKey(),
 				Cert:  g.GetCertificate(),
-				Rect:  tmpl.Fields[entSignField].Rectangle.IntList(),
+				Rect:  tmpl.Fields[model.EntSignField].Rectangle.IntList(),
 			},
 			{
-				Field: riderSignField,
+				Field: model.PersonalSignField,
 				Image: paths.Image,
 				Key:   paths.Key,
 				Cert:  paths.Cert,
-				Rect:  tmpl.Fields[riderSignField].Rectangle.IntList(),
+				Rect:  tmpl.Fields[model.PersonalSignField].Rectangle.IntList(),
 			},
 		},
 	})

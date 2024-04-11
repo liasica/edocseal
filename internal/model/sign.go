@@ -4,6 +4,11 @@
 
 package model
 
+const (
+	EntSignField      = "aurSeal"
+	PersonalSignField = "riderSeal"
+)
+
 type Sign struct {
 	TemplateID string      `json:"templateId"`
 	InFile     string      `json:"in_file"`
