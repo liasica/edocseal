@@ -21,7 +21,7 @@ import (
 )
 
 // CreateDocument 根据模板创建待签约文档
-func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) (b []byte, docId string, err error) {
+func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) (b []byte, paths *model.DocumentPaths, err error) {
 	// 获取模板和配置
 	var tmpl *model.TemplateData
 	tmpl, err = GetTemplate(templateId)
@@ -29,7 +29,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		return
 	}
 
-	paths := NewDocumentPaths()
+	paths = NewDocumentPaths()
 
 	// 复制模板
 	err = edocseal.FileCopy(tmpl.Path, paths.UnSignedDocument)
@@ -119,13 +119,11 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		},
 	})
 	err = os.WriteFile(paths.Config, sb, os.ModePerm)
-
-	docId = paths.ID
 	return
 }
 
 // SignDocument 文档签约
-func SignDocument(req *pb.ContractSignRequest) (err error) {
+func SignDocument(req *pb.ContractSignRequest) (file string, err error) {
 	// 获取文档链接
 	var paths *model.DocumentPaths
 	paths, err = GetDocumentPaths(req.DocId)
@@ -155,10 +153,11 @@ func SignDocument(req *pb.ContractSignRequest) (err error) {
 	out, err = edocseal.Exec(g.GetSigner(), "--config", paths.Config)
 	if err != nil {
 		zap.L().Error("签名失败", zap.Error(err), zap.Reflect("payload", req), zap.String("output", string(out)))
-		return err
+		return
 	}
 	zap.L().Info("签名成功", zap.String("docId", req.DocId))
-	return nil
+	file = paths.SignedDocument
+	return
 }
 
 // UploadDocument 上传至阿里云

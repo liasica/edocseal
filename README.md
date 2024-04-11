@@ -1,3 +1,7 @@
+### 待办
+- [ ] 使用队列处理签名任务，例如 [asynq](https://github.com/hibiken/asynq) 或 [nsq](https://github.com/nsqio/nsq)
+
+
 ### 生成模板
 ```shell
 edocseal template templates/原始模板.pdf -t runtime/模板表单.pdf

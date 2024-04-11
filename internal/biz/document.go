@@ -29,14 +29,16 @@ func getDocumentDir(docId string) string {
 
 func getDocumentPaths(dir, docId string) *model.DocumentPaths {
 	return &model.DocumentPaths{
-		ID:               docId,
-		Directory:        dir,
-		UnSignedDocument: filepath.Join(dir, docId+"_unsigned.pdf"),
-		SignedDocument:   filepath.Join(dir, docId+".pdf"),
-		Image:            filepath.Join(dir, "signature.png"),
-		Config:           filepath.Join(dir, "config.json"),
-		Cert:             filepath.Join(dir, "cert.pem"),
-		Key:              filepath.Join(dir, "key.pem"),
+		ID:                  docId,
+		OssUnSignedDocument: filepath.Join("__contracts", docId[:4], docId[4:6], docId[6:], docId+"_unsigned.pdf"),
+		OssSignedDocument:   filepath.Join("__contracts", docId[:4], docId[4:6], docId[6:], docId+".pdf"),
+		Directory:           dir,
+		UnSignedDocument:    filepath.Join(dir, docId+"_unsigned.pdf"),
+		SignedDocument:      filepath.Join(dir, docId+".pdf"),
+		Image:               filepath.Join(dir, "signature.png"),
+		Config:              filepath.Join(dir, "config.json"),
+		Cert:                filepath.Join(dir, "cert.pem"),
+		Key:                 filepath.Join(dir, "key.pem"),
 	}
 }
 

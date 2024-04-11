@@ -35,6 +35,8 @@ type AliyunOss struct {
 }
 
 type Config struct {
+	// 同时处理任务数
+	TaskNum int
 
 	// Signer路径
 	Signer string
@@ -147,6 +149,11 @@ func LoadConfig(configFile string) {
 
 func GetConfig() *Config {
 	return cfg
+}
+
+// GetTaskNum 获取任务数
+func GetTaskNum() int {
+	return cfg.TaskNum
 }
 
 // GetSeal 获取企业签章图片

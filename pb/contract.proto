@@ -45,9 +45,14 @@ message ContractSignRequest {
   string idcard = 8; // 身份证号
 }
 
+enum ContractSignStatus {
+  SUCCESS = 0;
+  FAIL = 1;
+}
+
 // 合同签署响应
 message ContractSignResponse {
-  string status = 1; // 签署状态 SUCCESS:成功，FAIL:失败
-  string file = 2; // 已签署合同文件地址
+  ContractSignStatus status = 1; // 签署状态 0:成功，1:失败
+  string url = 2; // 已签署合同文件地址
   string message = 3; // 其他消息，例如错误消息，成功时为空
 }
