@@ -1,8 +1,8 @@
 // Copyright (C) edocseal. 2024-present.
 //
-// Created at 2024-04-09, by liasica
+// Created at 2024-04-11, by liasica
 
-package commands
+package internal
 
 import (
 	"fmt"
@@ -16,11 +16,12 @@ import (
 	"github.com/liasica/edocseal/internal/model"
 )
 
-func Template() *cobra.Command {
+func templateCommand() *cobra.Command {
 	var (
 		temp string
 		path string
 	)
+
 	cmd := &cobra.Command{
 		Use:               "template <input>",
 		Short:             "添加模板",
@@ -75,9 +76,16 @@ func Template() *cobra.Command {
 					os.Exit(1)
 				}
 
+				var typ model.TemplateFieldType
+				typ, err = model.NewTemplateFieldType(field.Fieldtype)
+				if err != nil {
+					fmt.Printf("字段类型解析失败: %v\n", err)
+					os.Exit(1)
+				}
+
 				fields[field.Fullname] = model.TemplateField{
 					Page: field.Pageposfrom1,
-					Type: getFiledType(field.Fieldtype),
+					Type: typ,
 					Rectangle: &model.TemplateRectangle{
 						LeftBottom: model.Coordinate{
 							X: data.Value.Rect[0],
@@ -113,16 +121,4 @@ func Template() *cobra.Command {
 	_ = cmd.MarkFlagRequired("temp")
 
 	return cmd
-}
-
-func getFiledType(typ string) model.TemplateFieldType {
-	switch typ {
-	case "/Sig":
-		return model.TemplateFieldTypeSignature
-	case "/Tx":
-		return model.TemplateFieldTypeText
-	case "/Btn":
-		return model.TemplateFieldTypeCheckbox
-	}
-	return ""
 }

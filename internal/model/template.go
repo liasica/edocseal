@@ -4,6 +4,8 @@
 
 package model
 
+import "fmt"
+
 // TemplateFieldType 模板字段类型
 type TemplateFieldType string
 
@@ -12,6 +14,30 @@ const (
 	TemplateFieldTypeCheckbox  TemplateFieldType = "checkbox"  // 勾选
 	TemplateFieldTypeSignature TemplateFieldType = "signature" // 签名
 )
+
+func (t TemplateFieldType) Code() string {
+	switch t {
+	case TemplateFieldTypeText:
+		return "/Tx"
+	case TemplateFieldTypeCheckbox:
+		return "/Btn"
+	case TemplateFieldTypeSignature:
+		return "/Sig"
+	}
+	return ""
+}
+
+func NewTemplateFieldType(name string) (TemplateFieldType, error) {
+	switch name {
+	case "/Tx":
+		return TemplateFieldTypeText, nil
+	case "/Btn":
+		return TemplateFieldTypeCheckbox, nil
+	case "/Sig":
+		return TemplateFieldTypeSignature, nil
+	}
+	return "", fmt.Errorf("未知的字段类型 ( %s )", name)
+}
 
 type Coordinate struct {
 	X float64 `json:"x"`

@@ -34,6 +34,7 @@ func RunCommand() {
 	cmd.AddCommand(
 		certificateCommand(),
 		serverCommand(),
+		templateCommand(),
 	)
 
 	_ = cmd.Execute()
