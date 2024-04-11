@@ -6,6 +6,7 @@ package biz
 
 import (
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"fmt"
 
 	"github.com/liasica/edocseal"
@@ -27,12 +28,12 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 
 	// 签发证书
 	crt, key, _, err = ca.CreateInterCertificate(rootCrt.GetPrivateKey(), rootCrt.GetCertificate(), pkix.Name{
-		Country:            []string{"中国"},   // 国家
-		Province:           []string{province}, // 省份
-		Locality:           []string{city},     // 城市
-		Organization:       []string{name},     // 证书持有者组织名称
-		OrganizationalUnit: []string{idcard},   // 证书持有者组织唯一标识
-		CommonName:         idcard,             // 证书持有者通用名，需保持唯一，否则验证会失败
+		Country:            []string{"CN"},
+		Province:           []string{province},
+		Locality:           []string{city},
+		Organization:       []string{name},
+		OrganizationalUnit: []string{idcard},
+		CommonName:         idcard,
 	})
 	if err != nil {
 		return
@@ -42,7 +43,20 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 }
 
 // 机构签发证书
-// TODO: 待实现
 func agencyIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
+	// 生成私钥
+	priKey := ca.GenerateRsaPrivateKey()
+
+	// 生成CSR请求
+	var csr []byte
+	csr, err = ca.GenerateRequest(priKey, pkix.Name{
+		Country:      []string{"CN"},
+		Organization: []string{name},
+	})
+
+	pkcs10 := base64.StdEncoding.EncodeToString(csr)
+	fmt.Println(pkcs10)
+
+	// TODO: 待实现请求机构签发证书，model放到model/ca.go中
 	return
 }
