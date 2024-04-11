@@ -12,16 +12,32 @@ import (
 	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/ca"
 	"github.com/liasica/edocseal/internal/g"
+	"github.com/liasica/edocseal/internal/model"
 )
 
-func RequestCertificae(path string, name, province, city, address, phone, idcard string) {
+// RequestCertificae 申请证书
+func RequestCertificae(paths *model.DocumentPaths, name, province, city, address, phone, idcard string) (err error) {
+	var crt, key []byte
+	if g.IsSelfSign() {
+		crt, key, err = selfIssueCertificate(name, province, city, address, phone, idcard)
+		if err != nil {
+			return
+		}
+	}
+	// 保存证书
+	err = ca.SaveToFile(paths.Cert, crt, ca.BlocTypeCertificate)
+	if err != nil {
+		return
+	}
 
+	// 保存私钥
+	return ca.SaveToFile(paths.Key, key, ca.BlocTypePrivateKey)
 }
 
 // 自签发证书
 func selfIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
 	// 获取根证书
-	rootCrt, _ := g.NewCertificate()
+	rootCrt := g.NewCertificate()
 	if rootCrt == nil {
 		return nil, nil, edocseal.ErrRootCertificateNotFound
 	}

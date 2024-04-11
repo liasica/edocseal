@@ -222,7 +222,7 @@ type ContractSignRequest struct {
 	unknownFields protoimpl.UnknownFields
 
 	DocId    string `protobuf:"bytes,1,opt,name=doc_id,json=docId,proto3" json:"doc_id,omitempty"` // 待签约文档编号
-	Image    string `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`              // 个人签章图片
+	Image    string `protobuf:"bytes,2,opt,name=image,proto3" json:"image,omitempty"`              // 个人签章图片（base64编码）
 	Name     string `protobuf:"bytes,3,opt,name=name,proto3" json:"name,omitempty"`                // 签署人
 	Province string `protobuf:"bytes,4,opt,name=province,proto3" json:"province,omitempty"`        // 省份
 	City     string `protobuf:"bytes,5,opt,name=city,proto3" json:"city,omitempty"`                // 城市

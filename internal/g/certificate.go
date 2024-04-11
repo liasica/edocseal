@@ -13,7 +13,6 @@ import (
 
 var (
 	rootCrt *Certificate
-	entCrt  *Certificate
 )
 
 // Certificate 证书配置
@@ -23,15 +22,12 @@ type Certificate struct {
 }
 
 // NewCertificate 获取证书
-func NewCertificate() (root *Certificate, ent *Certificate) {
+func NewCertificate() (root *Certificate) {
 	if rootCrt == nil {
 		rootCrt = loadCertificate(cfg.RootCertificate)
 	}
-	if entCrt == nil {
-		entCrt = loadCertificate(cfg.EnterpriseCertificate)
-	}
 
-	return rootCrt, entCrt
+	return rootCrt
 }
 
 // 加载证书

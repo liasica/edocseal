@@ -33,6 +33,16 @@ func (rect *TemplateRectangle) Height() float64 {
 	return rect.RightTop.Y - rect.LeftBottom.Y
 }
 
+// IntList 获取整数列表
+func (rect *TemplateRectangle) IntList() []int {
+	return []int{
+		int(rect.LeftBottom.X),
+		int(rect.LeftBottom.Y),
+		int(rect.RightTop.X),
+		int(rect.RightTop.Y),
+	}
+}
+
 // TemplateField 模板字段
 type TemplateField struct {
 	Page        int                `json:"page"`                  // 页码，从1开始

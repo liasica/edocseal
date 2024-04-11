@@ -5,12 +5,15 @@
 package g
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
+
+	"github.com/liasica/edocseal"
 )
 
 var (
@@ -32,11 +35,12 @@ type AliyunOss struct {
 }
 
 type Config struct {
-	// 企业签章图片
-	Seal string
 
 	// Signer路径
 	Signer string
+
+	// 是否自签名
+	SelfSign bool
 
 	// 目录配置
 	Dir struct {
@@ -54,7 +58,11 @@ type Config struct {
 	RootCertificate CertificatePath
 
 	// 企业证书，用于签署协议
-	EnterpriseCertificate CertificatePath
+	Enterprise struct {
+		Seal        string // 企业签章图片
+		Certificate string // 企业证书
+		PrivateKey  string // 企业私钥
+	}
 
 	// 日志配置
 	Logger struct {
@@ -83,8 +91,7 @@ type Config struct {
 func readConfig() (err error) {
 	err = viper.ReadInConfig()
 	if err != nil {
-		fmt.Printf("配置读取失败: %s\n", err)
-		return
+		return fmt.Errorf("配置读取失败: %s\n", err)
 	}
 
 	cfg = &Config{}
@@ -93,9 +100,19 @@ func readConfig() (err error) {
 		return
 	}
 
-	// 获取签章完整路径
-	cfg.Seal, err = filepath.Abs(cfg.Seal)
-
+	// 获取企业签名文件完整路径
+	cfg.Enterprise.Seal, _ = filepath.Abs(cfg.Enterprise.Seal)
+	if !edocseal.FileExists(cfg.Enterprise.Seal) {
+		return errors.New("企业签章图片不存在")
+	}
+	cfg.Enterprise.PrivateKey, _ = filepath.Abs(cfg.Enterprise.PrivateKey)
+	if !edocseal.FileExists(cfg.Enterprise.PrivateKey) {
+		return errors.New("企业私钥不存在")
+	}
+	cfg.Enterprise.Certificate, _ = filepath.Abs(cfg.Enterprise.Certificate)
+	if !edocseal.FileExists(cfg.Enterprise.Certificate) {
+		return errors.New("企业证书不存在")
+	}
 	return
 }
 
@@ -134,12 +151,27 @@ func GetConfig() *Config {
 
 // GetSeal 获取企业签章图片
 func GetSeal() string {
-	return cfg.Seal
+	return cfg.Enterprise.Seal
+}
+
+// GetCertificate 获取企业证书
+func GetCertificate() string {
+	return cfg.Enterprise.Certificate
+}
+
+// GetPrivateKey 获取企业私钥
+func GetPrivateKey() string {
+	return cfg.Enterprise.PrivateKey
 }
 
 // GetSigner 获取Signer路径
 func GetSigner() string {
 	return cfg.Signer
+}
+
+// IsSelfSign 是否自签名
+func IsSelfSign() bool {
+	return cfg.SelfSign
 }
 
 // GetConfigPath 获取配置目录

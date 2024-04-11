@@ -39,14 +39,13 @@ func Boot() {
 	}
 
 	// 初始化证书
-	rootCrt, entCrt := g.NewCertificate()
+	rootCrt := g.NewCertificate()
 
 	zap.L().Info(
 		"edocseal 初始化完成",
 		zap.String("cfgPath", g.GetConfigPath()),
 		zap.String("rpcBind", g.GetRPCBind()),
 		zap.Bool("rootCrt", rootCrt.GetCertificate() != nil && rootCrt.GetPrivateKey() != nil),
-		zap.Bool("entCrt", entCrt.GetCertificate() != nil && entCrt.GetPrivateKey() != nil),
 		zap.String("signerVersion", string(b)),
 	)
 }

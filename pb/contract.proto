@@ -36,7 +36,7 @@ message ContractCreateResponse {
 // 个签属性和团签属性只能二选一（需要进行限制判定）
 message ContractSignRequest {
   string doc_id = 1; // 待签约文档编号
-  string image = 2; // 个人签章图片
+  string image = 2; // 个人签章图片（base64编码）
   string name = 3; // 签署人
   string province = 4; // 省份
   string city = 5; // 城市

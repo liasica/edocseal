@@ -6,12 +6,14 @@ package biz
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
 	"os"
-	"path/filepath"
-	"time"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/signintech/pdft"
 	xpdf "github.com/signintech/pdft/minigopdf"
+	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/internal/g"
@@ -19,24 +21,10 @@ import (
 	"github.com/liasica/edocseal/pb"
 )
 
-// GetDocumentFile 获取文档
-func GetDocumentFile(docId string) (string, error) {
-	path := filepath.Join(g.GetDocumentDir(), docId[:4], docId[4:6], docId+".pdf")
-	if !edocseal.FileExists(path) {
-		return "", edocseal.ErrDocumentNotFound(docId)
-	}
-	return path, nil
-}
-
-// GenerateDocumentId 生成文档目录，返回文档ID和目录地址
-func GenerateDocumentId() (docId, path string) {
-	prefix := time.Now().Format("200601")
-	docId = g.GetID()
-	// 创建文件夹
-	path = filepath.Join(g.GetDocumentDir(), prefix[:4], prefix[4:], docId)
-	_ = edocseal.CreateDirectory(path)
-	return
-}
+const (
+	entSignField   = "entSign"
+	riderSignField = "riderSign"
+)
 
 // CreateDocument 根据模板创建待签约文档
 func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) (b []byte, docId string, err error) {
@@ -47,14 +35,10 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		return
 	}
 
-	var path string
-	docId, path = GenerateDocumentId()
-
-	// 生成文档ID
-	dst := filepath.Join(path, docId+".pdf")
+	paths := NewDocumentPaths()
 
 	// 复制模板
-	err = edocseal.FileCopy(tmpl.Path, dst)
+	err = edocseal.FileCopy(tmpl.Path, paths.UnSignedDocument)
 	if err != nil {
 		return
 	}
@@ -63,7 +47,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	pt := new(pdft.PDFt)
 
 	// 打开PDF
-	err = pt.Open(dst)
+	err = pt.Open(paths.UnSignedDocument)
 	if err != nil {
 		return
 	}
@@ -104,12 +88,6 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		}
 	}
 
-	// 创建目录
-	err = edocseal.CreateDirectory(filepath.Dir(dst))
-	if err != nil {
-		return
-	}
-
 	// 文档写入缓冲区
 	buf := new(bytes.Buffer)
 	err = pt.SaveTo(buf)
@@ -119,17 +97,95 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 
 	// 保存文档
 	b = buf.Bytes()
-	err = os.WriteFile(dst, b, os.ModePerm)
+	err = os.WriteFile(paths.UnSignedDocument, b, os.ModePerm)
+	if err != nil {
+		return
+	}
+
+	// 保存配置
+	sb, _ := jsoniter.Marshal(model.DocumentConfig{
+		TemplateID: templateId,
+		Signatures: []model.Signature{
+			{
+				Field: entSignField,
+				Image: g.GetSeal(),
+				Key:   g.GetPrivateKey(),
+				Cert:  g.GetCertificate(),
+				Rect:  tmpl.Fields[entSignField].Rectangle.IntList(),
+			},
+			{
+				Field: riderSignField,
+				Image: paths.Image,
+				Key:   paths.Key,
+				Cert:  paths.Cert,
+				Rect:  tmpl.Fields[riderSignField].Rectangle.IntList(),
+			},
+		},
+	})
+	err = os.WriteFile(paths.Config, sb, os.ModePerm)
+
+	docId = paths.ID
 	return
 }
 
 // SignDocument 文档签约
 func SignDocument(req *pb.ContractSignRequest) (err error) {
-	var doc string
-	doc, err = GetDocumentFile(req.DocId)
+	// 获取文档链接
+	var paths *model.DocumentPaths
+	paths, err = GetDocumentPaths(req.DocId)
+	if err != nil {
+		return
+	}
+
+	// 保存签名
+	var img []byte
+	img, err = base64.StdEncoding.DecodeString(req.Image)
+	if err != nil {
+		return
+	}
+	err = os.WriteFile(paths.Image, img, os.ModePerm)
+	if err != nil {
+		return
+	}
+
+	// 获取签名字段配置
+	var (
+		cfg model.DocumentConfig
+		cb  []byte
+	)
+	cb, err = os.ReadFile(paths.Config)
+	if err != nil {
+		return
+	}
+	err = jsoniter.Unmarshal(cb, &cfg)
+	if err != nil {
+		return
+	}
 
 	// 获取证书
-	RequestCertificae(filepath.Dir(doc))
+	err = RequestCertificae(paths, req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
+	if err != nil {
+		return
+	}
+
+	// 合同加签
+	sign := &model.Sign{
+		InFile:     paths.UnSignedDocument,
+		OutFile:    paths.SignedDocument,
+		Signatures: cfg.Signatures,
+	}
+
+	// 调用签名
+	var out []byte
+	argument, _ := jsoniter.MarshalToString(sign)
+	argument = fmt.Sprintf("'%s'", argument)
+	out, err = edocseal.Exec(g.GetSigner(), argument)
+	if err != nil {
+		zap.L().Error("签名失败", zap.Error(err), zap.Reflect("payload", req), zap.String("argument", argument), zap.String("output", string(out)))
+		return err
+	}
+	zap.L().Info("签名成功", zap.String("docId", req.DocId))
+	return nil
 }
 
 // UploadDocument 上传至阿里云

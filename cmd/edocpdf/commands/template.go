@@ -91,6 +91,16 @@ func Template() *cobra.Command {
 				}
 			}
 
+			// 判定是否有签名字段
+			if _, ok := fields["entSign"]; !ok {
+				fmt.Println("模板没有签名字段: entSign")
+				os.Exit(1)
+			}
+			if _, ok := fields["riderSign"]; !ok {
+				fmt.Println("模板没有签名字段: riderSign")
+				os.Exit(1)
+			}
+
 			// 存储模板配置
 			json, _ := jsoniter.MarshalIndent(fields, "", "  ")
 			_ = os.WriteFile(filepath.Join(path, fmt.Sprintf("%s.json", id)), json, 0755)
