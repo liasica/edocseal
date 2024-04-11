@@ -5,6 +5,8 @@
 package internal
 
 import (
+	"os"
+
 	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal"
@@ -15,8 +17,15 @@ func Boot() {
 	// 替换全局日志
 	zap.ReplaceGlobals(g.NewZap())
 
+	// 验证signer version
+	b, err := edocseal.Exec(g.GetSigner(), "version")
+	if err != nil {
+		zap.L().Fatal("Python环境未安装或配置错误")
+		os.Exit(1)
+	}
+
 	// 创建目录
-	err := edocseal.CreateDirectory(g.GetTemplateDir())
+	err = edocseal.CreateDirectory(g.GetTemplateDir())
 	if err != nil {
 		zap.L().Fatal("创建模板目录失败", zap.Error(err))
 	}
@@ -38,5 +47,6 @@ func Boot() {
 		zap.String("rpcBind", g.GetRPCBind()),
 		zap.Bool("rootCrt", rootCrt.GetCertificate() != nil && rootCrt.GetPrivateKey() != nil),
 		zap.Bool("entCrt", entCrt.GetCertificate() != nil && entCrt.GetPrivateKey() != nil),
+		zap.String("signerVersion", string(b)),
 	)
 }

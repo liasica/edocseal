@@ -5,13 +5,9 @@
 package internal
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/liasica/edocseal/internal"
-	"github.com/liasica/edocseal/internal/biz"
 	"github.com/liasica/edocseal/internal/g"
 )
 
@@ -28,13 +24,6 @@ func RunCommand() {
 
 			// 初始化
 			internal.Boot()
-
-			// 加载所有字体
-			err := biz.LoadFonts(g.GetConfigPath())
-			if err != nil {
-				fmt.Printf("字体加载失败: %v\n", err)
-				os.Exit(1)
-			}
 		},
 		Run: func(_ *cobra.Command, _ []string) {
 		},

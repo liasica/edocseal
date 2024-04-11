@@ -5,6 +5,7 @@
 package edocseal
 
 import (
+	"bytes"
 	"os/exec"
 	"strings"
 )
@@ -17,6 +18,8 @@ func Exec(arg ...string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	stdout = bytes.TrimRight(stdout, "\n")
 
 	return stdout, nil
 }

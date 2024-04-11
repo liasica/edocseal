@@ -35,6 +35,9 @@ type Config struct {
 	// 企业签章图片
 	Seal string
 
+	// Signer路径
+	Signer string
+
 	// 目录配置
 	Dir struct {
 		Template string // 模板目录
@@ -132,6 +135,11 @@ func GetConfig() *Config {
 // GetSeal 获取企业签章图片
 func GetSeal() string {
 	return cfg.Seal
+}
+
+// GetSigner 获取Signer路径
+func GetSigner() string {
+	return cfg.Signer
 }
 
 // GetConfigPath 获取配置目录
