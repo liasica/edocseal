@@ -151,7 +151,7 @@ func (*Certificate) inert() *cobra.Command {
 				interCrt, interKey []byte
 				serial             *big.Int
 			)
-			interCrt, interKey, serial, err = ca.CreateInterCertificate(dns, rootPrikey, rootCa, pkix.Name{
+			interCrt, interKey, serial, err = ca.CreateInterCertificate(rootPrikey, rootCa, pkix.Name{
 				Country:            []string{"中国"},               // 国家
 				Province:           []string{province},           // 省份
 				Locality:           []string{locality},           // 城市

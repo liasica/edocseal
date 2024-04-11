@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.3.0
 // - protoc             v4.25.3
-// source: contract.proto
+// source: pb/contract.proto
 
 package pb
 
@@ -146,5 +146,5 @@ var Contract_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "contract.proto",
+	Metadata: "pb/contract.proto",
 }

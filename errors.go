@@ -35,4 +35,8 @@ var (
 	ErrFieldNotFound = func(field string) *Error {
 		return NewError(ErrNotFoundCode, field+" 字段不存在")
 	}
+	ErrDocumentNotFound = func(docId string) *Error {
+		return NewError(ErrNotFoundCode, "文档 "+docId+" 不存在")
+	}
+	ErrRootCertificateNotFound = NewError(ErrNotFoundCode, "根证书不存在")
 )

@@ -6,8 +6,6 @@ package biz
 
 import (
 	"bytes"
-	"math/big"
-	"math/rand"
 	"os"
 	"path/filepath"
 	"time"
@@ -21,6 +19,25 @@ import (
 	"github.com/liasica/edocseal/pb"
 )
 
+// GetDocumentFile 获取文档
+func GetDocumentFile(docId string) (string, error) {
+	path := filepath.Join(g.GetDocumentDir(), docId[:4], docId[4:6], docId+".pdf")
+	if !edocseal.FileExists(path) {
+		return "", edocseal.ErrDocumentNotFound(docId)
+	}
+	return path, nil
+}
+
+// GenerateDocumentId 生成文档目录，返回文档ID和目录地址
+func GenerateDocumentId() (docId, path string) {
+	prefix := time.Now().Format("200601")
+	docId = g.GetID()
+	// 创建文件夹
+	path = filepath.Join(g.GetDocumentDir(), prefix[:4], prefix[4:], docId)
+	_ = edocseal.CreateDirectory(path)
+	return
+}
+
 // CreateDocument 根据模板创建待签约文档
 func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) (b []byte, docId string, err error) {
 	// 获取模板和配置
@@ -30,10 +47,11 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		return
 	}
 
-	docId = time.Now().Format("200601021504") + big.NewInt(rand.Int63()).String()
+	var path string
+	docId, path = GenerateDocumentId()
 
 	// 生成文档ID
-	dst := g.GetDocumentDir() + "/" + docId + ".pdf"
+	dst := filepath.Join(path, docId+".pdf")
 
 	// 复制模板
 	err = edocseal.FileCopy(tmpl.Path, dst)
@@ -106,7 +124,13 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 }
 
 // SignDocument 文档签约
-func SignDocument() {}
+func SignDocument(req *pb.ContractSignRequest) (err error) {
+	var doc string
+	doc, err = GetDocumentFile(req.DocId)
+
+	// 获取证书
+	RequestCertificae(filepath.Dir(doc))
+}
 
 // UploadDocument 上传至阿里云
 func UploadDocument(path string, b []byte) (url string, err error) {

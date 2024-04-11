@@ -32,31 +32,17 @@ message ContractCreateResponse {
   string doc_id = 2; // 待签约文档编号
 }
 
-// 合同签署主体
-enum ContractSignSubject {
-  Enterprise = 0; // 企业
-  Personal = 1; // 个人
-}
-
-// 合同签署实体
-message ContractSignEntity {
-  ContractSignSubject subject = 1; // 签署主体，必填
-  string field = 2; // 签章字段，必填
-  optional string image = 3; // 签章图片，BASE64编码，个人必填
-  optional string name = 4; // 签署人，个人必填
-  optional string province = 5; // 省份，个人必填
-  optional string city = 6; // 城市，个人必填
-  optional string address = 7; // 地址，个人必填
-  optional string phone = 8; // 手机号，个人必填
-  optional string idcard = 9; // 身份证号，个人必填
-}
-
 // 合同签署请求
 // 个签属性和团签属性只能二选一（需要进行限制判定）
 message ContractSignRequest {
   string doc_id = 1; // 待签约文档编号
-  ContractSignEntity enterprise = 2; // 企业签署人
-  ContractSignEntity personal = 3; // 个人签署人
+  string image = 2; // 个人签章图片
+  string name = 3; // 签署人
+  string province = 4; // 省份
+  string city = 5; // 城市
+  string address = 6; // 地址`
+  string phone = 7; // 手机号
+  string idcard = 8; // 身份证号
 }
 
 // 合同签署响应

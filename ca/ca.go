@@ -143,7 +143,7 @@ func LoadCertificateFromFile(path string) (crt *x509.Certificate, err error) {
 }
 
 // CreateInterCertificate 签发中级证书
-func CreateInterCertificate(dns string, priKey *rsa.PrivateKey, ca *x509.Certificate, subject pkix.Name) (interCrt, interKey []byte, serial *big.Int, err error) {
+func CreateInterCertificate(priKey *rsa.PrivateKey, ca *x509.Certificate, subject pkix.Name) (interCrt, interKey []byte, serial *big.Int, err error) {
 	// 生成中级证书密钥对
 	key := GenerateRsaPrivateKey()
 
@@ -153,7 +153,6 @@ func CreateInterCertificate(dns string, priKey *rsa.PrivateKey, ca *x509.Certifi
 	// 证书请求
 	certificate := x509.Certificate{
 		Subject:               subject,
-		DNSNames:              []string{dns},
 		SerialNumber:          serial,
 		NotBefore:             time.Now(),
 		NotAfter:              time.Now().AddDate(1, 0, 0),
@@ -161,7 +160,13 @@ func CreateInterCertificate(dns string, priKey *rsa.PrivateKey, ca *x509.Certifi
 		IsCA:                  true,
 		MaxPathLen:            0,
 		MaxPathLenZero:        true,
-		KeyUsage:              x509.KeyUsageCertSign | x509.KeyUsageCRLSign,
+		KeyUsage: x509.KeyUsageDigitalSignature |
+			x509.KeyUsageContentCommitment |
+			x509.KeyUsageKeyEncipherment |
+			x509.KeyUsageDataEncipherment |
+			x509.KeyUsageKeyAgreement |
+			x509.KeyUsageCertSign |
+			x509.KeyUsageCRLSign,
 	}
 
 	// 使用根证书签发中级证书
