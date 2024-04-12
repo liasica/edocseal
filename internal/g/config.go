@@ -10,7 +10,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 
 	"github.com/liasica/edocseal"
@@ -135,20 +134,13 @@ func LoadConfig(configFile string) {
 	// 读取配置文件
 	err = readConfig()
 	if err != nil {
+		fmt.Printf("配置读取失败: %v\n", err)
 		os.Exit(1)
 	}
 
-	// 监听配置文件变动后重载
-	viper.OnConfigChange(func(in fsnotify.Event) {
-		fmt.Println("配置文件变动，重新加载")
-		_ = readConfig()
-	})
-
-	viper.WatchConfig()
-}
-
-func GetConfig() *Config {
-	return cfg
+	if cfg.TaskNum == 0 {
+		cfg.TaskNum = 3
+	}
 }
 
 // GetTaskNum 获取任务数
