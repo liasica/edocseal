@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
+	"github.com/google/uuid"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cobra"
 
@@ -29,15 +31,18 @@ func templateCommand() *cobra.Command {
 		Args:              cobra.ExactArgs(1),
 		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		Run: func(_ *cobra.Command, args []string) {
-			// 重命名模板文档
 			// 获取模板文件md5
-			id, err := edocseal.FileMd5(args[0])
+			fileId, err := edocseal.FileMd5(args[0])
 			if err != nil {
-				fmt.Printf("模板文件MD5获取失败: %v\n", err)
+				fmt.Printf("模板MD5获取失败: %v\n", err)
 				os.Exit(1)
 			}
-			fmt.Println("模板ID为: ", id)
-			_ = os.Rename(args[0], filepath.Join(path, id+".pdf"))
+
+			// 重命名模板文档
+			templateFile, _ := filepath.Abs(filepath.Join(path, fileId+".pdf"))
+			if !edocseal.FileExists(templateFile) {
+				_ = os.Rename(args[0], templateFile)
+			}
 
 			// 获取表单属性
 			var b []byte
@@ -55,15 +60,23 @@ func templateCommand() *cobra.Command {
 				os.Exit(1)
 			}
 
+			// 生成模板ID
+			templateId := strings.ToUpper(strings.ReplaceAll(uuid.New().String(), "-", ""))
+			template := model.Template{
+				ID:     templateId,
+				File:   templateFile,
+				Fields: make(map[string]model.TemplateField),
+			}
+
 			// 模板数据
-			fields := make(map[string]model.TemplateField)
+			var hasEnt, hasRider bool
 			for _, field := range form.Acroform.Fields {
 				m := form.Objects[1]["obj:"+field.Annotation.Object]
 				mb, _ := jsoniter.Marshal(m)
 				var data edocseal.FormFieldObject
 				_ = jsoniter.Unmarshal(mb, &data)
 
-				fmt.Printf("%s (%s): [%.2f, %.2f, %.2f, %.2f]\n",
+				fmt.Printf("%20.20s %10.10s\t\t%6.2f, %6.2f, %6.2f, %6.2f\n",
 					field.Fullname,
 					field.Fieldtype,
 					data.Value.Rect[0],
@@ -71,10 +84,10 @@ func templateCommand() *cobra.Command {
 					data.Value.Rect[2],
 					data.Value.Rect[3],
 				)
-				if _, ok := fields[field.Fullname]; ok {
-					fmt.Printf("字段重复: %s\n", field.Fullname)
-					os.Exit(1)
-				}
+				// if _, ok := fields[field.Fullname]; ok {
+				// 	fmt.Printf("字段重复: %s\n", field.Fullname)
+				// 	os.Exit(1)
+				// }
 
 				var typ model.TemplateFieldType
 				typ, err = model.NewTemplateFieldType(field.Fieldtype)
@@ -83,7 +96,15 @@ func templateCommand() *cobra.Command {
 					os.Exit(1)
 				}
 
-				fields[field.Fullname] = model.TemplateField{
+				if field.Fullname == model.EntSignField {
+					hasEnt = true
+				}
+
+				if field.Fullname == model.PersonalSignField {
+					hasRider = true
+				}
+
+				template.Fields[field.Fullname] = model.TemplateField{
 					Page: field.Pageposfrom1,
 					Type: typ,
 					Rectangle: &model.TemplateRectangle{
@@ -100,19 +121,19 @@ func templateCommand() *cobra.Command {
 			}
 
 			// 判定是否有签名字段
-			if _, ok := fields[model.EntSignField]; !ok {
+			if !hasEnt {
 				fmt.Printf("模板没有签名字段: %s\n", model.EntSignField)
 				os.Exit(1)
 			}
-			if _, ok := fields[model.PersonalSignField]; !ok {
+			if !hasRider {
 				fmt.Printf("模板没有签名字段: %s\n", model.PersonalSignField)
 				os.Exit(1)
 			}
 
 			// 存储模板配置
-			json, _ := jsoniter.MarshalIndent(fields, "", "  ")
-			_ = os.WriteFile(filepath.Join(path, fmt.Sprintf("%s.json", id)), json, 0755)
-			fmt.Println("完成模板创建")
+			json, _ := jsoniter.MarshalIndent(template, "", "  ")
+			_ = os.WriteFile(filepath.Join(path, fmt.Sprintf("%s.json", templateId)), json, 0755)
+			fmt.Printf("完成模板创建，模板ID: %s\n", templateId)
 		},
 	}
 

@@ -7,9 +7,9 @@ package biz
 import (
 	"crypto/x509/pkix"
 	"encoding/base64"
+	"errors"
 	"fmt"
 
-	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/ca"
 	"github.com/liasica/edocseal/internal/g"
 	"github.com/liasica/edocseal/internal/model"
@@ -39,7 +39,7 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 	// 获取根证书
 	rootCrt := g.NewCertificate()
 	if rootCrt == nil {
-		return nil, nil, edocseal.ErrRootCertificateNotFound
+		return nil, nil, errors.New("根证书不存在")
 	}
 
 	// 签发证书

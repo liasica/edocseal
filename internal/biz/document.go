@@ -5,6 +5,7 @@
 package biz
 
 import (
+	"fmt"
 	"path/filepath"
 	"time"
 
@@ -46,7 +47,7 @@ func getDocumentPaths(dir, docId string) *model.DocumentPaths {
 func GetDocumentPaths(docId string) (*model.DocumentPaths, error) {
 	dir, _ := filepath.Abs(filepath.Join(g.GetDocumentDir(), docId[:4], docId[4:6], docId[6:]))
 	if !edocseal.FileExists(dir) {
-		return nil, edocseal.ErrDocumentNotFound(docId)
+		return nil, fmt.Errorf("文档不存在: %s", docId)
 	}
 	return getDocumentPaths(dir, docId), nil
 }

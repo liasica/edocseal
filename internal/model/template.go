@@ -69,16 +69,17 @@ func (rect *TemplateRectangle) IntList() []int {
 	}
 }
 
+// Template 模板
+type Template struct {
+	ID     string                   `json:"id"`     // 模板ID
+	File   string                   `json:"file"`   // 模板文件
+	Fields map[string]TemplateField `json:"fields"` // 字段列表
+}
+
 // TemplateField 模板字段
 type TemplateField struct {
 	Page        int                `json:"page"`                  // 页码，从1开始
 	Description string             `json:"description,omitempty"` // 字段描述
 	Type        TemplateFieldType  `json:"type,omitempty"`        // 字段类型
 	Rectangle   *TemplateRectangle `json:"rectangle,omitempty"`   // 字段位置
-}
-
-// TemplateData 模板数据
-type TemplateData struct {
-	Path   string                   `json:"path"`
-	Fields map[string]TemplateField `json:"fields"`
 }

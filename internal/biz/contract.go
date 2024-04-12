@@ -7,6 +7,7 @@ package biz
 import (
 	"bytes"
 	"encoding/base64"
+	"fmt"
 	"os"
 
 	jsoniter "github.com/json-iterator/go"
@@ -23,7 +24,7 @@ import (
 // CreateDocument 根据模板创建待签约文档
 func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) (b []byte, paths *model.DocumentPaths, err error) {
 	// 获取模板和配置
-	var tmpl *model.TemplateData
+	var tmpl *model.Template
 	tmpl, err = GetTemplate(templateId)
 	if err != nil {
 		return
@@ -32,7 +33,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	paths = NewDocumentPaths()
 
 	// 复制模板
-	err = edocseal.FileCopy(tmpl.Path, paths.UnSignedDocument)
+	err = edocseal.FileCopy(tmpl.File, paths.UnSignedDocument)
 	if err != nil {
 		return
 	}
@@ -63,7 +64,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	for k, v := range fields {
 		c, ok := tmpl.Fields[k]
 		if !ok {
-			err = edocseal.ErrFieldNotFound(k)
+			err = fmt.Errorf("字段 %s 不存在", k)
 			return
 		}
 

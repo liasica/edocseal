@@ -23,7 +23,7 @@ var (
 )
 
 // GetTemplate 根据ID返回模板路径以及配置
-func GetTemplate(id string) (*model.TemplateData, error) {
+func GetTemplate(id string) (*model.Template, error) {
 	data, ok := templates.Load(id)
 	if !ok {
 		var err error
@@ -32,27 +32,29 @@ func GetTemplate(id string) (*model.TemplateData, error) {
 			return nil, err
 		}
 	}
-	return data.(*model.TemplateData), nil
+	return data.(*model.Template), nil
 }
 
-func loadTemplateConfig(id string) (*model.TemplateData, error) {
-	cfgPath := filepath.Join(g.GetTemplateDir(), id+".json")
-	path := filepath.Join(g.GetTemplateDir(), id+".pdf")
-	if !edocseal.FileExists(cfgPath) || !edocseal.FileExists(path) {
-		return nil, errors.New("模板未找到")
-	}
-
-	data := &model.TemplateData{
-		Path: path,
-	}
-	b, err := os.ReadFile(cfgPath)
+func loadTemplateConfig(id string) (*model.Template, error) {
+	b, err := os.ReadFile(filepath.Join(g.GetTemplateDir(), id+".json"))
 	if err != nil {
 		return nil, err
 	}
 
-	_ = jsoniter.Unmarshal(b, &data.Fields)
+	template := new(model.Template)
 
-	return data, nil
+	// 解析模板配置
+	err = jsoniter.Unmarshal(b, &template)
+	if err != nil {
+		return nil, err
+	}
+
+	// 验证模板文档是否存在
+	if !edocseal.FileExists(template.File) {
+		return nil, errors.New("模板未找到")
+	}
+
+	return template, nil
 }
 
 func oss() (ao *edocseal.AliyunOss, url string, err error) {
