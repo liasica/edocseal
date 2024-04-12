@@ -2,11 +2,11 @@
   <configuration default="false" name="server" type="GoApplicationRunConfiguration" factoryName="Go Application">
     <module name="edocseal" />
     <working_directory value="$PROJECT_DIR$" />
-    <go_parameters value="server" />
+    <parameters value="server" />
     <kind value="PACKAGE" />
     <package value="github.com/liasica/edocseal/cmd/edocseal" />
     <directory value="$PROJECT_DIR$" />
-    <filePath value="$PROJECT_DIR$/cmd/edocseal/main.go" />
+    <filePath value="$PROJECT_DIR$/cmd/edocpdf/main.go" />
     <method v="2" />
   </configuration>
 </component>

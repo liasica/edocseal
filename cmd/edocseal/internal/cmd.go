@@ -25,8 +25,6 @@ func RunCommand() {
 			// 初始化
 			internal.Boot()
 		},
-		Run: func(_ *cobra.Command, _ []string) {
-		},
 	}
 
 	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", "config/config.yaml", "配置文件")

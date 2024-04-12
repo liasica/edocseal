@@ -29,7 +29,7 @@ func serverCommand() *cobra.Command {
 		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		Run: func(_ *cobra.Command, _ []string) {
 			// 启动任务队列
-			task.NewTask().Run()
+			go task.NewTask().Run()
 
 			// 监听端口
 			lis, err := net.Listen("tcp", g.GetRPCBind())
