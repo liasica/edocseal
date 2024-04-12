@@ -33,6 +33,10 @@ type AliyunOss struct {
 	Url             string
 }
 
+type Snca struct {
+	Url string
+}
+
 type Config struct {
 
 	// Signer路径
@@ -91,6 +95,8 @@ type Config struct {
 	Aliyun struct {
 		Oss AliyunOss
 	}
+
+	Snca Snca
 }
 
 func readConfig() (err error) {
@@ -213,4 +219,9 @@ func GetDocumentDir() string {
 // GetAliyunOss 获取阿里云OSS配置
 func GetAliyunOss() AliyunOss {
 	return cfg.Aliyun.Oss
+}
+
+// GetSnca 获取SNCA配置
+func GetSnca() *Snca {
+	return &cfg.Snca
 }

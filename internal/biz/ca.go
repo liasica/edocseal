@@ -10,10 +10,8 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
-	"fmt"
 
 	"github.com/go-resty/resty/v2"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/tjfoc/gmsm/sm3"
 	"go.uber.org/zap"
 
@@ -102,27 +100,31 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	sum := h.Sum(nil)
 	param["passwdDigest"] = hex.EncodeToString(sum)
 
-	var resp *resty.Response
+	var (
+		resp   *resty.Response
+		result *model.AgencyCertResponse
+	)
+
 	resp, err = resty.New().R().
 		SetHeader("Content-Type", "application/json").
 		SetBody(param).
-		SetResult(&model.AgencyCertResponse{}).
-		Post("http://117.32.132.76:28998/boss-eai/cert/getCert")
+		SetResult(&result).
+		Post(g.GetSnca().Url)
 	if err != nil {
-		zap.L().Fatal("机构签发证书失败", zap.Error(err))
+		zap.L().Error("机构签发证书失败", zap.Error(err))
 		return
 	}
-	res := new(model.AgencyCertResponse)
-	err = jsoniter.Unmarshal(resp.Body(), res)
-	if err != nil {
-		zap.L().Fatal("机构签发证书失败", zap.Error(err))
-		return
-	}
-	if res.ErrorCode != "200" || res.Result == "false" {
-		zap.L().Fatal("机构签发证书失败", zap.Error(errors.New(res.ErrorMessage)))
-		return nil, nil, errors.New(res.ErrorMessage)
+	zap.L().Info("机构签发证书", zap.String("response", string(resp.Body())))
+
+	if result == nil {
+		return nil, nil, errors.New("机构签发证书失败，返回结果为空")
 	}
 
-	crt, err = base64.StdEncoding.DecodeString(res.JsonObj.SignCert)
+	if result.ErrorCode != "200" || result.Result == "false" {
+		zap.L().Error("机构签发证书失败", zap.Error(errors.New(result.ErrorMessage)))
+		return nil, nil, errors.New(result.ErrorMessage)
+	}
+
+	crt, err = base64.StdEncoding.DecodeString(result.JsonObj.SignCert)
 	return
 }
