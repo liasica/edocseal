@@ -39,7 +39,10 @@ func DocumentTask() *Task {
 
 func CreateTasks(signNumber, documentNumber int) {
 	sign = create(signNumber)
+	sign.name = "sign"
+
 	document = create(documentNumber)
+	document.name = "document"
 
 	go sign.run()
 	go document.run()
@@ -76,7 +79,7 @@ func (t *Task) run() {
 
 // 执行任务
 func (t *Task) do(job *Job) {
-	zap.L().Info("新增任务", zap.String("name", t.name), zap.Int("running", t.pool.Running()))
+	zap.L().Info("新增任务", zap.String("task", t.name), zap.Int("running", t.pool.Running()))
 
 	start := time.Now()
 	var err error
@@ -84,11 +87,11 @@ func (t *Task) do(job *Job) {
 		// 防止崩溃
 		if r := recover(); r != nil {
 			err = fmt.Errorf("%v", r)
-			zap.L().Error("任务崩溃", zap.String("name", t.name), zap.Error(err))
+			zap.L().Error("任务崩溃", zap.String("task", t.name), zap.Error(err))
 		}
 		// 返回结果
 		zap.L().Info("执行完成",
-			zap.String("name", t.name),
+			zap.String("task", t.name),
 			zap.Duration("cost", time.Since(start)),
 			zap.Error(err),
 			zap.Int("running", t.pool.Running()),
