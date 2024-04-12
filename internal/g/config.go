@@ -74,9 +74,10 @@ type Config struct {
 
 	// 日志配置
 	Logger struct {
-		Console  bool   // 是否输出至控制台
-		Redis    bool   // 是否输出至Redis
-		RedisKey string // Redis输出key
+		Console    bool   // 是否输出至控制台
+		Redis      bool   // 是否输出至Redis
+		RedisKey   string // Redis输出key
+		LoggerName string // 日志名称
 	}
 
 	// RPC配置

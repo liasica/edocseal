@@ -52,5 +52,5 @@ func NewZap() *zap.Logger {
 	core := zapcore.NewTee(cores...)
 
 	// logger 输出到 console 且标识调用代码行
-	return zap.New(core).WithOptions(zap.AddCaller())
+	return zap.New(core).WithOptions(zap.AddCaller()).Named(cfg.Logger.LoggerName)
 }

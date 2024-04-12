@@ -11,6 +11,7 @@ import (
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
 	"github.com/liasica/edocseal/internal/g"
@@ -45,7 +46,7 @@ func serverCommand() *cobra.Command {
 			defer s.GracefulStop()
 
 			pb.RegisterContractServer(s, &service.ContractService{})
-			fmt.Println("RPC启动成功：", g.GetRPCBind())
+			zap.L().Info("RPC启动成功", zap.String("bind", g.GetRPCBind()))
 
 			// 启动服务
 			err = s.Serve(lis)
