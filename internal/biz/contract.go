@@ -9,6 +9,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"strings"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/signintech/pdft"
@@ -124,9 +125,8 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 }
 
 // SignDocument 文档签约
-func SignDocument(req *pb.ContractSignRequest) (file string, err error) {
+func SignDocument(req *pb.ContractSignRequest) (paths *model.DocumentPaths, err error) {
 	// 获取文档链接
-	var paths *model.DocumentPaths
 	paths, err = GetDocumentPaths(req.DocId)
 	if err != nil {
 		return
@@ -157,7 +157,6 @@ func SignDocument(req *pb.ContractSignRequest) (file string, err error) {
 		return
 	}
 	zap.L().Info("签名成功", zap.String("docId", req.DocId))
-	file = paths.SignedDocument
 	return
 }
 
@@ -175,6 +174,9 @@ func UploadDocument(path string, b []byte) (url string, err error) {
 	if err != nil {
 		return
 	}
-	url = url + "/" + path
+	if !strings.HasSuffix(url, "/") {
+		url += "/"
+	}
+	url = url + path
 	return
 }

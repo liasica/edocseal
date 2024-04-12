@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/liasica/edocseal/internal/biz"
+	"github.com/liasica/edocseal/internal/model"
 	"github.com/liasica/edocseal/internal/task"
 	"github.com/liasica/edocseal/pb"
 )
@@ -19,44 +20,52 @@ type ContractService struct {
 
 // Create 创建合同
 func (*ContractService) Create(_ context.Context, req *pb.ContractCreateRequest) (*pb.ContractCreateResponse, error) {
-	// 创建合同
-	doc, paths, err := biz.CreateDocument(req.TemplateId, req.Values)
-	if err != nil {
-		return nil, err
-	}
+	res := &pb.ContractCreateResponse{}
 
-	// 上传合同
-	var url string
-	url, err = biz.UploadDocument(paths.OssUnSignedDocument, doc)
+	err := <-task.DocumentTask().AddJob(func() error {
+		// 创建合同
+		doc, paths, err := biz.CreateDocument(req.TemplateId, req.Values)
+		if err != nil {
+			return err
+		}
 
-	return &pb.ContractCreateResponse{
-		Url:   url,
-		DocId: paths.ID,
-	}, nil
+		// 上传合同
+		var url string
+		url, err = biz.UploadDocument(paths.OssUnSignedDocument, doc)
+		if err != nil {
+			return err
+		}
+
+		res.Url = url
+		res.DocId = paths.ID
+		return nil
+	})
+
+	return res, err
 }
 
 // Sign 合同签署
 func (*ContractService) Sign(_ context.Context, req *pb.ContractSignRequest) (*pb.ContractSignResponse, error) {
 	res := &pb.ContractSignResponse{}
 
-	w := task.NewTask().AddJob(func() (err error) {
+	w := task.SignTask().AddJob(func() (err error) {
 		// 签署合同
-		var file string
-		file, err = biz.SignDocument(req)
+		var paths *model.DocumentPaths
+		paths, err = biz.SignDocument(req)
 		if err != nil {
 			return
 		}
 
 		// 读取合同
 		var b []byte
-		b, err = os.ReadFile(file)
+		b, err = os.ReadFile(paths.SignedDocument)
 		if err != nil {
 			return
 		}
 
 		// 上传合同
 		var url string
-		url, err = biz.UploadDocument(req.DocId, b)
+		url, err = biz.UploadDocument(paths.OssSignedDocument, b)
 		if err != nil {
 			return
 		}

@@ -9,13 +9,10 @@ import (
 	"net"
 	"os"
 
-	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/logging"
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/internal/g"
 	"github.com/liasica/edocseal/internal/service"
 	"github.com/liasica/edocseal/internal/task"
@@ -29,7 +26,7 @@ func serverCommand() *cobra.Command {
 		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		Run: func(_ *cobra.Command, _ []string) {
 			// 启动任务队列
-			go task.NewTask().Run()
+			task.CreateTasks(g.GetSignTaskNum(), g.GetDocumentTaskNum())
 
 			// 监听端口
 			lis, err := net.Listen("tcp", g.GetRPCBind())
@@ -41,7 +38,7 @@ func serverCommand() *cobra.Command {
 			// 创建grpc server
 			s := grpc.NewServer(
 				grpc.ChainUnaryInterceptor(
-					logging.UnaryServerInterceptor(edocseal.InterceptorLogger(zap.L())),
+					// logging.UnaryServerInterceptor(edocseal.InterceptorLogger(zap.L())),
 					recovery.UnaryServerInterceptor(),
 				),
 			)

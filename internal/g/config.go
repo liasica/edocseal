@@ -34,14 +34,18 @@ type AliyunOss struct {
 }
 
 type Config struct {
-	// 同时处理任务数
-	TaskNum int
 
 	// Signer路径
 	Signer string
 
 	// 是否自签名
 	SelfSign bool
+
+	// 同时处理任务数
+	Task struct {
+		Sign     int // 签约任务
+		Document int // 文档任务
+	}
 
 	// 目录配置
 	Dir struct {
@@ -138,14 +142,22 @@ func LoadConfig(configFile string) {
 		os.Exit(1)
 	}
 
-	if cfg.TaskNum == 0 {
-		cfg.TaskNum = 3
+	if cfg.Task.Sign == 0 {
+		cfg.Task.Sign = 3
+	}
+	if cfg.Task.Document == 0 {
+		cfg.Task.Document = 3
 	}
 }
 
-// GetTaskNum 获取任务数
-func GetTaskNum() int {
-	return cfg.TaskNum
+// GetSignTaskNum 获取签约任务数
+func GetSignTaskNum() int {
+	return cfg.Task.Sign
+}
+
+// GetDocumentTaskNum 获取文档任务数
+func GetDocumentTaskNum() int {
+	return cfg.Task.Document
 }
 
 // GetSeal 获取企业签章图片

@@ -54,7 +54,6 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 	if err != nil {
 		return
 	}
-	fmt.Println(address, phone, idcard)
 	return
 }
 
