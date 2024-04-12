@@ -38,7 +38,6 @@ type Snca struct {
 }
 
 type Config struct {
-
 	// Signer路径
 	Signer string
 
