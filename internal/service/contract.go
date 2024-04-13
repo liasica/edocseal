@@ -8,6 +8,8 @@ import (
 	"context"
 	"os"
 
+	"go.uber.org/zap"
+
 	"github.com/liasica/edocseal/internal/biz"
 	"github.com/liasica/edocseal/internal/model"
 	"github.com/liasica/edocseal/internal/task"
@@ -26,9 +28,23 @@ type ContractService struct {
 func (*ContractService) Create(_ context.Context, req *pb.ContractCreateRequest) (*pb.ContractCreateResponse, error) {
 	res := &pb.ContractCreateResponse{}
 
-	err := <-task.DocumentTask().AddJob(func() error {
+	err := <-task.DocumentTask().AddJob(func() (err error) {
+		level := zap.InfoLevel
+		defer func() {
+			fields := []zap.Field{
+				zap.Reflect("payload", req),
+				zap.Reflect("response", res),
+			}
+			if err != nil {
+				level = zap.ErrorLevel
+				fields = append(fields, zap.Error(err))
+			}
+			zap.L().Check(level, "生成文档").Write(fields...)
+		}()
 		// 创建合同
-		doc, paths, err := biz.CreateDocument(req.TemplateId, req.Values)
+		var doc []byte
+		var paths *model.DocumentPaths
+		doc, paths, err = biz.CreateDocument(req.TemplateId, req.Values)
 		if err != nil {
 			return err
 		}
@@ -53,6 +69,27 @@ func (*ContractService) Sign(_ context.Context, req *pb.ContractSignRequest) (*p
 	res := &pb.ContractSignResponse{}
 
 	w := task.SignTask().AddJob(func() (err error) {
+		level := zap.InfoLevel
+		defer func() {
+			fields := []zap.Field{
+				zap.String("docId", req.DocId),
+				zap.Reflect("payload", map[string]string{
+					"name":     req.Name,
+					"province": req.Province,
+					"city":     req.City,
+					"address":  req.Address,
+					"phone":    req.Phone,
+					"idcard":   req.Idcard,
+				}),
+				zap.Reflect("response", res),
+			}
+			if err != nil {
+				level = zap.ErrorLevel
+				fields = append(fields, zap.Error(err))
+			}
+			zap.L().Check(level, "签署合同").Write(fields...)
+		}()
+
 		// 签署合同
 		var paths *model.DocumentPaths
 		paths, err = biz.SignDocument(req)
