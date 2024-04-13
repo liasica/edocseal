@@ -2,6 +2,7 @@
 
 REGISTRY=harbor.liasica.com/auroraride/edocseal:$1
 PORT=26611
+MAINTAIN=http://10.17.0.15:5000/stop
 
 if [ "$1" = "prod" ]; then
 	PORT=26610
@@ -14,6 +15,7 @@ docker push "$REGISTRY"
 ssh root@118.116.4.16 -p $PORT "
 	cd /var/www
 	docker pull ${REGISTRY}
+	curl ${MAINTAIN}
 	docker compose stop edocseal
 	docker compose rm -f edocseal
 	docker compose up edocseal -d

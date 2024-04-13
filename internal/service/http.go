@@ -20,5 +20,5 @@ func StopTasks(w http.ResponseWriter, _ *http.Request) {
 	go task.SignTask().HaltAndWait(wg)
 
 	wg.Wait()
-	_, _ = w.Write(nil)
+	_, _ = w.Write([]byte("ok\n"))
 }

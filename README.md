@@ -7,6 +7,11 @@
 edocseal template templates/原始模板.pdf -t runtime/模板表单.pdf
 ```
 
+### 编译 Base Docker
+```shell
+docker build -t liasica/edocseal ./docker/Dockerfile
+```
+
 ### 签名
 
 #### 依赖

@@ -30,6 +30,17 @@ func serverCommand() *cobra.Command {
 			// 启动任务队列
 			task.CreateTasks(g.GetSignTaskNum(), g.GetDocumentTaskNum())
 
+			// 启动http服务
+			go func() {
+				http.HandleFunc("/stop", service.StopTasks)
+				zap.L().Info("API启动", zap.String("bind", g.GetHttpBind()))
+				err := http.ListenAndServe(g.GetHttpBind(), nil)
+				if err != nil {
+					fmt.Printf("HTTP服务启动失败：%s\n", err)
+					os.Exit(1)
+				}
+			}()
+
 			// 监听端口
 			lis, err := net.Listen("tcp", g.GetRPCBind())
 			if err != nil {
@@ -47,7 +58,7 @@ func serverCommand() *cobra.Command {
 			defer s.GracefulStop()
 
 			pb.RegisterContractServer(s, &service.ContractService{})
-			zap.L().Info("RPC启动成功", zap.String("bind", g.GetRPCBind()))
+			zap.L().Info("RPC启动", zap.String("bind", g.GetRPCBind()))
 
 			// 启动服务
 			err = s.Serve(lis)
@@ -55,17 +66,6 @@ func serverCommand() *cobra.Command {
 				fmt.Printf("RPC服务启动失败：%s\n", err)
 				os.Exit(1)
 			}
-
-			// 启动http服务
-			go func() {
-				http.HandleFunc("/stop-tasks", service.StopTasks)
-				err = http.ListenAndServe(g.GetHttpBind(), nil)
-				if err != nil {
-					fmt.Printf("HTTP服务启动失败：%s\n", err)
-					os.Exit(1)
-				}
-				zap.L().Info("Http启动成功", zap.String("bind", g.GetHttpBind()))
-			}()
 
 			select {}
 		},

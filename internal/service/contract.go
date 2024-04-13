@@ -14,6 +14,10 @@ import (
 	"github.com/liasica/edocseal/pb"
 )
 
+// GracefulStartGrpcServer TODO: 优雅启动和停止grpc服务
+func GracefulStartGrpcServer() {
+}
+
 type ContractService struct {
 	pb.UnimplementedContractServer
 }
