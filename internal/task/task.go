@@ -5,7 +5,10 @@
 package task
 
 import (
+	"errors"
 	"fmt"
+	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/panjf2000/ants/v2"
@@ -18,8 +21,9 @@ var (
 )
 
 type Task struct {
-	name     string
-	dispatch chan *Job // 分发器
+	name     string      // 任务名称
+	dispatch chan *Job   // 分发器
+	halt     atomic.Bool // 停止新任务进入
 
 	pool *ants.PoolWithFunc
 }
@@ -79,9 +83,8 @@ func (t *Task) run() {
 
 // 执行任务
 func (t *Task) do(job *Job) {
-	zap.L().Info("新增任务", zap.String("task", t.name), zap.Int("running", t.pool.Running()))
-
 	start := time.Now()
+
 	var err error
 	defer func() {
 		// 防止崩溃
@@ -99,7 +102,14 @@ func (t *Task) do(job *Job) {
 		job.waiter <- err
 	}()
 
+	if t.halt.Load() {
+		zap.L().Info("停止任务新增，直接返维护中", zap.String("task", t.name))
+		err = errors.New("维护中")
+		return
+	}
+
 	// 执行任务
+	zap.L().Info("新增任务", zap.String("task", t.name), zap.Int("running", t.pool.Running()))
 	err = job.worker()
 	return
 }
@@ -111,4 +121,28 @@ func (t *Task) AddJob(worker func() error) (waiter chan error) {
 		waiter: waiter,
 	}
 	return
+}
+
+// Halt 停止任务队列
+func (t *Task) Halt() {
+	t.halt.Store(true)
+}
+
+// Wait 等待任务队列完成
+func (t *Task) Wait() {
+	for {
+		isDone := t.pool.Running() == 0
+		if isDone {
+			return
+		}
+		fmt.Printf("%s 任务队列中还有 %d 个任务在执行, %d 个任务等待中\n", t.name, t.pool.Running(), t.pool.Waiting())
+		time.Sleep(500 * time.Millisecond)
+	}
+}
+
+// HaltAndWait 停止任务队列并等待执行中的队列完成
+func (t *Task) HaltAndWait(wg *sync.WaitGroup) {
+	t.Halt()
+	t.Wait()
+	wg.Done()
 }

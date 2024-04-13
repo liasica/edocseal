@@ -85,6 +85,11 @@ type Config struct {
 		Bind string // 绑定地址
 	}
 
+	// HTTP配置
+	Http struct {
+		Bind string // 绑定地址
+	}
+
 	// Redis配置
 	Redis struct {
 		Addr     string // 地址
@@ -199,6 +204,11 @@ func GetConfigPath() string {
 // GetRPCBind 获取RPC绑定地址
 func GetRPCBind() string {
 	return cfg.RPC.Bind
+}
+
+// GetHttpBind 获取HTTP绑定地址
+func GetHttpBind() string {
+	return cfg.Http.Bind
 }
 
 // GetTemplateDir 获取模板路径
