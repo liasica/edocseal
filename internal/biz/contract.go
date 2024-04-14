@@ -7,6 +7,7 @@ package biz
 import (
 	"bytes"
 	"encoding/base64"
+	"io/fs"
 	"os"
 	"strings"
 
@@ -32,28 +33,27 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 
 	paths = NewDocumentPaths()
 
-	// 复制模板
-	err = edocseal.FileCopy(tmpl.File, paths.UnSignedDocument)
-	if err != nil {
-		return
-	}
-
 	// 创建PDF
 	pt := new(pdft.PDFt)
 
 	// 打开PDF
-	err = pt.Open(paths.UnSignedDocument)
+	err = pt.Open(tmpl.File)
 	if err != nil {
 		return
 	}
 
 	// 加载所有字体
-	err = addFonts(pt)
+	var f fs.File
+	f, err = g.GetFont(g.FontSong)
+	if err != nil {
+		return
+	}
+	err = pt.AddFontFrom(g.FontSong, f)
 	if err != nil {
 		return
 	}
 
-	err = pt.SetFont(FontSong, "", 10)
+	err = pt.SetFont(g.FontSong, "", 10)
 	if err != nil {
 		return
 	}
@@ -65,6 +65,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		c, ok := tmpl.Fields[k]
 		if !ok {
 			zap.L().Warn("字段不存在", zap.String("field", k))
+			continue
 		}
 
 		rect := c.Rectangle
@@ -73,7 +74,12 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 
 		switch val := v.Value.(type) {
 		case *pb.ContractFromField_Text:
-			err = pt.Insert(val.Text, c.Page, x, size.Height-y, rect.Width(), rect.Height(), xpdf.Left|xpdf.Middle)
+			var w float64
+			w, err = pt.MeasureTextWidth(val.Text)
+			if err != nil {
+				return
+			}
+			err = pt.Insert(val.Text, c.Page, x, size.Height-y, w, rect.Height(), xpdf.Left|xpdf.Middle)
 		case *pb.ContractFromField_Checkbox:
 			err = pt.InsertImg(g.GetCheckImage(), c.Page, x, size.Height-y, rect.Width(), rect.Height())
 		}

@@ -5,9 +5,12 @@
 package biz
 
 import (
+	"sync"
 	"testing"
 
+	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/internal/g"
@@ -19,18 +22,48 @@ func TestCreateDocument(t *testing.T) {
 	g.LoadConfig("config/config.yaml")
 	err := edocseal.CreateDirectory(g.GetDocumentDir())
 	require.NoError(t, err)
+	l, _ := zap.NewDevelopment()
+	zap.ReplaceGlobals(l)
 
-	var (
-		b     []byte
-		paths *model.DocumentPaths
-	)
-	b, paths, err = CreateDocument("02AD3B0C64E247DEBDD002DEC49BAAB9", map[string]*pb.ContractFromField{
-		"check1":       {Value: &pb.ContractFromField_Checkbox{Checkbox: true}},
-		"name":         {Value: &pb.ContractFromField_Text{Text: "张三"}},
-		"idcardNumber": {Value: &pb.ContractFromField_Text{Text: "110101199003070000"}},
-	})
+	var data map[string]any
+	err = jsoniter.Unmarshal([]byte(`{"address":{"Value":{"Text":"北京市天安门左边第三个通道中间第十六块砖"}},"aurDate":{"Value":{"Text":"2024年04月14日"}},"city":{"Value":{"Text":"北京市"}},"ebikeBattery":{"Value":{"Text":"时光驹电池"}},"ebikeBrand":{"Value":{"Text":"大风车"}},"ebikeColor":{"Value":{"Text":"橘黄"}},"ebikeModel":{"Value":{"Text":"60V30AH"}},"ebikeSN":{"Value":{"Text":"121621907801271"}},"ebikeScheme1":{"Value":{"Checkbox":true}},"ebikeScheme1PayMonth":{"Value":{"Text":"0"}},"ebikeScheme1PayTotal":{"Value":{"Text":"9.00"}},"ebikeScheme1Price":{"Value":{"Text":"9.00"}},"ebikeScheme1Start":{"Value":{"Text":"2024年04月14日"}},"ebikeScheme1Stop":{"Value":{"Text":"2024年04月23日"}},"idcard":{"Value":{"Text":"410881199504096034"}},"name":{"Value":{"Text":"王亚飞"}},"payMonth":{"Value":{"Text":"0"}},"phone":{"Value":{"Text":"18563171523"}},"riderContact":{"Value":{"Text":"[其他]计算 - 17566668888"}},"riderDate":{"Value":{"Text":"2024年04月14日"}},"riderSign":{"Value":{"Text":"王亚飞"}},"schemaEbike":{"Value":{"Checkbox":true}},"sn":{"Value":{"Text":"20240414092857796"}}}`), &data)
 	require.NoError(t, err)
-	t.Logf("文档已创建, 文档ID: %s, 大小: %dbytes", paths.ID, len(b))
+
+	values := make(map[string]*pb.ContractFromField)
+	for k, v := range data {
+		value := v.(map[string]any)["Value"].(map[string]any)
+		if check, ok := value["Checkbox"]; ok {
+			values[k] = &pb.ContractFromField{
+				Value: &pb.ContractFromField_Checkbox{Checkbox: check.(bool)},
+			}
+		} else {
+			values[k] = &pb.ContractFromField{Value: &pb.ContractFromField_Text{Text: value["Text"].(string)}}
+		}
+	}
+
+	wg := sync.WaitGroup{}
+	wg.Add(30)
+
+	for n := 0; n < 10; n++ {
+		x := sync.WaitGroup{}
+		x.Add(3)
+		for i := 0; i < 3; i++ {
+			go func() {
+				var (
+					b     []byte
+					paths *model.DocumentPaths
+				)
+				b, paths, err = CreateDocument("C1455B9383BF453082B7341226EC60B3", values)
+				require.NoError(t, err)
+				t.Logf("文档已创建, 文档ID: %s, 大小: %dbytes", paths.ID, len(b))
+				wg.Done()
+				x.Done()
+			}()
+		}
+		x.Wait()
+	}
+
+	wg.Wait()
 }
 
 func TestSignDocument(t *testing.T) {
