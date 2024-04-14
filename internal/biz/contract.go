@@ -7,7 +7,6 @@ package biz
 import (
 	"bytes"
 	"encoding/base64"
-	"fmt"
 	"os"
 	"strings"
 
@@ -65,8 +64,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	for k, v := range fields {
 		c, ok := tmpl.Fields[k]
 		if !ok {
-			err = fmt.Errorf("字段 %s 不存在", k)
-			return
+			zap.L().Warn("字段不存在", zap.String("field", k))
 		}
 
 		rect := c.Rectangle
