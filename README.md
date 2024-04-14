@@ -3,6 +3,7 @@
 - [ ] 使用队列处理签名任务，例如 [asynq](https://github.com/hibiken/asynq) 或 [nsq](https://github.com/nsqio/nsq)
 - [ ] 合同24小时内有效，超时自动删除
 - [ ] 删除失效的文件
+- [ ] 上传至阿里云OSS私密bucket，用户每次下载时生成临时链接
 
 ### 生成模板
 
