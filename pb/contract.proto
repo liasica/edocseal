@@ -40,7 +40,7 @@ message ContractSignRequest {
   string name = 3; // 签署人
   string province = 4; // 省份
   string city = 5; // 城市
-  string address = 6; // 地址`
+  string address = 6; // 地址
   string phone = 7; // 手机号
   string idcard = 8; // 身份证号
 }
