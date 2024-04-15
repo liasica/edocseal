@@ -181,6 +181,6 @@ func UploadDocument(path string, b []byte) (url string, err error) {
 	if !strings.HasSuffix(url, "/") {
 		url += "/"
 	}
-	url = url + path
-	return
+
+	return CreateShortUrl(url + path)
 }

@@ -44,6 +44,14 @@ type Config struct {
 	// 是否自签名
 	SelfSign bool
 
+	// 短链接前缀
+	ShortUrlPrefix string
+
+	// Bbolt路径
+	Bbolt struct {
+		Path string
+	}
+
 	// 同时处理任务数
 	Task struct {
 		Sign     int // 签约任务
@@ -174,6 +182,16 @@ func GetDocumentTaskNum() int {
 // GetSeal 获取企业签章图片
 func GetSeal() string {
 	return cfg.Enterprise.Seal
+}
+
+// GetShortUrlPrefix 获取短链接前缀
+func GetShortUrlPrefix() string {
+	return cfg.ShortUrlPrefix
+}
+
+// GetBboltPath 获取Bbolt路径
+func GetBboltPath() string {
+	return cfg.Bbolt.Path
 }
 
 // GetCertificate 获取企业证书

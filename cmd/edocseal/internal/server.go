@@ -7,7 +7,6 @@ package internal
 import (
 	"fmt"
 	"net"
-	"net/http"
 	"os"
 
 	"github.com/grpc-ecosystem/go-grpc-middleware/v2/interceptors/recovery"
@@ -32,13 +31,7 @@ func serverCommand() *cobra.Command {
 
 			// 启动http服务
 			go func() {
-				http.HandleFunc("/stop", service.StopTasks)
-				zap.L().Info("API启动", zap.String("bind", g.GetHttpBind()))
-				err := http.ListenAndServe(g.GetHttpBind(), nil)
-				if err != nil {
-					fmt.Printf("HTTP服务启动失败：%s\n", err)
-					os.Exit(1)
-				}
+				service.StartHttpServer()
 			}()
 
 			// 监听端口

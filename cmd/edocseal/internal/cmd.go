@@ -33,6 +33,7 @@ func RunCommand() {
 		certificateCommand(),
 		serverCommand(),
 		templateCommand(),
+		shorturlCommand(),
 	)
 
 	_ = cmd.Execute()

@@ -6,6 +6,7 @@ package internal
 
 import (
 	"os"
+	"path/filepath"
 
 	"go.uber.org/zap"
 
@@ -36,6 +37,10 @@ func Boot() {
 	err = edocseal.CreateDirectory(g.GetDocumentDir())
 	if err != nil {
 		zap.L().Fatal("文档目录创建失败", zap.Error(err))
+	}
+	err = edocseal.CreateDirectory(filepath.Dir(g.GetBboltPath()))
+	if err != nil {
+		zap.L().Fatal("创建bbolt目录失败", zap.Error(err))
 	}
 
 	// 初始化证书

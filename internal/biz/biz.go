@@ -11,6 +11,7 @@ import (
 	"sync"
 
 	jsoniter "github.com/json-iterator/go"
+	bolt "go.etcd.io/bbolt"
 
 	"github.com/liasica/edocseal"
 	"github.com/liasica/edocseal/internal/g"
@@ -61,5 +62,35 @@ func oss() (ao *edocseal.AliyunOss, url string, err error) {
 	cfg := g.GetAliyunOss()
 	ao, err = edocseal.NewAliyunOss(cfg.AccessKeyId, cfg.AccessKeySecret, cfg.Endpoint, cfg.Bucket)
 	url = cfg.Url
+	return
+}
+
+// CreateShortUrl 生成短链接
+func CreateShortUrl(url string) (short string, err error) {
+	var id string
+	id, err = g.NewShortId().Generate()
+	if err != nil {
+		return
+	}
+	// 保存
+	err = g.NewBolt().Update(func(tx *bolt.Tx) error {
+		return tx.Bucket(g.ShortUrlBucket).Put([]byte(id), []byte(url))
+	})
+	if err == nil {
+		short = g.GetShortUrlPrefix() + id
+	}
+	return
+}
+
+// GetShortUrl 获取短链接
+func GetShortUrl(id string) (url string, err error) {
+	err = g.NewBolt().View(func(tx *bolt.Tx) error {
+		v := tx.Bucket(g.ShortUrlBucket).Get([]byte(id))
+		if v == nil {
+			return errors.New("短链接未找到")
+		}
+		url = string(v)
+		return nil
+	})
 	return
 }
