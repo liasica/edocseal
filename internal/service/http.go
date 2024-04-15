@@ -21,9 +21,9 @@ import (
 func StartHttpServer() {
 	r := mux.NewRouter()
 	r.HandleFunc("/s/{id}", shortUrl)
-	http.HandleFunc("/maintain/stop/9geUbBHvX3caRWl1", stopTasks)
+	r.HandleFunc("/maintain/stop/9geUbBHvX3caRWl1", stopTasks)
 	zap.L().Info("API启动", zap.String("bind", g.GetHttpBind()))
-	err := http.ListenAndServe(g.GetHttpBind(), nil)
+	err := http.ListenAndServe(g.GetHttpBind(), r)
 	if err != nil {
 		fmt.Printf("HTTP服务启动失败：%s\n", err)
 		os.Exit(1)
