@@ -53,17 +53,21 @@ func (t *documentTask) Do() {
 		return
 	}
 
-	// 查找已经属于过期时间的合同文档数据
+	// 查询前一天数据
+	yesterdayBeginTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().AddDate(0, 0, -1).Day(), 0, 0, 0, 0, time.Local)
+	yesterdayEndTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
 	docs, err := ent.NewDatabase().Document.
-		Query().Where(documenEnt.ExpiresAtLTE(time.Now())).
-		All(context.Background())
+		Query().Where(
+		documenEnt.CreateAtGTE(yesterdayBeginTime),
+		documenEnt.CreateAtLT(yesterdayEndTime),
+	).All(context.Background())
 	if err != nil {
-		zap.L().Error("查找过期文档数据失败失败", zap.Error(err))
+		zap.L().Error("查找昨日文档数据失败失败", zap.Error(err))
 		return
 	}
 
 	if len(docs) == 0 {
-		zap.L().Info("当前没有已过期的合同文档数据")
+		zap.L().Info("昨日没有合同文档数据")
 		return
 	}
 
@@ -71,23 +75,32 @@ func (t *documentTask) Do() {
 	err = ent.WithTx(ctx, func(tx *ent.Tx) (err error) {
 		// 处理得到过期的文档oss链接以及处理的文档文件夹链接
 		var docOssUrls, docOssFolds []string
+
 		for _, doc := range docs {
-			// 先删除过期文档
-			err = tx.Document.DeleteOne(doc).Exec(ctx)
-			if err != nil {
-				return
+			docPath := doc.Paths
+			// 判断是否已签约
+			switch doc.Status {
+			case documenEnt.StatusUnsigned:
+				// 未签约且已过期数据删除本地数据库记录、oss云端临时未签约文件、oss云端文件所属文件夹
+				// 前一天未签约数据此时必过期，不加过期时间的判断
+				// 先删除过期文档
+				err = tx.Document.DeleteOne(doc).Exec(ctx)
+				if err != nil {
+					return
+				}
+				// 未签约文档url
+				docOssUrls = append(docOssUrls, docPath.OssUnSigned)
+				// 未签约文档文件夹url
+				ossFolder := docPath.OssUnSigned[0:strings.LastIndex(docPath.OssUnSigned, "/")]
+				docOssFolds = append(docOssFolds, ossFolder)
+			case documenEnt.StatusSigned:
+				// 已签约数据仅删除oss云端临时未签约文件
+				// 未签约文档url
+				docOssUrls = append(docOssUrls, docPath.OssUnSigned)
+			default:
+				continue
 			}
 
-			// 轮询过期的文档数据得到其未签约ossurl
-			docPath := doc.Paths
-			docOssUrls = append(docOssUrls, docPath.OssUnSigned)
-			// 判断是否已签约决定是否删除文件夹
-			if doc.Status == documenEnt.StatusUnsigned && doc.SignedURL == "" {
-				// 未签约过的数据连同文件夹直接删,分隔未签约url得到其文件夹路径
-				usPath := docPath.OssUnSigned
-				ossFolder := usPath[0:strings.LastIndex(usPath, "/")]
-				docOssFolds = append(docOssFolds, ossFolder)
-			}
 		}
 
 		// oss多文件删除

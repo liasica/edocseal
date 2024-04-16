@@ -146,6 +146,20 @@ func (du *DocumentUpdate) SetPaths(m *model.Paths) *DocumentUpdate {
 	return du
 }
 
+// SetCreateAt sets the "create_at" field.
+func (du *DocumentUpdate) SetCreateAt(t time.Time) *DocumentUpdate {
+	du.mutation.SetCreateAt(t)
+	return du
+}
+
+// SetNillableCreateAt sets the "create_at" field if the given value is not nil.
+func (du *DocumentUpdate) SetNillableCreateAt(t *time.Time) *DocumentUpdate {
+	if t != nil {
+		du.SetCreateAt(*t)
+	}
+	return du
+}
+
 // Mutation returns the DocumentMutation object of the builder.
 func (du *DocumentUpdate) Mutation() *DocumentMutation {
 	return du.mutation
@@ -240,6 +254,9 @@ func (du *DocumentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if value, ok := du.mutation.Paths(); ok {
 		_spec.SetField(document.FieldPaths, field.TypeJSON, value)
+	}
+	if value, ok := du.mutation.CreateAt(); ok {
+		_spec.SetField(document.FieldCreateAt, field.TypeTime, value)
 	}
 	_spec.AddModifiers(du.modifiers...)
 	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
@@ -379,6 +396,20 @@ func (duo *DocumentUpdateOne) SetPaths(m *model.Paths) *DocumentUpdateOne {
 	return duo
 }
 
+// SetCreateAt sets the "create_at" field.
+func (duo *DocumentUpdateOne) SetCreateAt(t time.Time) *DocumentUpdateOne {
+	duo.mutation.SetCreateAt(t)
+	return duo
+}
+
+// SetNillableCreateAt sets the "create_at" field if the given value is not nil.
+func (duo *DocumentUpdateOne) SetNillableCreateAt(t *time.Time) *DocumentUpdateOne {
+	if t != nil {
+		duo.SetCreateAt(*t)
+	}
+	return duo
+}
+
 // Mutation returns the DocumentMutation object of the builder.
 func (duo *DocumentUpdateOne) Mutation() *DocumentMutation {
 	return duo.mutation
@@ -503,6 +534,9 @@ func (duo *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err
 	}
 	if value, ok := duo.mutation.Paths(); ok {
 		_spec.SetField(document.FieldPaths, field.TypeJSON, value)
+	}
+	if value, ok := duo.mutation.CreateAt(); ok {
+		_spec.SetField(document.FieldCreateAt, field.TypeTime, value)
 	}
 	_spec.AddModifiers(duo.modifiers...)
 	_node = &Document{config: duo.config}

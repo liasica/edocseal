@@ -29,6 +29,8 @@ const (
 	FieldUnsignedURL = "unsigned_url"
 	// FieldPaths holds the string denoting the paths field in the database.
 	FieldPaths = "paths"
+	// FieldCreateAt holds the string denoting the create_at field in the database.
+	FieldCreateAt = "create_at"
 	// Table holds the table name of the document in the database.
 	Table = "document"
 )
@@ -44,6 +46,7 @@ var Columns = []string{
 	FieldSignedURL,
 	FieldUnsignedURL,
 	FieldPaths,
+	FieldCreateAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -128,4 +131,9 @@ func BySignedURL(opts ...sql.OrderTermOption) OrderOption {
 // ByUnsignedURL orders the results by the unsigned_url field.
 func ByUnsignedURL(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldUnsignedURL, opts...).ToFunc()
+}
+
+// ByCreateAt orders the results by the create_at field.
+func ByCreateAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldCreateAt, opts...).ToFunc()
 }

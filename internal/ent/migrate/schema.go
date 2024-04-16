@@ -34,6 +34,7 @@ var (
 		{Name: "signed_url", Type: field.TypeString, Nullable: true, Comment: "已签约短链接"},
 		{Name: "unsigned_url", Type: field.TypeString, Nullable: true, Comment: "已签约短链接"},
 		{Name: "paths", Type: field.TypeJSON, Comment: "文档各项路径"},
+		{Name: "create_at", Type: field.TypeTime, Comment: "创建时间"},
 	}
 	// DocumentTable holds the schema information for the "document" table.
 	DocumentTable = &schema.Table{

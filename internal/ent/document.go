@@ -35,7 +35,9 @@ type Document struct {
 	// 已签约短链接
 	UnsignedURL string `json:"unsigned_url,omitempty"`
 	// 文档各项路径
-	Paths        *model.Paths `json:"paths,omitempty"`
+	Paths *model.Paths `json:"paths,omitempty"`
+	// 创建时间
+	CreateAt     time.Time `json:"create_at,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -48,7 +50,7 @@ func (*Document) scanValues(columns []string) ([]any, error) {
 			values[i] = new([]byte)
 		case document.FieldID, document.FieldHash, document.FieldStatus, document.FieldTemplateID, document.FieldIDCardNumber, document.FieldSignedURL, document.FieldUnsignedURL:
 			values[i] = new(sql.NullString)
-		case document.FieldExpiresAt:
+		case document.FieldExpiresAt, document.FieldCreateAt:
 			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
@@ -121,6 +123,12 @@ func (d *Document) assignValues(columns []string, values []any) error {
 					return fmt.Errorf("unmarshal field paths: %w", err)
 				}
 			}
+		case document.FieldCreateAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field create_at", values[i])
+			} else if value.Valid {
+				d.CreateAt = value.Time
+			}
 		default:
 			d.selectValues.Set(columns[i], values[i])
 		}
@@ -180,6 +188,9 @@ func (d *Document) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("paths=")
 	builder.WriteString(fmt.Sprintf("%v", d.Paths))
+	builder.WriteString(", ")
+	builder.WriteString("create_at=")
+	builder.WriteString(d.CreateAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

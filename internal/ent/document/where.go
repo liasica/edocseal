@@ -94,6 +94,11 @@ func UnsignedURL(v string) predicate.Document {
 	return predicate.Document(sql.FieldEQ(FieldUnsignedURL, v))
 }
 
+// CreateAt applies equality check predicate on the "create_at" field. It's identical to CreateAtEQ.
+func CreateAt(v time.Time) predicate.Document {
+	return predicate.Document(sql.FieldEQ(FieldCreateAt, v))
+}
+
 // HashEQ applies the EQ predicate on the "hash" field.
 func HashEQ(v string) predicate.Document {
 	return predicate.Document(sql.FieldEQ(FieldHash, v))
@@ -497,6 +502,46 @@ func UnsignedURLEqualFold(v string) predicate.Document {
 // UnsignedURLContainsFold applies the ContainsFold predicate on the "unsigned_url" field.
 func UnsignedURLContainsFold(v string) predicate.Document {
 	return predicate.Document(sql.FieldContainsFold(FieldUnsignedURL, v))
+}
+
+// CreateAtEQ applies the EQ predicate on the "create_at" field.
+func CreateAtEQ(v time.Time) predicate.Document {
+	return predicate.Document(sql.FieldEQ(FieldCreateAt, v))
+}
+
+// CreateAtNEQ applies the NEQ predicate on the "create_at" field.
+func CreateAtNEQ(v time.Time) predicate.Document {
+	return predicate.Document(sql.FieldNEQ(FieldCreateAt, v))
+}
+
+// CreateAtIn applies the In predicate on the "create_at" field.
+func CreateAtIn(vs ...time.Time) predicate.Document {
+	return predicate.Document(sql.FieldIn(FieldCreateAt, vs...))
+}
+
+// CreateAtNotIn applies the NotIn predicate on the "create_at" field.
+func CreateAtNotIn(vs ...time.Time) predicate.Document {
+	return predicate.Document(sql.FieldNotIn(FieldCreateAt, vs...))
+}
+
+// CreateAtGT applies the GT predicate on the "create_at" field.
+func CreateAtGT(v time.Time) predicate.Document {
+	return predicate.Document(sql.FieldGT(FieldCreateAt, v))
+}
+
+// CreateAtGTE applies the GTE predicate on the "create_at" field.
+func CreateAtGTE(v time.Time) predicate.Document {
+	return predicate.Document(sql.FieldGTE(FieldCreateAt, v))
+}
+
+// CreateAtLT applies the LT predicate on the "create_at" field.
+func CreateAtLT(v time.Time) predicate.Document {
+	return predicate.Document(sql.FieldLT(FieldCreateAt, v))
+}
+
+// CreateAtLTE applies the LTE predicate on the "create_at" field.
+func CreateAtLTE(v time.Time) predicate.Document {
+	return predicate.Document(sql.FieldLTE(FieldCreateAt, v))
 }
 
 // And groups predicates with the AND operator between them.

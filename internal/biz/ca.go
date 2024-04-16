@@ -9,10 +9,8 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/base64"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
 	"path/filepath"
 	"strings"
 	"time"
@@ -100,68 +98,6 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 	return
 }
 
-// 机构签发证书
-// func agencyIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
-// 	// 生成私钥
-// 	priKey := ca.GenerateRsaPrivateKey()
-// 	key, _ = x509.MarshalPKCS8PrivateKey(key)
-// 	// 生成CSR请求
-// 	var csr []byte
-// 	csr, err = ca.GenerateRequest(priKey, pkix.Name{
-// 		Country:      []string{"CN"},
-// 		Organization: []string{name},
-// 	})
-//
-// 	pkcs10 := base64.StdEncoding.EncodeToString(csr)
-// 	certParam := make(map[string]string)
-// 	certParam["alg"] = "RSA"
-// 	certParam["certType"] = "1"
-// 	certParam["province"] = province
-// 	certParam["city"] = city
-// 	certParam["agent"] = name
-// 	certParam["agentTel"] = phone
-// 	certParam["agentNumber"] = idcard
-// 	certParam["clientName"] = name
-// 	certParam["legalNumber"] = idcard
-// 	certParam["legalPersonTel"] = phone
-// 	certParam["companyAdd"] = address
-// 	certParam["prjId"] = "401"
-// 	certParam["pkcs10"] = pkcs10
-//
-// 	h := sm3.New()
-// 	h.Write([]byte(certParam["agentNumber"] + "_" + certParam["clientName"]))
-// 	sum := h.Sum(nil)
-// 	certParam["passwdDigest"] = hex.EncodeToString(sum)
-//
-// 	var (
-// 		resp   *resty.Response
-// 		result *model.AgencyCertResponse
-// 	)
-//
-// 	resp, err = resty.New().R().
-// 		SetHeader("Content-Type", "application/json").
-// 		SetBody(certParam).
-// 		SetResult(&result).
-// 		Post(g.GetSnca().Url)
-// 	if err != nil {
-// 		zap.L().Error("机构签发证书失败", zap.Error(err))
-// 		return
-// 	}
-// 	zap.L().Info("机构签发证书", zap.String("response", string(resp.Body())))
-//
-// 	if result == nil {
-// 		return nil, nil, errors.New("机构签发证书失败，返回结果为空")
-// 	}
-//
-// 	if result.ErrorCode != "200" || result.Result == "false" {
-// 		zap.L().Error("机构签发证书失败", zap.Error(errors.New(result.ErrorMessage)))
-// 		return nil, nil, errors.New(result.ErrorMessage)
-// 	}
-//
-// 	crt, err = base64.StdEncoding.DecodeString(result.JsonObj.SignCert)
-// 	return
-// }
-
 // 查询证书
 func queryCertification(idcard string) *ent.Certification {
 	cert, _ := ent.NewDatabase().Certification.Query().
@@ -183,14 +119,13 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 		Organization: []string{name},
 	})
 	pkcs10 := base64.StdEncoding.EncodeToString(csr)
-	log.Println(pkcs10)
 
 	// 1.陕西CA随机数接口
 	randomParam := make(map[string]string)
 	randomParam["source"] = "SCNX"
 	var (
 		randomResp   *resty.Response
-		randomResult *model.RandomBResponse
+		randomResult *model.ApplyServiceRandomResponse
 	)
 	randomResp, err = resty.New().R().
 		SetHeader("Content-Type", "application/json").
@@ -211,32 +146,30 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	}
 
 	// 2.陕西CA组装业务数据接口
-	busParam := make(map[string]string)
-	busParam["appType"] = "1"
-	busParam["certType"] = "9"
-	busParam["subCert"] = "1"
-	busParam["source"] = "SCNX"
-	busParam["clientName"] = "西安时光驹新能源科技有限公司"
-	busParam["countryName"] = "CN"
-	busParam["agent"] = name
-	busParam["agentTel"] = phone
-	busParam["agentNumber"] = idcard
-
-	busParam["certId"] = strings.ReplaceAll(uuid.New().String(), "-", "")
-	busParam["customerType"] = "1"
-
-	busParam["socialCreditCode"] = "91610133MA6U8RAJ1X"
-
-	busParam["province"] = province
-	busParam["city"] = city
+	busReq := model.BusinessDataFinishRequest{
+		AppType:          "1",
+		CertType:         "9",
+		SubCert:          "1",
+		Source:           "SCNX",
+		ClientName:       "西安时光驹新能源科技有限公司",
+		CountryName:      "CN",
+		Agent:            name,
+		AgentTel:         phone,
+		AgentNumber:      idcard,
+		CertId:           strings.ReplaceAll(uuid.New().String(), "-", ""),
+		CustomerType:     "1",
+		SocialCreditCode: "91610133MA6U8RAJ1X",
+		Province:         province,
+		City:             city,
+	}
 
 	var (
 		busResp   *resty.Response
-		busResult *model.BusResponse
+		busResult *model.BusinessDataFinishResponse
 	)
 	busResp, err = resty.New().R().
 		SetHeader("Content-Type", "application/json").
-		SetBody(busParam).
+		SetBody(busReq).
 		SetResult(&busResult).
 		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/businessDataFinish")
 	if err != nil {
@@ -253,29 +186,20 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	}
 
 	// 3.请求申请证书
-
-	certParam := make(map[string]string)
-	certParam["tokenInfo"] = fmt.Sprintf("%d", time.Now().UnixMicro()) + randomResult.RandomB + "SNCA" + busResult.Data.AppId
-	certParam["commonName"] = "证书测试" // 西安时光驹新能源科技有限公司证书
-	certParam["p10"] = pkcs10
-
-	// certParam["tokenInfo"] = "16685798921901441668579892190144SNCA1288087"
-	// certParam["commonName "] = "证书测试"
-	// certParam["p10"] = "MIIBDjCBsgIBADB**/D1H4vuA9J5g=="
+	certReq := model.ApplySealCertRequest{
+		TokenInfo:  fmt.Sprintf("%d", time.Now().UnixMicro()) + randomResult.RandomB + "SNCA" + busResult.Data.AppId,
+		CommonName: "证书测试", // 西安时光驹新能源科技有限公司证书
+		P10:        pkcs10,
+	}
 
 	var (
 		certResp   *resty.Response
-		certResult *model.AgencyCertResponse
+		certResult *model.ApplySealCertResponse
 	)
-	marshal, err := json.Marshal(certParam)
-	if err != nil {
-		return nil, nil, err
-	}
 
-	log.Println(string(marshal))
 	certResp, err = resty.New().R().
 		SetHeader("Content-Type", "application/json").
-		SetBody(certParam).
+		SetBody(certReq).
 		SetResult(&certResult).
 		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/applySealCert")
 	if err != nil {

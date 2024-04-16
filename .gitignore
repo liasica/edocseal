@@ -109,6 +109,7 @@ config/
 templates/
 documents/
 build/
+certificates/
 bbolt.db
 .idea/dataSources.xml
 .DS_Store

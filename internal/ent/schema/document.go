@@ -35,6 +35,7 @@ func (Document) Fields() []ent.Field {
 		field.String("signed_url").Optional().Comment("已签约短链接"),
 		field.String("unsigned_url").Optional().Comment("已签约短链接"),
 		field.JSON("paths", &model.Paths{}).Comment("文档各项路径"),
+		field.Time("create_at").Comment("创建时间"),
 	}
 }
 

@@ -131,6 +131,5 @@ func FileCopy(src, dst string) error {
 
 // DeleteDirectory 删除文件夹
 func DeleteDirectory(dir string) (err error) {
-	err = os.RemoveAll(dir)
-	return
+	return os.RemoveAll(dir)
 }

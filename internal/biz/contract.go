@@ -166,6 +166,7 @@ func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Docume
 		SetPaths(paths).
 		SetExpiresAt(expire).
 		SetUnsignedURL(url).
+		SetCreateAt(time.Now()).
 		Save(context.Background())
 
 	return

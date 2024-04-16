@@ -96,6 +96,12 @@ func (dc *DocumentCreate) SetPaths(m *model.Paths) *DocumentCreate {
 	return dc
 }
 
+// SetCreateAt sets the "create_at" field.
+func (dc *DocumentCreate) SetCreateAt(t time.Time) *DocumentCreate {
+	dc.mutation.SetCreateAt(t)
+	return dc
+}
+
 // SetID sets the "id" field.
 func (dc *DocumentCreate) SetID(s string) *DocumentCreate {
 	dc.mutation.SetID(s)
@@ -173,6 +179,9 @@ func (dc *DocumentCreate) check() error {
 	if _, ok := dc.mutation.Paths(); !ok {
 		return &ValidationError{Name: "paths", err: errors.New(`ent: missing required field "Document.paths"`)}
 	}
+	if _, ok := dc.mutation.CreateAt(); !ok {
+		return &ValidationError{Name: "create_at", err: errors.New(`ent: missing required field "Document.create_at"`)}
+	}
 	return nil
 }
 
@@ -240,6 +249,10 @@ func (dc *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec) {
 	if value, ok := dc.mutation.Paths(); ok {
 		_spec.SetField(document.FieldPaths, field.TypeJSON, value)
 		_node.Paths = value
+	}
+	if value, ok := dc.mutation.CreateAt(); ok {
+		_spec.SetField(document.FieldCreateAt, field.TypeTime, value)
+		_node.CreateAt = value
 	}
 	return _node, _spec
 }
@@ -398,6 +411,18 @@ func (u *DocumentUpsert) SetPaths(v *model.Paths) *DocumentUpsert {
 // UpdatePaths sets the "paths" field to the value that was provided on create.
 func (u *DocumentUpsert) UpdatePaths() *DocumentUpsert {
 	u.SetExcluded(document.FieldPaths)
+	return u
+}
+
+// SetCreateAt sets the "create_at" field.
+func (u *DocumentUpsert) SetCreateAt(v time.Time) *DocumentUpsert {
+	u.Set(document.FieldCreateAt, v)
+	return u
+}
+
+// UpdateCreateAt sets the "create_at" field to the value that was provided on create.
+func (u *DocumentUpsert) UpdateCreateAt() *DocumentUpsert {
+	u.SetExcluded(document.FieldCreateAt)
 	return u
 }
 
@@ -572,6 +597,20 @@ func (u *DocumentUpsertOne) SetPaths(v *model.Paths) *DocumentUpsertOne {
 func (u *DocumentUpsertOne) UpdatePaths() *DocumentUpsertOne {
 	return u.Update(func(s *DocumentUpsert) {
 		s.UpdatePaths()
+	})
+}
+
+// SetCreateAt sets the "create_at" field.
+func (u *DocumentUpsertOne) SetCreateAt(v time.Time) *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.SetCreateAt(v)
+	})
+}
+
+// UpdateCreateAt sets the "create_at" field to the value that was provided on create.
+func (u *DocumentUpsertOne) UpdateCreateAt() *DocumentUpsertOne {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdateCreateAt()
 	})
 }
 
@@ -921,6 +960,20 @@ func (u *DocumentUpsertBulk) SetPaths(v *model.Paths) *DocumentUpsertBulk {
 func (u *DocumentUpsertBulk) UpdatePaths() *DocumentUpsertBulk {
 	return u.Update(func(s *DocumentUpsert) {
 		s.UpdatePaths()
+	})
+}
+
+// SetCreateAt sets the "create_at" field.
+func (u *DocumentUpsertBulk) SetCreateAt(v time.Time) *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.SetCreateAt(v)
+	})
+}
+
+// UpdateCreateAt sets the "create_at" field to the value that was provided on create.
+func (u *DocumentUpsertBulk) UpdateCreateAt() *DocumentUpsertBulk {
+	return u.Update(func(s *DocumentUpsert) {
+		s.UpdateCreateAt()
 	})
 }
 

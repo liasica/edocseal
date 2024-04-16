@@ -532,6 +532,7 @@ type DocumentMutation struct {
 	signed_url     *string
 	unsigned_url   *string
 	paths          **model.Paths
+	create_at      *time.Time
 	clearedFields  map[string]struct{}
 	done           bool
 	oldValue       func(context.Context) (*Document, error)
@@ -956,6 +957,42 @@ func (m *DocumentMutation) ResetPaths() {
 	m.paths = nil
 }
 
+// SetCreateAt sets the "create_at" field.
+func (m *DocumentMutation) SetCreateAt(t time.Time) {
+	m.create_at = &t
+}
+
+// CreateAt returns the value of the "create_at" field in the mutation.
+func (m *DocumentMutation) CreateAt() (r time.Time, exists bool) {
+	v := m.create_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldCreateAt returns the old "create_at" field's value of the Document entity.
+// If the Document object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *DocumentMutation) OldCreateAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldCreateAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldCreateAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreateAt: %w", err)
+	}
+	return oldValue.CreateAt, nil
+}
+
+// ResetCreateAt resets all changes to the "create_at" field.
+func (m *DocumentMutation) ResetCreateAt() {
+	m.create_at = nil
+}
+
 // Where appends a list predicates to the DocumentMutation builder.
 func (m *DocumentMutation) Where(ps ...predicate.Document) {
 	m.predicates = append(m.predicates, ps...)
@@ -990,7 +1027,7 @@ func (m *DocumentMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *DocumentMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 9)
 	if m.hash != nil {
 		fields = append(fields, document.FieldHash)
 	}
@@ -1014,6 +1051,9 @@ func (m *DocumentMutation) Fields() []string {
 	}
 	if m.paths != nil {
 		fields = append(fields, document.FieldPaths)
+	}
+	if m.create_at != nil {
+		fields = append(fields, document.FieldCreateAt)
 	}
 	return fields
 }
@@ -1039,6 +1079,8 @@ func (m *DocumentMutation) Field(name string) (ent.Value, bool) {
 		return m.UnsignedURL()
 	case document.FieldPaths:
 		return m.Paths()
+	case document.FieldCreateAt:
+		return m.CreateAt()
 	}
 	return nil, false
 }
@@ -1064,6 +1106,8 @@ func (m *DocumentMutation) OldField(ctx context.Context, name string) (ent.Value
 		return m.OldUnsignedURL(ctx)
 	case document.FieldPaths:
 		return m.OldPaths(ctx)
+	case document.FieldCreateAt:
+		return m.OldCreateAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Document field %s", name)
 }
@@ -1128,6 +1172,13 @@ func (m *DocumentMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetPaths(v)
+		return nil
+	case document.FieldCreateAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetCreateAt(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Document field %s", name)
@@ -1216,6 +1267,9 @@ func (m *DocumentMutation) ResetField(name string) error {
 		return nil
 	case document.FieldPaths:
 		m.ResetPaths()
+		return nil
+	case document.FieldCreateAt:
+		m.ResetCreateAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Document field %s", name)
