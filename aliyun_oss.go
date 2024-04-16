@@ -61,3 +61,22 @@ func (c *AliyunOss) UploadBytes(name string, b []byte) (err error) {
 	}
 	return
 }
+
+// SingleDelete 单文件删除
+func (c *AliyunOss) SingleDelete(name string) (err error) {
+	err = c.Bucket.DeleteObject(name)
+	if err != nil {
+		return
+	}
+	return
+}
+
+// MultiDelete 多文件删除
+func (c *AliyunOss) MultiDelete(names []string) (err error) {
+	// 将oss.DeleteObjectsQuiet设置为true，表示不返回删除结果。
+	_, err = c.Bucket.DeleteObjects(names, oss.DeleteObjectsQuiet(true))
+	if err != nil {
+		return
+	}
+	return
+}

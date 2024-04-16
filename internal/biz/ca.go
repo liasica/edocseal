@@ -9,13 +9,16 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/base64"
-	"encoding/hex"
+	"encoding/json"
 	"errors"
+	"fmt"
+	"log"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/go-resty/resty/v2"
-	"github.com/tjfoc/gmsm/sm3"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal/ca"
@@ -98,6 +101,77 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 }
 
 // 机构签发证书
+// func agencyIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
+// 	// 生成私钥
+// 	priKey := ca.GenerateRsaPrivateKey()
+// 	key, _ = x509.MarshalPKCS8PrivateKey(key)
+// 	// 生成CSR请求
+// 	var csr []byte
+// 	csr, err = ca.GenerateRequest(priKey, pkix.Name{
+// 		Country:      []string{"CN"},
+// 		Organization: []string{name},
+// 	})
+//
+// 	pkcs10 := base64.StdEncoding.EncodeToString(csr)
+// 	certParam := make(map[string]string)
+// 	certParam["alg"] = "RSA"
+// 	certParam["certType"] = "1"
+// 	certParam["province"] = province
+// 	certParam["city"] = city
+// 	certParam["agent"] = name
+// 	certParam["agentTel"] = phone
+// 	certParam["agentNumber"] = idcard
+// 	certParam["clientName"] = name
+// 	certParam["legalNumber"] = idcard
+// 	certParam["legalPersonTel"] = phone
+// 	certParam["companyAdd"] = address
+// 	certParam["prjId"] = "401"
+// 	certParam["pkcs10"] = pkcs10
+//
+// 	h := sm3.New()
+// 	h.Write([]byte(certParam["agentNumber"] + "_" + certParam["clientName"]))
+// 	sum := h.Sum(nil)
+// 	certParam["passwdDigest"] = hex.EncodeToString(sum)
+//
+// 	var (
+// 		resp   *resty.Response
+// 		result *model.AgencyCertResponse
+// 	)
+//
+// 	resp, err = resty.New().R().
+// 		SetHeader("Content-Type", "application/json").
+// 		SetBody(certParam).
+// 		SetResult(&result).
+// 		Post(g.GetSnca().Url)
+// 	if err != nil {
+// 		zap.L().Error("机构签发证书失败", zap.Error(err))
+// 		return
+// 	}
+// 	zap.L().Info("机构签发证书", zap.String("response", string(resp.Body())))
+//
+// 	if result == nil {
+// 		return nil, nil, errors.New("机构签发证书失败，返回结果为空")
+// 	}
+//
+// 	if result.ErrorCode != "200" || result.Result == "false" {
+// 		zap.L().Error("机构签发证书失败", zap.Error(errors.New(result.ErrorMessage)))
+// 		return nil, nil, errors.New(result.ErrorMessage)
+// 	}
+//
+// 	crt, err = base64.StdEncoding.DecodeString(result.JsonObj.SignCert)
+// 	return
+// }
+
+// 查询证书
+func queryCertification(idcard string) *ent.Certification {
+	cert, _ := ent.NewDatabase().Certification.Query().
+		Where(certification.IDCardNumber(idcard), certification.ExpiresAtGT(time.Now())).
+		First(context.Background())
+
+	return cert
+}
+
+// 机构签发证书
 func agencyIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
 	// 生成私钥
 	priKey := ca.GenerateRsaPrivateKey()
@@ -108,62 +182,117 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 		Country:      []string{"CN"},
 		Organization: []string{name},
 	})
-
 	pkcs10 := base64.StdEncoding.EncodeToString(csr)
-	param := make(map[string]string)
-	param["alg"] = "RSA"
-	param["certType"] = "1"
-	param["province"] = province
-	param["city"] = city
-	param["agent"] = name
-	param["agentTel"] = phone
-	param["agentNumber"] = idcard
-	param["clientName"] = name
-	param["legalNumber"] = idcard
-	param["legalPersonTel"] = phone
-	param["companyAdd"] = address
-	param["prjId"] = "401"
-	param["pkcs10"] = pkcs10
+	log.Println(pkcs10)
 
-	h := sm3.New()
-	h.Write([]byte(param["agentNumber"] + "_" + param["clientName"]))
-	sum := h.Sum(nil)
-	param["passwdDigest"] = hex.EncodeToString(sum)
+	// 1.陕西CA随机数接口
+	randomParam := make(map[string]string)
+	randomParam["source"] = "SCNX"
+	var (
+		randomResp   *resty.Response
+		randomResult *model.RandomBResponse
+	)
+	randomResp, err = resty.New().R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(randomParam).
+		SetResult(&randomResult).
+		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/applyServiceRandom")
+	if err != nil {
+		zap.L().Error("机构随机数请求失败", zap.Error(err))
+		return
+	}
+	zap.L().Info("机构随机数请求", zap.String("response", string(randomResp.Body())))
+	if randomResult == nil {
+		return nil, nil, errors.New("机构随机数请求失败，返回结果为空")
+	}
+	if randomResult.ResultCode != "0" {
+		zap.L().Error("机构随机数请求失败", zap.Error(errors.New(randomResult.ResultCodeMsg)))
+		return nil, nil, errors.New(randomResult.ResultCodeMsg)
+	}
+
+	// 2.陕西CA组装业务数据接口
+	busParam := make(map[string]string)
+	busParam["appType"] = "1"
+	busParam["certType"] = "9"
+	busParam["subCert"] = "1"
+	busParam["source"] = "SCNX"
+	busParam["clientName"] = "西安时光驹新能源科技有限公司"
+	busParam["countryName"] = "CN"
+	busParam["agent"] = name
+	busParam["agentTel"] = phone
+	busParam["agentNumber"] = idcard
+
+	busParam["certId"] = strings.ReplaceAll(uuid.New().String(), "-", "")
+	busParam["customerType"] = "1"
+
+	busParam["socialCreditCode"] = "91610133MA6U8RAJ1X"
+
+	busParam["province"] = province
+	busParam["city"] = city
 
 	var (
-		resp   *resty.Response
-		result *model.AgencyCertResponse
+		busResp   *resty.Response
+		busResult *model.BusResponse
 	)
-
-	resp, err = resty.New().R().
+	busResp, err = resty.New().R().
 		SetHeader("Content-Type", "application/json").
-		SetBody(param).
-		SetResult(&result).
-		Post(g.GetSnca().Url)
+		SetBody(busParam).
+		SetResult(&busResult).
+		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/businessDataFinish")
+	if err != nil {
+		zap.L().Error("组装数据请求失败", zap.Error(err))
+		return
+	}
+	zap.L().Info("组装数据请求失败", zap.String("response", string(busResp.Body())))
+	if busResult == nil {
+		return nil, nil, errors.New("组装数据请求失败，返回结果为空")
+	}
+	if busResult.Result != "true" {
+		zap.L().Error("组装数据请求失败", zap.Error(errors.New(busResult.ResultMsg)))
+		return nil, nil, errors.New(busResult.ResultMsg)
+	}
+
+	// 3.请求申请证书
+
+	certParam := make(map[string]string)
+	certParam["tokenInfo"] = fmt.Sprintf("%d", time.Now().UnixMicro()) + randomResult.RandomB + "SNCA" + busResult.Data.AppId
+	certParam["commonName"] = "证书测试" // 西安时光驹新能源科技有限公司证书
+	certParam["p10"] = pkcs10
+
+	// certParam["tokenInfo"] = "16685798921901441668579892190144SNCA1288087"
+	// certParam["commonName "] = "证书测试"
+	// certParam["p10"] = "MIIBDjCBsgIBADB**/D1H4vuA9J5g=="
+
+	var (
+		certResp   *resty.Response
+		certResult *model.AgencyCertResponse
+	)
+	marshal, err := json.Marshal(certParam)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	log.Println(string(marshal))
+	certResp, err = resty.New().R().
+		SetHeader("Content-Type", "application/json").
+		SetBody(certParam).
+		SetResult(&certResult).
+		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/applySealCert")
 	if err != nil {
 		zap.L().Error("机构签发证书失败", zap.Error(err))
 		return
 	}
-	zap.L().Info("机构签发证书", zap.String("response", string(resp.Body())))
+	zap.L().Info("机构签发证书", zap.String("response", string(certResp.Body())))
 
-	if result == nil {
+	if certResult == nil {
 		return nil, nil, errors.New("机构签发证书失败，返回结果为空")
 	}
 
-	if result.ErrorCode != "200" || result.Result == "false" {
-		zap.L().Error("机构签发证书失败", zap.Error(errors.New(result.ErrorMessage)))
-		return nil, nil, errors.New(result.ErrorMessage)
+	if certResult.ResultCode != "0" {
+		zap.L().Error("机构签发证书失败", zap.Error(errors.New(certResult.ResultCodeMsg)))
+		return nil, nil, errors.New(certResult.ResultCodeMsg)
 	}
 
-	crt, err = base64.StdEncoding.DecodeString(result.JsonObj.SignCert)
+	crt, err = base64.StdEncoding.DecodeString(certResult.Data.SignCert)
 	return
-}
-
-// 查询证书
-func queryCertification(idcard string) *ent.Certification {
-	cert, _ := ent.NewDatabase().Certification.Query().
-		Where(certification.IDCardNumber(idcard), certification.ExpiresAtGT(time.Now())).
-		First(context.Background())
-
-	return cert
 }

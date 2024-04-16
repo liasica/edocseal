@@ -29,6 +29,9 @@ func serverCommand() *cobra.Command {
 			// 启动任务队列
 			task.CreateTasks(g.GetSignTaskNum(), g.GetDocumentTaskNum())
 
+			// 启动文档删除定时任务
+			go task.NewDocumentTask().Start()
+
 			// 启动http服务
 			go func() {
 				service.StartHttpServer()
