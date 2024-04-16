@@ -5,23 +5,37 @@
 package biz
 
 import (
+	"context"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	"path/filepath"
+	"time"
 
 	"github.com/go-resty/resty/v2"
 	"github.com/tjfoc/gmsm/sm3"
 	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal/ca"
+	"github.com/liasica/edocseal/internal/ent"
+	"github.com/liasica/edocseal/internal/ent/certification"
 	"github.com/liasica/edocseal/internal/g"
 	"github.com/liasica/edocseal/internal/model"
 )
 
+func certificatePaths(idcard string) (keypath string, capath string) {
+	return filepath.Join(g.GetCertificateDir(), idcard+"_key.pem"), filepath.Join(g.GetCertificateDir(), idcard+"_cert.pem")
+}
+
 // RequestCertificae 申请证书
-func RequestCertificae(paths *model.DocumentPaths, name, province, city, address, phone, idcard string) (err error) {
+func RequestCertificae(name, province, city, address, phone, idcard string) (cert *ent.Certification, err error) {
+	cert = queryCertification(idcard)
+	if cert != nil {
+		return
+	}
+
 	var crt, key []byte
 	if g.IsSelfSign() {
 		crt, key, err = selfIssueCertificate(name, province, city, address, phone, idcard)
@@ -34,14 +48,30 @@ func RequestCertificae(paths *model.DocumentPaths, name, province, city, address
 			return
 		}
 	}
-	// 保存证书
-	err = ca.SaveToFile(paths.Cert, crt, ca.BlocTypeCertificate)
+
+	kp, cp := certificatePaths(idcard)
+
+	// 保存私钥
+	err = ca.SaveToFile(kp, key, ca.BlocTypePrivateKey)
 	if err != nil {
 		return
 	}
 
-	// 保存私钥
-	return ca.SaveToFile(paths.Key, key, ca.BlocTypePrivateKey)
+	// 保存证书
+	err = ca.SaveToFile(cp, crt, ca.BlocTypeCertificate)
+	if err != nil {
+		return
+	}
+
+	// 保存证书信息
+	return ent.NewDatabase().Certification.Create().
+		SetIDCardNumber(idcard).
+		SetPrivatePath(kp).
+		SetCertPath(cp).
+		SetExpiresAt(time.Now().Add(time.Hour*24 - time.Minute*10)). // 防止证书过期，有效期减少10分钟
+		OnConflictColumns(certification.FieldIDCardNumber).
+		UpdateNewValues().
+		Save(context.Background())
 }
 
 // 自签发证书
@@ -127,4 +157,13 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 
 	crt, err = base64.StdEncoding.DecodeString(result.JsonObj.SignCert)
 	return
+}
+
+// 查询证书
+func queryCertification(idcard string) *ent.Certification {
+	cert, _ := ent.NewDatabase().Certification.Query().
+		Where(certification.IDCardNumber(idcard), certification.ExpiresAtGT(time.Now())).
+		First(context.Background())
+
+	return cert
 }

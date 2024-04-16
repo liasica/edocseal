@@ -6,12 +6,11 @@ package service
 
 import (
 	"context"
-	"os"
 
 	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal/internal/biz"
-	"github.com/liasica/edocseal/internal/model"
+	"github.com/liasica/edocseal/internal/ent"
 	"github.com/liasica/edocseal/internal/task"
 	"github.com/liasica/edocseal/pb"
 )
@@ -41,23 +40,16 @@ func (*ContractService) Create(_ context.Context, req *pb.ContractCreateRequest)
 			}
 			zap.L().Check(level, "生成文档").Write(fields...)
 		}()
+
 		// 创建合同
-		var doc []byte
-		var paths *model.DocumentPaths
-		doc, paths, err = biz.CreateDocument(req.TemplateId, req.Values)
+		var doc *ent.Document
+		doc, err = biz.CreateDocument(req, true)
 		if err != nil {
 			return err
 		}
 
-		// 上传合同
-		var url string
-		url, err = biz.UploadDocument(paths.OssUnSignedDocument, doc)
-		if err != nil {
-			return err
-		}
-
-		res.Url = url
-		res.DocId = paths.ID
+		res.Url = doc.UnsignedURL
+		res.DocId = doc.ID
 		return nil
 	})
 
@@ -90,29 +82,15 @@ func (*ContractService) Sign(_ context.Context, req *pb.ContractSignRequest) (*p
 			zap.L().Check(level, "签署合同").Write(fields...)
 		}()
 
+		var doc *ent.Document
 		// 签署合同
-		var paths *model.DocumentPaths
-		paths, err = biz.SignDocument(req)
-		if err != nil {
-			return
-		}
-
-		// 读取合同
-		var b []byte
-		b, err = os.ReadFile(paths.SignedDocument)
-		if err != nil {
-			return
-		}
-
-		// 上传合同
-		var url string
-		url, err = biz.UploadDocument(paths.OssSignedDocument, b)
+		doc, err = biz.SignDocument(req, true)
 		if err != nil {
 			return
 		}
 
 		res.Status = pb.ContractSignStatus_SUCCESS
-		res.Url = url
+		res.Url = doc.SignedURL
 		return
 	})
 

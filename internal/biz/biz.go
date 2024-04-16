@@ -58,10 +58,9 @@ func loadTemplateConfig(id string) (*model.Template, error) {
 	return template, nil
 }
 
-func oss() (ao *edocseal.AliyunOss, url string, err error) {
+func oss() (ao *edocseal.AliyunOss, err error) {
 	cfg := g.GetAliyunOss()
 	ao, err = edocseal.NewAliyunOss(cfg.AccessKeyId, cfg.AccessKeySecret, cfg.Endpoint, cfg.Bucket)
-	url = cfg.Url
 	return
 }
 

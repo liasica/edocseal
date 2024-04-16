@@ -53,5 +53,6 @@ func shortUrl(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		zap.L().Error("获取短链接失败", zap.Error(err), zap.String("id", id))
 	}
+	// TODO: oss保存到私有bucket并且使用acl生成临时访问链接后跳转
 	http.Redirect(w, r, src, http.StatusMovedPermanently)
 }

@@ -60,9 +60,10 @@ type Config struct {
 
 	// 目录配置
 	Dir struct {
-		Template string // 模板目录
-		Runtime  string // 运行时目录
-		Document string // 文档目录
+		Template    string // 模板目录
+		Runtime     string // 运行时目录
+		Document    string // 文档目录
+		Certificate string // 证书目录
 	}
 
 	// 文档配置
@@ -106,10 +107,15 @@ type Config struct {
 	}
 
 	Aliyun struct {
-		Oss AliyunOss
+		Oss *AliyunOss
 	}
 
 	Snca Snca
+
+	Postgres struct {
+		Dsn   string
+		Debug bool
+	}
 }
 
 func readConfig() (err error) {
@@ -244,12 +250,22 @@ func GetDocumentDir() string {
 	return cfg.Dir.Document
 }
 
+// GetCertificateDir 获取根证书路径
+func GetCertificateDir() string {
+	return cfg.Dir.Certificate
+}
+
 // GetAliyunOss 获取阿里云OSS配置
-func GetAliyunOss() AliyunOss {
+func GetAliyunOss() *AliyunOss {
 	return cfg.Aliyun.Oss
 }
 
 // GetSnca 获取SNCA配置
 func GetSnca() *Snca {
 	return &cfg.Snca
+}
+
+// GetPostgresConfig 获取Postgresql配置
+func GetPostgresConfig() (string, bool) {
+	return cfg.Postgres.Dsn, cfg.Postgres.Debug
 }

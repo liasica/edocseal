@@ -6,10 +6,17 @@ package biz
 
 import (
 	"bytes"
+	"context"
+	"crypto/md5"
 	"encoding/base64"
+	"encoding/hex"
+	"errors"
 	"io/fs"
 	"os"
+	"path/filepath"
+	"strconv"
 	"strings"
+	"time"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/signintech/pdft"
@@ -17,21 +24,60 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal"
+	"github.com/liasica/edocseal/internal/ent"
+	"github.com/liasica/edocseal/internal/ent/document"
 	"github.com/liasica/edocseal/internal/g"
 	"github.com/liasica/edocseal/internal/model"
 	"github.com/liasica/edocseal/pb"
 )
 
 // CreateDocument 根据模板创建待签约文档
-func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) (b []byte, paths *model.DocumentPaths, err error) {
+func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Document, err error) {
+	expire := time.Unix(req.Expire, 0)
+
+	// 查询文档防止重复创建
+	jc := jsoniter.Config{SortMapKeys: true}.Froze()
+	reqBytes, _ := jc.Marshal(req.Values)
+	hasher := md5.New()
+	// 写入模板ID
+	hasher.Write([]byte(req.TemplateId))
+	// 写入身份证号
+	hasher.Write([]byte(req.Idcard))
+	// 写入过期时间
+	hasher.Write([]byte(strconv.FormatInt(req.Expire, 10)))
+	// 写入字段
+	hasher.Write(reqBytes)
+	hash := hex.EncodeToString(hasher.Sum(nil))
+
+	// 查找是否已存在未失效的未签约合同
+	doc, _ = ent.NewDatabase().Document.Query().
+		Where(
+			document.Hash(hash),
+			document.IDCardNumber(req.Idcard),
+			document.StatusIn(document.StatusUnsigned),
+		).
+		First(context.Background())
+	if doc != nil {
+		return
+	}
+
 	// 获取模板和配置
 	var tmpl *model.Template
-	tmpl, err = GetTemplate(templateId)
+	tmpl, err = GetTemplate(req.TemplateId)
 	if err != nil {
 		return
 	}
 
-	paths = NewDocumentPaths()
+	// 生成文档ID
+	docId := time.Now().Format("20060102") + g.GetID()
+
+	paths := NewPaths(docId)
+
+	// 创建文件夹
+	err = edocseal.CreateDirectory(filepath.Dir(paths.UnSigned))
+	if err != nil {
+		return
+	}
 
 	// 创建PDF
 	pt := new(pdft.PDFt)
@@ -42,7 +88,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 		return
 	}
 
-	// 加载所有字体
+	// 加载字体
 	var f fs.File
 	f, err = g.GetFont(g.FontSong)
 	if err != nil {
@@ -52,7 +98,6 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	if err != nil {
 		return
 	}
-
 	err = pt.SetFont(g.FontSong, "", 10)
 	if err != nil {
 		return
@@ -61,7 +106,7 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	size := model.A4PageSize
 
 	// 填充字段
-	for k, v := range fields {
+	for k, v := range req.Values {
 		c, ok := tmpl.Fields[k]
 		if !ok {
 			zap.L().Warn("字段不存在", zap.String("field", k))
@@ -96,17 +141,90 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 	}
 
 	// 保存文档
-	b = buf.Bytes()
-	err = os.WriteFile(paths.UnSignedDocument, b, os.ModePerm)
+	b := buf.Bytes()
+	err = os.WriteFile(paths.UnSigned, b, os.ModePerm)
+	if err != nil {
+		return
+	}
+
+	// 上传合同
+	var url string
+	if upload {
+		url, err = UploadDocument(paths.OssUnSigned, b)
+		if err != nil {
+			return
+		}
+	}
+
+	// 保存文档信息
+	doc, err = ent.NewDatabase().Document.Create().
+		SetID(docId).
+		SetHash(hash).
+		SetTemplateID(req.TemplateId).
+		SetIDCardNumber(req.Idcard).
+		SetStatus(document.StatusUnsigned).
+		SetPaths(paths).
+		SetExpiresAt(expire).
+		SetUnsignedURL(url).
+		Save(context.Background())
+
+	return
+}
+
+// SignDocument 文档签约
+func SignDocument(req *pb.ContractSignRequest, upload bool) (doc *ent.Document, err error) {
+	doc, _ = QueryDocument(req.DocId)
+	if doc == nil {
+		return nil, errors.New("未找到待签约文档")
+	}
+
+	if doc.Status == document.StatusSigned {
+		return
+	}
+
+	// 获取模板
+	var tmpl *model.Template
+	tmpl, err = GetTemplate(doc.TemplateID)
+	if err != nil {
+		return
+	}
+
+	// 获取未签名文档
+	if !edocseal.FileExists(doc.Paths.UnSigned) {
+		return nil, errors.New("未找到未签约文档")
+	}
+
+	// 保存签名
+	var img []byte
+	img, err = base64.StdEncoding.DecodeString(req.Image)
+	if err != nil {
+		return
+	}
+	err = os.WriteFile(doc.Paths.Image, img, os.ModePerm)
+	if err != nil {
+		return
+	}
+
+	// 获取证书
+	var cert *ent.Certification
+	cert, err = RequestCertificae(req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
 	if err != nil {
 		return
 	}
 
 	// 保存配置
+	cfgPath, _ := filepath.Abs(filepath.Join(filepath.Dir(doc.Paths.UnSigned), "config.json"))
+	kp, _ := filepath.Abs(cert.PrivatePath)
+	cp, _ := filepath.Abs(cert.CertPath)
+
+	signed, _ := filepath.Abs(doc.Paths.Signed)
+	unsigned, _ := filepath.Abs(doc.Paths.UnSigned)
+	imgPath, _ := filepath.Abs(doc.Paths.Image)
+
 	sb, _ := jsoniter.Marshal(&model.Sign{
-		TemplateID: templateId,
-		InFile:     paths.UnSignedDocument,
-		OutFile:    paths.SignedDocument,
+		TemplateID: doc.TemplateID,
+		InFile:     unsigned,
+		OutFile:    signed,
 		Signatures: []model.Signature{
 			{
 				Field: model.EntSignField,
@@ -117,49 +235,47 @@ func CreateDocument(templateId string, fields map[string]*pb.ContractFromField) 
 			},
 			{
 				Field: model.PersonalSignField,
-				Image: paths.Image,
-				Key:   paths.Key,
-				Cert:  paths.Cert,
+				Image: imgPath,
+				Key:   kp,
+				Cert:  cp,
 				Rect:  tmpl.Fields[model.PersonalSignField].Rectangle.IntList(),
 			},
 		},
 	})
-	err = os.WriteFile(paths.Config, sb, os.ModePerm)
-	return
-}
-
-// SignDocument 文档签约
-func SignDocument(req *pb.ContractSignRequest) (paths *model.DocumentPaths, err error) {
-	// 获取文档链接
-	paths, err = GetDocumentPaths(req.DocId)
+	err = os.WriteFile(cfgPath, sb, os.ModePerm)
 	if err != nil {
-		return
-	}
-
-	// 保存签名
-	var img []byte
-	img, err = base64.StdEncoding.DecodeString(req.Image)
-	if err != nil {
-		return
-	}
-	err = os.WriteFile(paths.Image, img, os.ModePerm)
-	if err != nil {
-		return
-	}
-
-	// 获取证书
-	err = RequestCertificae(paths, req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
-	if err != nil {
+		zap.L().Error("文档写入失败", zap.Error(err), zap.Reflect("payload", req), zap.Error(err))
 		return
 	}
 
 	// 调用签名
 	var out []byte
-	out, err = edocseal.Exec(g.GetSigner(), "--config", paths.Config)
+	out, err = edocseal.Exec(g.GetSigner(), "--config", cfgPath)
 	if err != nil {
 		zap.L().Error("签名失败", zap.Error(err), zap.Reflect("payload", req), zap.String("output", string(out)))
 		return
 	}
+
+	var url string
+	// 上传至阿里云
+	if upload {
+		// 读取合同
+		var b []byte
+		b, err = os.ReadFile(doc.Paths.Signed)
+		if err != nil {
+			return
+		}
+
+		// 上传合同
+		url, err = UploadDocument(doc.Paths.OssSigned, b)
+		if err != nil {
+			return
+		}
+	}
+
+	// 更新数据库
+	_ = doc.Update().SetStatus(document.StatusSigned).SetSignedURL(url).Exec(context.Background())
+
 	zap.L().Info("签名成功", zap.String("docId", req.DocId))
 	return
 }
@@ -167,8 +283,10 @@ func SignDocument(req *pb.ContractSignRequest) (paths *model.DocumentPaths, err 
 // UploadDocument 上传至阿里云
 func UploadDocument(path string, b []byte) (url string, err error) {
 	// 获取OSS配置
-	var ao *edocseal.AliyunOss
-	ao, url, err = oss()
+	var (
+		ao *edocseal.AliyunOss
+	)
+	ao, err = oss()
 	if err != nil {
 		return
 	}
@@ -182,5 +300,5 @@ func UploadDocument(path string, b []byte) (url string, err error) {
 		url += "/"
 	}
 
-	return CreateShortUrl(url + path)
+	return CreateShortUrl(g.GetAliyunOss().GetUrl(path))
 }

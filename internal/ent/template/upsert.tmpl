@@ -1,0 +1,22 @@
+{{/* The line below tells Intellij/GoLand to enable the autocompletion based on the *gen.Graph type. */}}
+{{/* gotype: entgo.io/ent/entc/gen.Graph */}}
+
+{{ define "dialect/sql/create/additional/upsert" }}
+
+    {{ template "helper/upsertone" . }}
+
+    {{ $pkg := base $.Config.Package }}
+    {{ $builder := pascal $.Scope.Builder }}
+    {{ $receiver := receiver $builder }}
+    {{ $upsertOne := print $.Name "UpsertOne" }}
+    {{ $upsertSet := print $.Name "Upsert" }}
+
+    // Save creates the {{ $.Name }} in the database.
+    func (u *{{ $upsertOne }}) Save(ctx context.Context) (*{{ $.Name }}, error) {
+    if len(u.create.conflict) == 0 {
+    return nil, errors.New("{{ $pkg }}: missing options for {{ $builder }}.OnConflict")
+    }
+    return u.create.Save(ctx)
+    }
+
+{{ end }}

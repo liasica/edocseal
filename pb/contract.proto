@@ -24,7 +24,7 @@ message ContractFromField {
 message ContractCreateRequest {
   string template_id = 1; // 模板编号
   map<string, ContractFromField> values = 2; // 合同模板字段，key为字段名，value为字段值
-  string user_id = 3; // 用户ID
+  string idcard = 3; // 用户身份证号
   int64 expire = 4; // 合同有效截止日期（北京时间，时间戳）
 }
 
@@ -35,7 +35,6 @@ message ContractCreateResponse {
 }
 
 // 合同签署请求
-// 个签属性和团签属性只能二选一（需要进行限制判定）
 message ContractSignRequest {
   string doc_id = 1; // 待签约文档编号
   string image = 2; // 个人签章图片（base64编码）

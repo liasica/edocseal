@@ -109,4 +109,5 @@ config/
 templates/
 documents/
 build/
+certificates/
 bbolt.db
