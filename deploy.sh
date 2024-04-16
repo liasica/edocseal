@@ -2,7 +2,7 @@
 
 REGISTRY=harbor.liasica.com/auroraride/edocseal:$1
 PORT=26611
-MAINTAIN=http://10.17.0.15:5000/stop
+MAINTAIN=http://10.17.0.15:5000/maintain/stop/9geUbBHvX3caRWl1
 
 if [ "$1" = "prod" ]; then
 	PORT=26610

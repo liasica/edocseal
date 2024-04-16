@@ -105,6 +105,7 @@ fabric.properties
 go.work
 
 runtime/
+!internal/ent/runtime
 config/
 templates/
 documents/
