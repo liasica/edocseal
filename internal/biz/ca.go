@@ -122,7 +122,7 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 
 	// 1.陕西CA随机数接口
 	randomParam := make(map[string]string)
-	randomParam["source"] = "SCNX"
+	randomParam["source"] = "SGJ"
 	var (
 		randomResp   *resty.Response
 		randomResult *model.ApplyServiceRandomResponse
@@ -131,7 +131,7 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 		SetHeader("Content-Type", "application/json").
 		SetBody(randomParam).
 		SetResult(&randomResult).
-		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/applyServiceRandom")
+		Post(g.GetSnca().Url + "/sealCertService/com/api/cert/applyServiceRandom")
 	if err != nil {
 		zap.L().Error("机构随机数请求失败", zap.Error(err))
 		return
@@ -150,14 +150,14 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 		AppType:          "1",
 		CertType:         "9",
 		SubCert:          "1",
-		Source:           "SCNX",
-		ClientName:       "西安时光驹新能源科技有限公司",
+		Source:           "SGJ",
+		ClientName:       "极光出行签发证书",
 		CountryName:      "CN",
 		Agent:            name,
 		AgentTel:         phone,
 		AgentNumber:      idcard,
 		CertId:           strings.ReplaceAll(uuid.New().String(), "-", ""),
-		CustomerType:     "1",
+		CustomerType:     "405",
 		SocialCreditCode: "91610133MA6U8RAJ1X",
 		Province:         province,
 		City:             city,
@@ -171,7 +171,7 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 		SetHeader("Content-Type", "application/json").
 		SetBody(busReq).
 		SetResult(&busResult).
-		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/businessDataFinish")
+		Post(g.GetSnca().Url + "/sealCertService/com/api/cert/businessDataFinish")
 	if err != nil {
 		zap.L().Error("组装数据请求失败", zap.Error(err))
 		return
@@ -188,7 +188,7 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	// 3.请求申请证书
 	certReq := model.ApplySealCertRequest{
 		TokenInfo:  fmt.Sprintf("%d", time.Now().UnixMicro()) + randomResult.RandomB + "SNCA" + busResult.Data.AppId,
-		CommonName: "证书测试", // 西安时光驹新能源科技有限公司证书
+		CommonName: "西安时光驹新能源科技有限公司证书", // 西安时光驹新能源科技有限公司证书
 		P10:        pkcs10,
 	}
 
@@ -201,7 +201,7 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 		SetHeader("Content-Type", "application/json").
 		SetBody(certReq).
 		SetResult(&certResult).
-		Post("http://111.20.164.183:8998/sealCertService/com/api/cert/applySealCert")
+		Post(g.GetSnca().Url + "/sealCertService/com/api/cert/applySealCert")
 	if err != nil {
 		zap.L().Error("机构签发证书失败", zap.Error(err))
 		return

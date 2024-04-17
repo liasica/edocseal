@@ -56,11 +56,12 @@ func (t *documentTask) Do() {
 	// 查询前一天数据
 	yesterdayBeginTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().AddDate(0, 0, -1).Day(), 0, 0, 0, 0, time.Local)
 	yesterdayEndTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
-	docs, err := ent.NewDatabase().Document.
-		Query().Where(
-		documenEnt.CreateAtGTE(yesterdayBeginTime),
-		documenEnt.CreateAtLT(yesterdayEndTime),
-	).All(context.Background())
+	docs, err := ent.NewDatabase().Document.Query().
+		Where(
+			documenEnt.CreateAtGTE(yesterdayBeginTime),
+			documenEnt.CreateAtLT(yesterdayEndTime),
+		).
+		All(context.Background())
 	if err != nil {
 		zap.L().Error("查找昨日文档数据失败失败", zap.Error(err))
 		return
