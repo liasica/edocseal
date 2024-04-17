@@ -82,15 +82,15 @@ func (*ContractService) Sign(_ context.Context, req *pb.ContractSignRequest) (*p
 			zap.L().Check(level, "签署合同").Write(fields...)
 		}()
 
-		var doc *ent.Document
+		var url string
 		// 签署合同
-		doc, err = biz.SignDocument(req, true)
+		url, err = biz.SignDocument(req, true)
 		if err != nil {
 			return
 		}
 
 		res.Status = pb.ContractSignStatus_SUCCESS
-		res.Url = doc.SignedURL
+		res.Url = url
 		return
 	})
 
