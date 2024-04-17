@@ -111,7 +111,7 @@ func queryCertification(idcard string) *ent.Certification {
 func agencyIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
 	// 生成私钥
 	priKey := ca.GenerateRsaPrivateKey()
-	key, _ = x509.MarshalPKCS8PrivateKey(key)
+	key, _ = x509.MarshalPKCS8PrivateKey(priKey)
 	// 生成CSR请求
 	var csr []byte
 	csr, err = ca.GenerateRequest(priKey, pkix.Name{
@@ -158,7 +158,7 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 		AgentNumber:      idcard,
 		CertId:           strings.ReplaceAll(uuid.New().String(), "-", ""),
 		CustomerType:     "405",
-		SocialCreditCode: "91610133MA6U8RAJ1X",
+		SocialCreditCode: idcard,
 		Province:         province,
 		City:             city,
 	}

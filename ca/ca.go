@@ -40,7 +40,7 @@ func GenerateRequest(priKey *rsa.PrivateKey, subject pkix.Name) ([]byte, error) 
 		rand.Reader,
 		&x509.CertificateRequest{
 			Subject:            subject,
-			SignatureAlgorithm: x509.SHA512WithRSA,
+			SignatureAlgorithm: x509.SHA256WithRSA,
 		},
 		priKey,
 	)
