@@ -6,13 +6,13 @@ exclude: ^assets/docs
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: b73acb1
+    rev: 0d20f18
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
   - repo: https://github.com/golangci/golangci-lint
-    rev: 9d91e4a
+    rev: 7ad7949
     hooks:
       - id: golangci-lint
         name: golangci-lint

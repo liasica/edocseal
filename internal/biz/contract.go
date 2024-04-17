@@ -275,9 +275,9 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (doc *ent.Document, 
 	}
 
 	// 更新数据库
-	_ = doc.Update().SetStatus(document.StatusSigned).SetSignedURL(url).Exec(context.Background())
+	doc, _ = doc.Update().SetStatus(document.StatusSigned).SetSignedURL(url).Save(context.Background())
 
-	zap.L().Info("签名成功", zap.String("docId", req.DocId))
+	zap.L().Info("签名成功", zap.String("docId", req.DocId), zap.String("url", url))
 	return
 }
 
