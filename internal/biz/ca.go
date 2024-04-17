@@ -8,22 +8,15 @@ import (
 	"context"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"encoding/base64"
 	"errors"
-	"fmt"
 	"path/filepath"
-	"strings"
 	"time"
-
-	"github.com/go-resty/resty/v2"
-	"github.com/google/uuid"
-	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal/ca"
 	"github.com/liasica/edocseal/internal/ent"
 	"github.com/liasica/edocseal/internal/ent/certification"
 	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/internal/model"
+	"github.com/liasica/edocseal/third/snca"
 )
 
 func certificatePaths(idcard string) (keypath string, capath string) {
@@ -112,111 +105,29 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	// 生成私钥
 	priKey := ca.GenerateRsaPrivateKey()
 	key, _ = x509.MarshalPKCS8PrivateKey(priKey)
+
 	// 生成CSR请求
 	var csr []byte
 	csr, err = ca.GenerateRequest(priKey, pkix.Name{
-		Country:      []string{"CN"},
-		Organization: []string{name},
+		Country:    []string{"CN"},
+		CommonName: name,
 	})
-	pkcs10 := base64.StdEncoding.EncodeToString(csr)
-
-	// 1.陕西CA随机数接口
-	randomParam := make(map[string]string)
-	randomParam["source"] = "SGJ"
-	var (
-		randomResp   *resty.Response
-		randomResult *model.ApplyServiceRandomResponse
-	)
-	randomResp, err = resty.New().R().
-		SetHeader("Content-Type", "application/json").
-		SetBody(randomParam).
-		SetResult(&randomResult).
-		Post(g.GetSnca().Url + "/sealCertService/com/api/cert/applyServiceRandom")
 	if err != nil {
-		zap.L().Error("机构随机数请求失败", zap.Error(err))
 		return
 	}
-	zap.L().Info("机构随机数请求", zap.String("response", string(randomResp.Body())))
-	if randomResult == nil {
-		return nil, nil, errors.New("机构随机数请求失败，返回结果为空")
-	}
-	if randomResult.ResultCode != "0" {
-		zap.L().Error("机构随机数请求失败", zap.Error(errors.New(randomResult.ResultCodeMsg)))
-		return nil, nil, errors.New(randomResult.ResultCodeMsg)
-	}
 
-	// 2.陕西CA组装业务数据接口
-	busReq := model.BusinessDataFinishRequest{
-		AppType:          "1",
-		CertType:         "9",
-		SubCert:          "1",
-		Source:           "SGJ",
-		ClientName:       "极光出行签发证书",
-		CountryName:      "CN",
-		Agent:            name,
-		AgentTel:         phone,
-		AgentNumber:      idcard,
-		CertId:           strings.ReplaceAll(uuid.New().String(), "-", ""),
-		CustomerType:     "405",
-		SocialCreditCode: idcard,
-		Province:         province,
-		City:             city,
-	}
-
-	var (
-		busResp   *resty.Response
-		busResult *model.BusinessDataFinishResponse
-	)
-	busResp, err = resty.New().R().
-		SetHeader("Content-Type", "application/json").
-		SetBody(busReq).
-		SetResult(&busResult).
-		Post(g.GetSnca().Url + "/sealCertService/com/api/cert/businessDataFinish")
-	if err != nil {
-		zap.L().Error("组装数据请求失败", zap.Error(err))
-		return
-	}
-	zap.L().Info("组装数据请求失败", zap.String("response", string(busResp.Body())))
-	if busResult == nil {
-		return nil, nil, errors.New("组装数据请求失败，返回结果为空")
-	}
-	if busResult.Result != "true" {
-		zap.L().Error("组装数据请求失败", zap.Error(errors.New(busResult.ResultMsg)))
-		return nil, nil, errors.New(busResult.ResultMsg)
-	}
-
-	// 3.请求申请证书
-	certReq := model.ApplySealCertRequest{
-		TokenInfo:  fmt.Sprintf("%d", time.Now().UnixMicro()) + randomResult.RandomB + "SNCA" + busResult.Data.AppId,
-		CommonName: "西安时光驹新能源科技有限公司证书", // 西安时光驹新能源科技有限公司证书
-		P10:        pkcs10,
-	}
-
-	var (
-		certResp   *resty.Response
-		certResult *model.ApplySealCertResponse
+	// 申请证书
+	crt, err = snca.NewSnca(g.GetSnca()).RequestCACert(
+		snca.CertTypePersonal,
+		name,
+		name,
+		phone,
+		idcard,
+		province,
+		city,
+		csr,
+		"",
 	)
 
-	certResp, err = resty.New().R().
-		SetHeader("Content-Type", "application/json").
-		SetBody(certReq).
-		SetResult(&certResult).
-		Post(g.GetSnca().Url + "/sealCertService/com/api/cert/applySealCert")
-	if err != nil {
-		zap.L().Error("机构签发证书失败", zap.Error(err))
-		return
-	}
-	zap.L().Info("机构签发证书", zap.String("response", string(certResp.Body())))
-
-	if certResult == nil {
-		return nil, nil, errors.New("机构签发证书失败，返回结果为空")
-	}
-
-	if certResult.ResultCode != "0" {
-		zap.L().Error("机构签发证书失败", zap.Error(errors.New(certResult.ResultCodeMsg)))
-		return nil, nil, errors.New(certResult.ResultCodeMsg)
-	}
-
-	crt, err = base64.StdEncoding.DecodeString(certResult.Data.SignCert)
 	return
 }

@@ -34,7 +34,9 @@ type AliyunOss struct {
 }
 
 type Snca struct {
-	Url string
+	Url          string
+	Source       string
+	CustomerType string
 }
 
 type Config struct {
@@ -261,8 +263,8 @@ func GetAliyunOss() *AliyunOss {
 }
 
 // GetSnca 获取SNCA配置
-func GetSnca() *Snca {
-	return &cfg.Snca
+func GetSnca() (url, source, customerType string) {
+	return cfg.Snca.Url, cfg.Snca.Source, cfg.Snca.CustomerType
 }
 
 // GetPostgresConfig 获取Postgresql配置
