@@ -75,7 +75,7 @@ func TestSnca_RequestEnterpriseCACert(t *testing.T) {
 
 	var b []byte
 	b, err = NewSnca(g.GetSnca()).RequestCACert(
-		CertTypePersonal,
+		CertTypeEnterprise,
 		name,
 		"李四",
 		"18555555555",
