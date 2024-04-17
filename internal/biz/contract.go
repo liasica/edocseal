@@ -172,10 +172,10 @@ func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Docume
 }
 
 // SignDocument 文档签约
-func SignDocument(req *pb.ContractSignRequest, upload bool) (doc *ent.Document, err error) {
-	doc, _ = QueryDocument(req.DocId)
+func SignDocument(req *pb.ContractSignRequest, upload bool) (url string, err error) {
+	doc, _ := QueryDocument(req.DocId)
 	if doc == nil {
-		return nil, errors.New("未找到待签约文档")
+		return "", errors.New("未找到待签约文档")
 	}
 
 	if doc.Status == document.StatusSigned {
@@ -191,7 +191,7 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (doc *ent.Document, 
 
 	// 获取未签名文档
 	if !edocseal.FileExists(doc.Paths.UnSigned) {
-		return nil, errors.New("未找到未签约文档")
+		return "", errors.New("未找到未签约文档")
 	}
 
 	// 保存签名
@@ -256,7 +256,6 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (doc *ent.Document, 
 		return
 	}
 
-	var url string
 	// 上传至阿里云
 	if upload {
 		// 读取合同
@@ -273,10 +272,13 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (doc *ent.Document, 
 		}
 	}
 
-	// 更新数据库
-	doc, _ = doc.Update().SetStatus(document.StatusSigned).SetSignedURL(url).Save(context.Background())
-
 	zap.L().Info("签名成功", zap.String("docId", req.DocId), zap.String("url", url))
+
+	// 更新数据库
+	err = doc.Update().SetStatus(document.StatusSigned).SetSignedURL(url).Exec(context.Background())
+	if err != nil {
+		zap.L().Error("更新文档状态失败 → 签约成功", zap.Error(err), zap.String("docId", req.DocId), zap.String("url", url))
+	}
 	return
 }
 
