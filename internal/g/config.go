@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/spf13/viper"
 
@@ -16,8 +15,8 @@ import (
 )
 
 var (
-	cfg  *Config
-	path string
+	cfg        *Config
+	configFile string
 )
 
 type CertificatePath struct {
@@ -37,6 +36,19 @@ type Snca struct {
 	Url          string
 	Source       string
 	CustomerType string
+}
+
+type Enterprise struct {
+	Seal        string // 企业签章图片
+	Certificate string // 企业证书
+	PrivateKey  string // 企业私钥
+	PersonName  string // 代办姓名
+	Phone       string // 代办电话
+	Idcard      string // 代办身份证
+	Province    string // 省份
+	City        string // 城市
+	CreditCode  string // 统一社会信用代码
+	Name        string // 企业名称
 }
 
 type Config struct {
@@ -77,11 +89,7 @@ type Config struct {
 	RootCertificate CertificatePath
 
 	// 企业证书，用于签署协议
-	Enterprise struct {
-		Seal        string // 企业签章图片
-		Certificate string // 企业证书
-		PrivateKey  string // 企业私钥
-	}
+	Enterprise *Enterprise
 
 	// 日志配置
 	Logger struct {
@@ -133,15 +141,12 @@ func readConfig() (err error) {
 	}
 
 	// 获取企业签名文件完整路径
-	cfg.Enterprise.Seal, _ = filepath.Abs(cfg.Enterprise.Seal)
 	if !edocseal.FileExists(cfg.Enterprise.Seal) {
 		return errors.New("企业签章图片不存在")
 	}
-	cfg.Enterprise.PrivateKey, _ = filepath.Abs(cfg.Enterprise.PrivateKey)
 	if !edocseal.FileExists(cfg.Enterprise.PrivateKey) {
 		return errors.New("企业私钥不存在")
 	}
-	cfg.Enterprise.Certificate, _ = filepath.Abs(cfg.Enterprise.Certificate)
 	if !edocseal.FileExists(cfg.Enterprise.Certificate) {
 		return errors.New("企业证书不存在")
 	}
@@ -149,17 +154,17 @@ func readConfig() (err error) {
 }
 
 // LoadConfig 加载配置文件
-func LoadConfig(configFile string) {
-	path = filepath.Dir(configFile)
+func LoadConfig(path string) {
+	configFile = path
 
 	// 判定配置文件是否存在
-	_, err := os.Stat(configFile)
+	_, err := os.Stat(path)
 	if err != nil {
 		fmt.Println("配置文件不存在")
 		os.Exit(1)
 	}
 
-	viper.SetConfigFile(configFile)
+	viper.SetConfigFile(path)
 	viper.AutomaticEnv()
 
 	// 读取配置文件
@@ -187,9 +192,15 @@ func GetDocumentTaskNum() int {
 	return cfg.Task.Document
 }
 
-// GetSeal 获取企业签章图片
-func GetSeal() string {
-	return cfg.Enterprise.Seal
+// GetEnterpriseConfig 获取企业配置
+func GetEnterpriseConfig() *Enterprise {
+	return cfg.Enterprise
+}
+
+// UpdateEnterpriseConfig 更新企业配置
+func UpdateEnterpriseConfig(key, cert string) {
+	cfg.Enterprise.PrivateKey = key
+	cfg.Enterprise.Certificate = cert
 }
 
 // GetShortUrlPrefix 获取短链接前缀
@@ -202,16 +213,6 @@ func GetBboltPath() string {
 	return cfg.Bbolt.Path
 }
 
-// GetCertificate 获取企业证书
-func GetCertificate() string {
-	return cfg.Enterprise.Certificate
-}
-
-// GetPrivateKey 获取企业私钥
-func GetPrivateKey() string {
-	return cfg.Enterprise.PrivateKey
-}
-
 // GetSigner 获取Signer路径
 func GetSigner() string {
 	return cfg.Signer
@@ -220,11 +221,6 @@ func GetSigner() string {
 // IsSelfSign 是否自签名
 func IsSelfSign() bool {
 	return cfg.SelfSign
-}
-
-// GetConfigPath 获取配置目录
-func GetConfigPath() string {
-	return path
 }
 
 // GetRPCBind 获取RPC绑定地址
@@ -270,4 +266,9 @@ func GetSnca() (url, source, customerType string) {
 // GetPostgresConfig 获取Postgresql配置
 func GetPostgresConfig() (string, bool) {
 	return cfg.Postgres.Dsn, cfg.Postgres.Debug
+}
+
+// GetConfigFile 获取配置文件路径
+func GetConfigFile() string {
+	return configFile
 }

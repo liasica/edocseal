@@ -38,13 +38,13 @@ func TestSnca_RequestCACert(t *testing.T) {
 	var b []byte
 	b, err = NewSnca(g.GetSnca()).RequestCACert(
 		CertTypePersonal,
+		csr,
 		name,
 		name,
 		"18555555555",
 		"110101199003070000",
 		"陕西省",
 		"西安市",
-		csr,
 		"",
 	)
 
@@ -76,13 +76,13 @@ func TestSnca_RequestEnterpriseCACert(t *testing.T) {
 	var b []byte
 	b, err = NewSnca(g.GetSnca()).RequestCACert(
 		CertTypeEnterprise,
+		csr,
 		name,
 		"李四",
 		"18555555555",
 		"110101199003070000",
 		"陕西省",
 		"西安市",
-		csr,
 		"91610133MA712R0U00",
 	)
 

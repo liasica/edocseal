@@ -126,13 +126,13 @@ func LoadPrivateKeyFromFile(path string) (priKey *rsa.PrivateKey, err error) {
 	return ParsePrivateKey(b)
 }
 
-// ParseCertificate 解析证书
+// ParseCertificate 解析pem编码证书
 func ParseCertificate(b []byte) (crt *x509.Certificate, err error) {
 	block, _ := pem.Decode(b)
 	return x509.ParseCertificate(block.Bytes)
 }
 
-// LoadCertificateFromFile 从文件加载证书
+// LoadCertificateFromFile 从pem文件加载证书
 func LoadCertificateFromFile(path string) (crt *x509.Certificate, err error) {
 	var b []byte
 	b, err = os.ReadFile(path)

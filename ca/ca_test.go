@@ -77,3 +77,9 @@ func TestParse(t *testing.T) {
 	// Public key can be obtained through priv.PublicKey
 	fmt.Println(priv, e)
 }
+
+func TestLoadCertificateFromFile(t *testing.T) {
+	cert, err := LoadCertificateFromFile("../certificates/enterprise_test_cert.pem")
+	require.NoError(t, err)
+	require.NotNil(t, cert)
+}

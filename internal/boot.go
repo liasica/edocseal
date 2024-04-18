@@ -60,7 +60,7 @@ func Boot() {
 
 	zap.L().Info(
 		"edocseal 初始化完成",
-		zap.String("cfgPath", g.GetConfigPath()),
+		zap.String("configFile", g.GetConfigFile()),
 		zap.String("rpcBind", g.GetRPCBind()),
 		zap.Bool("rootCrt", rootCrt.GetCertificate() != nil && rootCrt.GetPrivateKey() != nil),
 		zap.String("signerVersion", string(b)),
