@@ -180,6 +180,7 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (url string, err err
 	}
 
 	if doc.Status == document.StatusSigned {
+		url = doc.SignedURL
 		return
 	}
 
