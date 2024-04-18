@@ -24,11 +24,11 @@ func NewEnterpriseTask() *EnterpriseTask {
 func (e *EnterpriseTask) Run() {
 	c := cron.New()
 	_, err := c.AddFunc("0 3 * * *", func() {
-		zap.L().Info("开始执行Document定时删除任务")
+		zap.L().Info("开始执行企业证书检查过期任务")
 		e.do()
 	})
 	if err != nil {
-		zap.L().Fatal("Document定时删除任务执行失败", zap.Error(err))
+		zap.L().Fatal("企业证书检查过期任务执行失败", zap.Error(err))
 		return
 	}
 	c.Start()
