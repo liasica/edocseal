@@ -34,6 +34,7 @@ func RunCommand() {
 		serverCommand(),
 		templateCommand(),
 		shorturlCommand(),
+		enterpriseCommand(),
 	)
 
 	_ = cmd.Execute()
