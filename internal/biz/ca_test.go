@@ -21,3 +21,12 @@ func TestAgencyIssueCertificate(t *testing.T) {
 	t.Logf("crt: %s", crt)
 	t.Logf("key: %s", key)
 }
+
+func TestRequestEnterpriseCertAndUpdateConfig(t *testing.T) {
+	g.LoadConfig("config/config.yaml")
+
+	err := RequestEnterpriseCertAndUpdateConfig()
+	require.NoError(t, err)
+
+	t.Logf("%#v", g.GetEnterpriseConfig())
+}

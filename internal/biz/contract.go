@@ -222,6 +222,11 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (url string, err err
 	unsigned, _ := filepath.Abs(doc.Paths.UnSigned)
 	imgPath, _ := filepath.Abs(doc.Paths.Image)
 
+	ec := g.GetEnterpriseConfig()
+	eSeal, _ := filepath.Abs(ec.Seal)
+	eKey, _ := filepath.Abs(ec.PrivateKey)
+	eCert, _ := filepath.Abs(ec.Certificate)
+
 	sb, _ := jsoniter.Marshal(&model.Sign{
 		TemplateID: doc.TemplateID,
 		InFile:     unsigned,
@@ -229,9 +234,9 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (url string, err err
 		Signatures: []model.Signature{
 			{
 				Field: model.EntSignField,
-				Image: g.GetSeal(),
-				Key:   g.GetPrivateKey(),
-				Cert:  g.GetCertificate(),
+				Image: eSeal,
+				Key:   eKey,
+				Cert:  eCert,
 				Rect:  tmpl.Fields[model.EntSignField].Rectangle.IntList(),
 			},
 			{

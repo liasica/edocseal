@@ -142,7 +142,7 @@ func (s *Snca) ApplySealCert(randomB, appId, name, csr string) (b []byte, err er
 }
 
 // RequestCACert 请求CA证书
-func (s *Snca) RequestCACert(typ CertType, name, personName, phone, idcard, province, city string, csrBytes []byte, creditCode string) (b []byte, err error) {
+func (s *Snca) RequestCACert(typ CertType, csrBytes []byte, name, personName, phone, idcard, province, city, creditCode string) (b []byte, err error) {
 	var (
 		randomB string
 		appId   string

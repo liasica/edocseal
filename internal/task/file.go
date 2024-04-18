@@ -15,18 +15,18 @@ import (
 	"github.com/liasica/edocseal/internal/g"
 )
 
-type documentTask struct {
+type FileTask struct {
 }
 
-func NewDocumentTask() *documentTask {
-	return &documentTask{}
+func NewFileTask() *FileTask {
+	return &FileTask{}
 }
 
-func (t *documentTask) Start() {
+func (t *FileTask) Run() {
 	c := cron.New()
-	_, err := c.AddFunc("00 02 * * * ", func() {
+	_, err := c.AddFunc("0 2 * * *", func() {
 		zap.L().Info("开始执行Document定时删除任务")
-		t.Do()
+		t.do()
 	})
 	if err != nil {
 		zap.L().Fatal("Document定时删除任务执行失败", zap.Error(err))
@@ -35,7 +35,7 @@ func (t *documentTask) Start() {
 	c.Start()
 }
 
-func (t *documentTask) Do() {
+func (t *FileTask) do() {
 	// 删除本地上月合同文件夹
 	lastMonth := time.Now().AddDate(0, -1, 0).Format("200601")
 	delMonthDir, _ := filepath.Abs(filepath.Join(g.GetDocumentDir(), lastMonth[:4], lastMonth[4:6]))
@@ -56,7 +56,8 @@ func (t *documentTask) Do() {
 	// 查询前一天数据
 	yesterdayBeginTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().AddDate(0, 0, -1).Day(), 0, 0, 0, 0, time.Local)
 	yesterdayEndTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
-	docs, err := ent.NewDatabase().Document.Query().
+	var docs []*ent.Document
+	docs, err = ent.NewDatabase().Document.Query().
 		Where(
 			documenEnt.CreateAtGTE(yesterdayBeginTime),
 			documenEnt.CreateAtLT(yesterdayEndTime),

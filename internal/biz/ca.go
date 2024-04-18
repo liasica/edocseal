@@ -9,7 +9,10 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"errors"
+	"fmt"
+	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/liasica/edocseal/ca"
@@ -119,15 +122,80 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	// 申请证书
 	crt, err = snca.NewSnca(g.GetSnca()).RequestCACert(
 		snca.CertTypePersonal,
+		csr,
 		name,
 		name,
 		phone,
 		idcard,
 		province,
 		city,
-		csr,
 		"",
 	)
 
 	return
+}
+
+// RequestEnterpriseCertAndUpdateConfig 申请企业证书并更新配置
+func RequestEnterpriseCertAndUpdateConfig() (err error) {
+	cfg := g.GetEnterpriseConfig()
+
+	priKey := ca.GenerateRsaPrivateKey()
+	key, _ := x509.MarshalPKCS8PrivateKey(priKey)
+
+	// 生成CSR请求
+	var csr []byte
+	csr, err = ca.GenerateRequest(priKey, pkix.Name{
+		Country:    []string{"CN"},
+		CommonName: cfg.Name,
+	})
+	if err != nil {
+		return
+	}
+
+	// 签发证书
+	var b []byte
+	b, err = snca.NewSnca(g.GetSnca()).RequestCACert(
+		snca.CertTypeEnterprise,
+		csr,
+		cfg.Name,
+		cfg.PersonName,
+		cfg.Phone,
+		cfg.Idcard,
+		cfg.Province,
+		cfg.City,
+		cfg.CreditCode,
+	)
+	if err != nil {
+		return
+	}
+
+	// 读取证书
+	var crt *x509.Certificate
+	crt, err = x509.ParseCertificate(b)
+	if err != nil {
+		return
+	}
+
+	// 私钥路径
+	kf := filepath.Join(g.GetCertificateDir(), fmt.Sprintf("%s_%d_key.pem", cfg.Name, crt.SerialNumber))
+	err = ca.SaveToFile(kf, key, ca.BlocTypePrivateKey)
+	if err != nil {
+		return
+	}
+
+	// 证书路径
+	cf := filepath.Join(g.GetCertificateDir(), fmt.Sprintf("%s_%d_cert.pem", cfg.Name, crt.SerialNumber))
+	err = ca.SaveToFile(cf, b, ca.BlocTypeCertificate)
+	if err != nil {
+		return
+	}
+
+	c, _ := os.ReadFile(g.GetConfigFile())
+	str := string(c)
+	str = strings.ReplaceAll(str, cfg.PrivateKey, kf)
+	str = strings.ReplaceAll(str, cfg.Certificate, cf)
+
+	g.UpdateEnterpriseConfig(kf, cf)
+
+	return os.WriteFile(g.GetConfigFile(), []byte(str), os.ModePerm)
 }
