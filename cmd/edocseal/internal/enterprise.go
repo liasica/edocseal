@@ -169,13 +169,13 @@ func generateEnterpriseCert(cPath, oName, pName, phone, idcard, provice, city, o
 	var cert []byte
 	cert, err = snca.NewSnca(g.GetSnca()).RequestCACert(
 		snca.CertTypeEnterprise,
+		csr,
 		oName,
 		pName,
 		phone,
 		idcard,
 		provice,
 		city,
-		csr,
 		oCode,
 	)
 	if err != nil {
