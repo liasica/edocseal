@@ -89,6 +89,12 @@ func (s *Snca) BusinessDataFinish(typ CertType, name, personName, phone, idcard,
 		req.Department = "AUR"
 	}
 
+	if typ == CertTypePersonal {
+		req.LegalPerson = personName
+		req.LegalNumber = idcard
+		req.LegalPersonTel = phone
+	}
+
 	var (
 		res    *resty.Response
 		result BusinessDataFinishResponse

@@ -52,9 +52,9 @@ type BusinessDataFinishRequest struct {
 	Source           string      `json:"source,omitempty"`           // 第三方来源标识（可在联调时约定）
 	PaymentMode      PaymentMode `json:"paymentMode,omitempty"`      // 支付方式 付款方式 1现金 6微信 7支付宝，其他情况默认现金
 	ClientName       string      `json:"clientName,omitempty"`       // 证书名称
-	LegalPerson      string      `json:"legalPerson,omitempty"`      // 法人，非必填
-	LegalNumber      string      `json:"legalNumber,omitempty"`      // 法人证件号码，非必填
-	LegalPersonTel   string      `json:"legalPersonTel,omitempty"`   // 法人电话，非必填
+	LegalPerson      string      `json:"legalPerson,omitempty"`      // 法人，个人必填，企业非必填
+	LegalNumber      string      `json:"legalNumber,omitempty"`      // 法人证件号码，个人必填，企业非必填
+	LegalPersonTel   string      `json:"legalPersonTel,omitempty"`   // 法人电话，个人必填，企业非必填
 	Agent            string      `json:"agent,omitempty"`            // 经办人
 	AgentTel         string      `json:"agentTel,omitempty"`         // 经办人电话
 	AgentNumber      string      `json:"agentNumber,omitempty"`      // 经办人证件号码
