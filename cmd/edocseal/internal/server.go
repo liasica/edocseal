@@ -36,9 +36,7 @@ func serverCommand() *cobra.Command {
 			go task.NewEnterpriseTask().Run()
 
 			// 启动http服务
-			go func() {
-				service.StartHttpServer()
-			}()
+			go service.StartHttpServer()
 
 			// 监听端口
 			lis, err := net.Listen("tcp", g.GetRPCBind())
