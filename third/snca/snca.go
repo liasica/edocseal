@@ -19,6 +19,7 @@ import (
 
 type Snca struct {
 	url          string
+	urlFallback  string
 	source       string
 	customerType string
 }
@@ -39,12 +40,12 @@ func (s *Snca) ApplyServiceRan() (randomB string, err error) {
 		result ApplyServiceRandomResponse
 	)
 
-	res, err = resty.New().R().
+	res, err = s.request().R().
 		SetBody(&ApplyServiceRandomRequest{
 			Source: s.source,
 		}).
 		SetResult(&result).
-		Post(s.NewUrl(UrlApplyServiceRandom))
+		Post(UrlApplyServiceRandom)
 
 	if err != nil {
 		return
@@ -99,10 +100,10 @@ func (s *Snca) BusinessDataFinish(typ CertType, name, personName, phone, idcard,
 		res    *resty.Response
 		result BusinessDataFinishResponse
 	)
-	res, err = resty.New().R().
+	res, err = s.request().R().
 		SetBody(req).
 		SetResult(&result).
-		Post(s.NewUrl(UrlBusinessDataFinish))
+		Post(UrlBusinessDataFinish)
 	if err != nil {
 		return
 	}
@@ -125,14 +126,14 @@ func (s *Snca) ApplySealCert(randomB, appId, name, csr string) (b []byte, err er
 		result ApplySealCertResponse
 	)
 
-	res, err = resty.New().R().
+	res, err = s.request().R().
 		SetBody(ApplySealCertRequest{
 			TokenInfo:  edocseal.RandStr(16) + randomB + "SNCA" + appId,
 			CommonName: name,
 			P10:        csr,
 		}).
 		SetResult(&result).
-		Post(s.NewUrl(UrlApplySealCert))
+		Post(UrlApplySealCert)
 	if err != nil {
 		return
 	}
