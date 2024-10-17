@@ -20,14 +20,14 @@ import (
 
 func templateCommand() *cobra.Command {
 	var (
-		temp string
+		form string
 		path string
 	)
 
 	cmd := &cobra.Command{
 		Use:               "template <input>",
 		Short:             "添加模板",
-		Example:           "edocpdf template ./时光驹APP个签合同.pdf",
+		Example:           "edocpdf template ./template.pdf",
 		Args:              cobra.ExactArgs(1),
 		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		Run: func(_ *cobra.Command, args []string) {
@@ -46,7 +46,7 @@ func templateCommand() *cobra.Command {
 
 			// 获取表单属性
 			var b []byte
-			b, err = edocseal.Exec("qpdf", temp, "--json")
+			b, err = edocseal.Exec("qpdf", form, "--json")
 			if err != nil {
 				fmt.Printf("模板表单解析失败: %v\n", err)
 				os.Exit(1)
@@ -137,7 +137,7 @@ func templateCommand() *cobra.Command {
 		},
 	}
 
-	cmd.Flags().StringVarP(&temp, "temp", "t", "runtime", "表单文件")
+	cmd.Flags().StringVarP(&form, "form", "f", "", "表单文件")
 	cmd.Flags().StringVarP(&path, "path", "p", "templates", "模板路径")
 
 	_ = cmd.MarkFlagRequired("temp")

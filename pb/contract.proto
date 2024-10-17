@@ -17,7 +17,17 @@ message ContractFromField {
   oneof value {
     string text = 1; // 文本
     bool checkbox = 2; // 勾选
+    ContractTable table = 3; // 表格
   }
+}
+
+message ContractTable {
+  repeated string columns = 1; // 表格列名
+  repeated ContractTableRow rows = 2; // 表格行数据
+}
+
+message ContractTableRow {
+  repeated string cells = 1; // 表格行数据
 }
 
 // 创建合同请求

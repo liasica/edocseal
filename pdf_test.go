@@ -5,12 +5,16 @@
 package edocseal
 
 import (
+	"bytes"
 	"fmt"
+	"image"
+	"image/png"
 	"os"
 	"testing"
 
 	"github.com/benoitkugler/pdf/model"
 	"github.com/benoitkugler/pdf/reader"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/signintech/gopdf"
 	"github.com/signintech/pdft"
 	xpdf "github.com/signintech/pdft/minigopdf"
@@ -89,7 +93,7 @@ func TestPdfFillForm(t *testing.T) {
 	t.Log(filled)
 }
 
-func TestPdfForm(t *testing.T) {
+func TestPdft(t *testing.T) {
 	pt := new(pdft.PDFt)
 	err := pt.Open("./runtime/template.pdf")
 	require.NoError(t, err)
@@ -103,28 +107,60 @@ func TestPdfForm(t *testing.T) {
 	// lower-left x, lower-left y, upper-right x, and upper-right y
 	// model.Rectangle{Llx:144.24, Lly:385.68, Urx:307.08, Ury:404.64}
 	// 144.24, 385.68, 307.08, 404.64
-	text := "我是一大堆车辆型号啊"
 	// A4大小 W: 595, H: 842 (DP: 72)
 	// PDF编码规则是从左往右从下往上，因此此处需要使用高度 - Y
-	err = pt.Insert(text, 1, 144.24, 842-404.64, 163, 19, xpdf.Left|xpdf.Middle)
+	err = pt.Insert("我是一大堆车辆型号啊", 1, 144.24, 842-404.64, 163, 19, xpdf.Left|xpdf.Middle, nil)
 	require.NoError(t, err)
 
 	var check []byte
-	check, err = os.ReadFile("./config/check.png")
+	check, err = os.ReadFile("./internal/g/assets/check.png")
 	require.NoError(t, err)
 
 	err = pt.InsertImg(check, 1, 123.6, 842-414.904, 10, 10)
 	require.NoError(t, err)
 
-	err = pt.Save("./runtime/output.pdf")
+	err = pt.Save("./runtime/example_pdft.pdf")
 	require.NoError(t, err)
 }
 
 func TestGoPdf(t *testing.T) {
+	b, err := os.ReadFile("./internal/g/assets/check.png")
+	require.NoError(t, err)
+
+	var check image.Image
+	check, err = png.Decode(bytes.NewReader(b))
+	require.NoError(t, err)
+
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
-	tpl1 := pdf.ImportPage("./runtime/template.pdf", 1, "/MediaBox")
-	pdf.UseImportedTemplate(tpl1, 0, 0, gopdf.PageSizeA4.W, gopdf.PageSizeA4.H)
-	err := pdf.WritePdf("./runtime/example.pdf")
+
+	err = pdf.ImportPagesFromFile("./runtime/template.pdf", "/MediaBox")
 	require.NoError(t, err)
+
+	err = pdf.AddTTFFont("Song", "./runtime/HuawenFangSong.ttf")
+	require.NoError(t, err)
+
+	err = pdf.SetFont("Song", "", 10)
+	require.NoError(t, err)
+
+	err = pdf.SetPage(1)
+	require.NoError(t, err)
+
+	pdf.SetXY(144.24, 842-404.64)
+	err = pdf.CellWithOption(&gopdf.Rect{W: 163, H: 19}, "我是一大堆车辆型号啊", gopdf.CellOption{Align: gopdf.Left | gopdf.Middle})
+	require.NoError(t, err)
+
+	err = pdf.ImageFrom(check, 123.6, 842-414.904, &gopdf.Rect{W: 10, H: 10})
+	require.NoError(t, err)
+
+	err = pdf.WritePdf("./runtime/example_gopdf.pdf")
+	require.NoError(t, err)
+}
+
+func TestPdfCPU(t *testing.T) {
+	ctx, err := pdfcpu.ReadFile("./runtime/template.pdf", nil)
+	require.NoError(t, err)
+
+	ref := ctx.Info
+	t.Log(ref)
 }

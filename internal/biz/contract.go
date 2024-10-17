@@ -124,7 +124,7 @@ func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Docume
 			if err != nil {
 				return
 			}
-			err = pt.Insert(val.Text, c.Page, x, size.Height-y, w, rect.Height(), xpdf.Left|xpdf.Middle)
+			err = pt.Insert(val.Text, c.Page, x, size.Height-y, w, rect.Height(), xpdf.Left|xpdf.Middle, nil)
 		case *pb.ContractFromField_Checkbox:
 			err = pt.InsertImg(g.GetCheckImage(), c.Page, x, size.Height-y, rect.Width(), rect.Height())
 		}
