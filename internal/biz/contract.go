@@ -144,6 +144,7 @@ func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Docume
 			document.Hash(hash),
 			document.IDCardNumber(req.Idcard),
 			document.StatusIn(document.StatusUnsigned),
+			document.ExpiresAtGTE(expire),
 		).
 		First(context.Background())
 	if doc != nil {
@@ -275,6 +276,7 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (url string, err err
 				Key:   eKey,
 				Cert:  eCert,
 				Rect:  tmpl.Fields[model.EntSignField].Rectangle.IntList(),
+				Page:  tmpl.Fields[model.EntSignField].Page - 1,
 			},
 			{
 				Field: model.PersonalSignField,
@@ -282,6 +284,7 @@ func SignDocument(req *pb.ContractSignRequest, upload bool) (url string, err err
 				Key:   kp,
 				Cert:  cp,
 				Rect:  tmpl.Fields[model.PersonalSignField].Rectangle.IntList(),
+				Page:  tmpl.Fields[model.PersonalSignField].Page - 1,
 			},
 		},
 	})

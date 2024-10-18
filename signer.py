@@ -44,8 +44,9 @@ class SignatureField:
     key: str
     cert: str
     rect: List[int]
+    page: int
 
-    def __init__(self, field: str, image: str, key: str, cert: str, rect: List[int]) -> None:
+    def __init__(self, field: str, image: str, key: str, cert: str, rect: List[int], page: int) -> None:
         """
         签约人
 
@@ -59,12 +60,15 @@ class SignatureField:
             证书
         :param rect:
             签字区域
+        :param page:
+            签字区域所在页面，从0开始
         """
         self.field = field
         self.image = image
         self.key = key
         self.cert = cert
         self.rect = rect
+        self.page = page
 
     @staticmethod
     def from_dict(obj: Any) -> 'SignatureField':
@@ -74,7 +78,8 @@ class SignatureField:
         key = from_str(obj.get('key'))
         cert = from_str(obj.get('cert'))
         rect = from_list(from_int, obj.get('rect'))
-        return SignatureField(field, image, key, cert, rect)
+        page = from_int(obj.get('page'))
+        return SignatureField(field, image, key, cert, rect, page)
 
     def to_dict(self) -> dict:
         result: dict = {
@@ -83,6 +88,7 @@ class SignatureField:
             'key': from_str(self.key),
             'cert': from_str(self.cert),
             'rect': from_list(from_int, self.rect),
+            'page': from_int(self.page)
         }
         return result
 
@@ -143,12 +149,12 @@ def sign_double():
         w = IncrementalPdfFileWriter(inf, strict=False)
         fields.append_signature_field(
             w, sig_field_spec=fields.SigFieldSpec(
-                s1.field, box=list_to_tuple(s1.rect), on_page=-1
+                s1.field, box=list_to_tuple(s1.rect), on_page=s1.page
             )
         )
         fields.append_signature_field(
             w, sig_field_spec=fields.SigFieldSpec(
-                s2.field, box=list_to_tuple(s2.rect), on_page=-1
+                s2.field, box=list_to_tuple(s2.rect), on_page=s2.page
             )
         )
 
@@ -188,7 +194,7 @@ def sign_double():
             outf.close()
 
 
-VERSION = '1.0.0'
+VERSION = '1.0.1'
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--config", help="签名配置")

@@ -22,4 +22,5 @@ type Signature struct {
 	Key   string `json:"key"`   // 私钥
 	Cert  string `json:"cert"`  // 证书
 	Rect  []int  `json:"rect"`  // 签名区域
+	Page  int    `json:"page"`  // 签名所在页面，从0开始
 }

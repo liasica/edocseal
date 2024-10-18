@@ -22,7 +22,7 @@ func Boot() {
 	// 验证signer version
 	b, err := edocseal.Exec(g.GetSigner(), "--version")
 	if err != nil {
-		zap.L().Fatal("Python环境未安装或配置错误")
+		zap.L().Fatal("Python环境未安装或配置错误", zap.Error(err))
 		os.Exit(1)
 	}
 
