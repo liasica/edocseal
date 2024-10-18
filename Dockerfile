@@ -1,4 +1,4 @@
-FROM --platform=linux/amd64 liasica/edocseal:latest
+FROM liasica/edocseal:latest
 
 COPY ./build/release/edocseal /app/
 COPY ./signer.py /app/
