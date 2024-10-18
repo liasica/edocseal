@@ -176,15 +176,17 @@ func RequestEnterpriseCertAndUpdateConfig() (err error) {
 		return
 	}
 
+	dir := filepath.Dir(g.GetConfigFile())
+
 	// 私钥路径
-	kf := filepath.Join(g.GetCertificateDir(), fmt.Sprintf("%s_%d_key.pem", cfg.Name, crt.SerialNumber))
+	kf := filepath.Join(dir, fmt.Sprintf("%s_%d_key.pem", cfg.Name, crt.SerialNumber))
 	err = ca.SaveToFile(kf, key, ca.BlocTypePrivateKey)
 	if err != nil {
 		return
 	}
 
 	// 证书路径
-	cf := filepath.Join(g.GetCertificateDir(), fmt.Sprintf("%s_%d_cert.pem", cfg.Name, crt.SerialNumber))
+	cf := filepath.Join(dir, fmt.Sprintf("%s_%d_cert.pem", cfg.Name, crt.SerialNumber))
 	err = ca.SaveToFile(cf, b, ca.BlocTypeCertificate)
 	if err != nil {
 		return

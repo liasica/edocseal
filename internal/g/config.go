@@ -34,6 +34,7 @@ type AliyunOss struct {
 
 type Snca struct {
 	Url          string
+	UrlFallback  string
 	Source       string
 	CustomerType string
 }
