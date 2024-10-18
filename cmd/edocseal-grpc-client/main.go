@@ -52,15 +52,15 @@ func create() string {
 		log.Fatal(err)
 	}
 
-	values := make(map[string]*pb.ContractFromField)
+	values := make(map[string]*pb.ContractFormField)
 	for k, v := range data {
 		value := v.(map[string]any)["Value"].(map[string]any)
 		if check, ok := value["Checkbox"]; ok {
-			values[k] = &pb.ContractFromField{
-				Value: &pb.ContractFromField_Checkbox{Checkbox: check.(bool)},
+			values[k] = &pb.ContractFormField{
+				Value: &pb.ContractFormField_Checkbox{Checkbox: check.(bool)},
 			}
 		} else {
-			values[k] = &pb.ContractFromField{Value: &pb.ContractFromField_Text{Text: value["Text"].(string)}}
+			values[k] = &pb.ContractFormField{Value: &pb.ContractFormField_Text{Text: value["Text"].(string)}}
 		}
 	}
 

@@ -5,82 +5,115 @@
 package edocseal
 
 import (
-	"math/big"
-	"math/rand"
-	"path/filepath"
+	"bytes"
+	"io"
+	"os"
 
-	"github.com/benoitkugler/pdf/formfill"
-	"github.com/benoitkugler/pdf/model"
-	"github.com/benoitkugler/pdf/reader"
-
-	"github.com/liasica/edocseal/pb"
+	"github.com/signintech/gopdf"
 )
 
-// PdfParseFields 解析PDF文件中待填充字段
-func PdfParseFields(path string) (fields map[string]model.Rectangle, err error) {
-	var doc model.Document
-	doc, _, err = reader.ParsePDFFile(path, reader.Options{})
-	if err != nil {
-		return
-	}
+const DefaultMediaBox = "/MediaBox"
 
-	fields = make(map[string]model.Rectangle)
-
-	// 获取所有字段
-	for _, field := range doc.Catalog.AcroForm.Flatten() {
-		t := field.Field.T
-
-		if len(field.Field.Widgets) > 0 {
-			fields[t] = field.Field.Widgets[0].Rect
-		}
-	}
-
-	return
+type PdfCreator struct {
+	box   string
+	fonts map[string]io.Reader
+	font  *PdfFont
 }
 
-// PdfFillForm 填充PDF表单
-func PdfFillForm(filename, filledDir string, fields map[string]*pb.ContractFromField) (filled string, err error) {
-	// 解析PDF文件
-	var doc model.Document
-	doc, _, err = reader.ParsePDFFile(filename, reader.Options{})
-	if err != nil {
-		return
-	}
+type PdfFont struct {
+	Name  string
+	Size  any
+	Style string
+}
 
-	// 获取表单字段
-	var form []formfill.FDFField
-	for t, value := range fields {
-		field := formfill.FDFField{
-			T: t,
-		}
-		// 根据字段类型填充值
-		switch v := value.Value.(type) {
-		case *pb.ContractFromField_Text:
-			field.Values = formfill.Values{V: formfill.FDFText(v.Text)}
-		case *pb.ContractFromField_Checkbox:
-			field.Values = formfill.Values{V: formfill.FDFName(v.String())}
-		}
-		form = append(form, field)
-	}
+type PdfCreateOption interface {
+	apply(*PdfCreator)
+}
 
-	form = append(form, formfill.FDFField{
-		T:      "Checkbox1",
-		Values: formfill.Values{V: formfill.FDFName("On")},
+type pdfCreateOptionFunc func(*PdfCreator)
+
+func (f pdfCreateOptionFunc) apply(creator *PdfCreator) {
+	f(creator)
+}
+
+func WithMediaBox(mediaBox string) PdfCreateOption {
+	return pdfCreateOptionFunc(func(creator *PdfCreator) {
+		creator.box = mediaBox
 	})
+}
 
-	// 填充表单
-	err = formfill.FillForm(&doc, formfill.FDFDict{Fields: form}, true)
+func WithFont(name string, font io.Reader) PdfCreateOption {
+	return pdfCreateOptionFunc(func(creator *PdfCreator) {
+		if creator.fonts == nil {
+			creator.fonts = make(map[string]io.Reader)
+		}
+		creator.fonts[name] = font
+	})
+}
+
+func WithDefaultFont(name string, style string, size any) PdfCreateOption {
+	return pdfCreateOptionFunc(func(creator *PdfCreator) {
+		creator.font = &PdfFont{
+			Name:  name,
+			Size:  size,
+			Style: style,
+		}
+	})
+}
+
+func NewPdfCreator(opts ...PdfCreateOption) *PdfCreator {
+	c := &PdfCreator{
+		box: DefaultMediaBox,
+	}
+	for _, opt := range opts {
+		opt.apply(c)
+	}
+	return c
+}
+
+// CreatePDF 创建并处理PDF
+func (creator *PdfCreator) CreatePDF(out string, source io.ReadSeeker, process func(*gopdf.GoPdf) error) (b []byte, err error) {
+	// 创建PDF
+	pdf := &gopdf.GoPdf{}
+	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
+
+	// 导入页面
+	err = pdf.ImportPagesFromSource(source, creator.box)
 	if err != nil {
 		return
 	}
 
-	// 保存填充后的文件
-	filled = filepath.Join(filledDir, FileNameWithoutExtension(filename), big.NewInt(rand.Int63()).String()+".pdf")
-	err = CreateDirectory(filepath.Dir(filled))
+	// 加载字体
+	for name, font := range creator.fonts {
+		err = pdf.AddTTFFontByReader(name, font)
+		if err != nil {
+			return
+		}
+	}
+
+	// 设置默认字体
+	if creator.font != nil {
+		err = pdf.SetFont(creator.font.Name, creator.font.Style, creator.font.Size)
+		if err != nil {
+			return
+		}
+	}
+
+	// 处理PDF
+	err = process(pdf)
 	if err != nil {
 		return
 	}
 
-	err = doc.WriteFile(filled, nil)
+	// 文档写入缓冲区
+	buf := new(bytes.Buffer)
+	_, err = pdf.WriteTo(buf)
+	if err != nil {
+		return
+	}
+
+	// 保存文档
+	b = buf.Bytes()
+	err = os.WriteFile(out, b, os.ModePerm)
 	return
 }

@@ -4,7 +4,7 @@
 
 package pb
 
-func (c *ContractFromField_Checkbox) String() string {
+func (c *ContractFormField_Checkbox) String() string {
 	if c.Checkbox {
 		return "On"
 	}

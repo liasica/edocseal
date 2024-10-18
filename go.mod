@@ -7,7 +7,6 @@ toolchain go1.23.1
 require (
 	entgo.io/ent v0.14.1
 	github.com/aliyun/aliyun-oss-go-sdk v3.0.2+incompatible
-	github.com/benoitkugler/pdf v0.0.14
 	github.com/go-resty/resty/v2 v2.15.3
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/mux v1.8.1
@@ -35,7 +34,6 @@ require (
 	ariga.io/atlas v0.28.1 // indirect
 	github.com/agext/levenshtein v1.2.3 // indirect
 	github.com/apparentlymart/go-textseg/v15 v15.0.0 // indirect
-	github.com/benoitkugler/pstokenizer v1.0.1 // indirect
 	github.com/bmatcuk/doublestar v1.3.4 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
@@ -83,8 +81,6 @@ require (
 )
 
 replace (
-	//github.com/signintech/gopdf v0.27.1 => /Users/liasica/projects/go/gopdf
-	//github.com/signintech/gopdf v0.27.1 => github.com/liasica/gopdf v0.0.0-20241016101048-ae46c47ab1a4
-	github.com/signintech/gopdf v0.27.1 => github.com/liasica/gopdf v0.0.0-20241017033825-0b2920722652
+	github.com/signintech/gopdf v0.27.1 => github.com/liasica/gopdf v0.0.0-20241017062426-996989b8a752
 	github.com/signintech/pdft v0.6.0 => github.com/liasica/pdft v0.0.0-20241016080532-66407e936c16
 )

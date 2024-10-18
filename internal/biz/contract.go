@@ -5,13 +5,11 @@
 package biz
 
 import (
-	"bytes"
 	"context"
 	"crypto/md5"
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -19,8 +17,7 @@ import (
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
-	"github.com/signintech/pdft"
-	xpdf "github.com/signintech/pdft/minigopdf"
+	"github.com/signintech/gopdf"
 	"go.uber.org/zap"
 
 	"github.com/liasica/edocseal"
@@ -30,6 +27,98 @@ import (
 	"github.com/liasica/edocseal/internal/model"
 	"github.com/liasica/edocseal/pb"
 )
+
+func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, values map[string]*pb.ContractFormField) (err error) {
+	size := gopdf.PageSizeA4
+	// 填充字段
+	for k, v := range values {
+		c, ok := fields[k]
+		if !ok {
+			zap.L().Warn("字段不存在", zap.String("field", k))
+			continue
+		}
+
+		// 设置页面
+		err = pdf.SetPage(c.Page)
+		if err != nil {
+			return
+		}
+
+		rect := c.Rectangle
+		x := rect.LeftBottom.X
+		y := size.H - rect.RightTop.Y
+
+		switch val := v.Value.(type) {
+		case *pb.ContractFormField_Text:
+			var w float64
+			w, err = pdf.MeasureTextWidth(val.Text)
+			if err != nil {
+				return
+			}
+			pdf.SetXY(x, y)
+			err = pdf.CellWithOption(&gopdf.Rect{W: w, H: rect.Height()}, val.Text, gopdf.CellOption{Align: gopdf.Left | gopdf.Middle})
+		case *pb.ContractFormField_Checkbox:
+			err = pdf.ImageFrom(g.GetCheckImage(), x, y, &gopdf.Rect{W: rect.Width(), H: rect.Height()})
+		case *pb.ContractFormField_Table:
+			table := pdf.NewTableLayout(x, y, 20, len(val.Table.Rows))
+			w := 0.0
+			// 添加并配置表格列
+			for _, col := range val.Table.Columns {
+				w += col.Scale
+				if w > 1 {
+					return errors.New("表格宽度溢出")
+				}
+				align := pb.ContractTableAlign_center
+				if col.Align != nil {
+					align = *col.Align
+				}
+				table.AddColumn(col.Header, col.Scale*rect.Width(), align.String())
+			}
+
+			// 添加表格行
+			for _, row := range val.Table.Rows {
+				table.AddRow(row.Cells)
+			}
+
+			// 设置表格头样式
+			table.SetHeaderStyle(gopdf.CellStyle{
+				BorderStyle: gopdf.BorderStyle{
+					Top:      true,
+					Left:     true,
+					Bottom:   true,
+					Right:    true,
+					Width:    2.0,
+					RGBColor: gopdf.RGBColor{R: 166, G: 166, B: 166},
+				},
+				FillColor: gopdf.RGBColor{R: 220, G: 220, B: 220},
+				TextColor: gopdf.RGBColor{R: 0, G: 0, B: 0},
+				FontSize:  12,
+			})
+
+			// 设置表格样式
+			table.SetTableStyle(gopdf.CellStyle{
+				BorderStyle: gopdf.BorderStyle{
+					Top:      true,
+					Left:     true,
+					Bottom:   true,
+					Right:    true,
+					Width:    1.0,
+					RGBColor: gopdf.RGBColor{R: 166, G: 166, B: 166},
+				},
+				FillColor: gopdf.RGBColor{R: 255, G: 255, B: 255},
+				TextColor: gopdf.RGBColor{R: 0, G: 0, B: 0},
+				FontSize:  10,
+			})
+
+			// 绘制表格
+			err = table.DrawTable()
+		}
+		if err != nil {
+			return
+		}
+	}
+	return
+}
 
 // CreateDocument 根据模板创建待签约文档
 func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Document, err error) {
@@ -79,70 +168,17 @@ func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Docume
 		return
 	}
 
+	song, font := g.GetFontSong()
+	creator := edocseal.NewPdfCreator(
+		edocseal.WithFont(song, font),
+		edocseal.WithDefaultFont(song, "", 10),
+	)
+
 	// 创建PDF
-	pt := new(pdft.PDFt)
-
-	// 打开PDF
-	err = pt.Open(tmpl.File)
-	if err != nil {
-		return
-	}
-
-	// 加载字体
-	var f fs.File
-	f, err = g.GetFont(g.FontSong)
-	if err != nil {
-		return
-	}
-	err = pt.AddFontFrom(g.FontSong, f)
-	if err != nil {
-		return
-	}
-	err = pt.SetFont(g.FontSong, "", 10)
-	if err != nil {
-		return
-	}
-
-	size := model.A4PageSize
-
-	// 填充字段
-	for k, v := range req.Values {
-		c, ok := tmpl.Fields[k]
-		if !ok {
-			zap.L().Warn("字段不存在", zap.String("field", k))
-			continue
-		}
-
-		rect := c.Rectangle
-		x := rect.LeftBottom.X
-		y := rect.RightTop.Y
-
-		switch val := v.Value.(type) {
-		case *pb.ContractFromField_Text:
-			var w float64
-			w, err = pt.MeasureTextWidth(val.Text)
-			if err != nil {
-				return
-			}
-			err = pt.Insert(val.Text, c.Page, x, size.Height-y, w, rect.Height(), xpdf.Left|xpdf.Middle, nil)
-		case *pb.ContractFromField_Checkbox:
-			err = pt.InsertImg(g.GetCheckImage(), c.Page, x, size.Height-y, rect.Width(), rect.Height())
-		}
-		if err != nil {
-			return
-		}
-	}
-
-	// 文档写入缓冲区
-	buf := new(bytes.Buffer)
-	err = pt.SaveTo(buf)
-	if err != nil {
-		return
-	}
-
-	// 保存文档
-	b := buf.Bytes()
-	err = os.WriteFile(paths.UnSigned, b, os.ModePerm)
+	var b []byte
+	b, err = creator.CreatePDF(paths.UnSigned, tmpl.ReadSeeker(), func(pdf *gopdf.GoPdf) error {
+		return FillDocument(pdf, tmpl.Fields, req.Values)
+	})
 	if err != nil {
 		return
 	}

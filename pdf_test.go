@@ -6,92 +6,17 @@ package edocseal
 
 import (
 	"bytes"
-	"fmt"
 	"image"
 	"image/png"
 	"os"
 	"testing"
 
-	"github.com/benoitkugler/pdf/model"
-	"github.com/benoitkugler/pdf/reader"
 	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
 	"github.com/signintech/gopdf"
 	"github.com/signintech/pdft"
 	xpdf "github.com/signintech/pdft/minigopdf"
 	"github.com/stretchr/testify/require"
-
-	"github.com/liasica/edocseal/pb"
 )
-
-func TestPdfParseFields(t *testing.T) {
-	fields, err := PdfParseFields("templates/input.pdf")
-	require.NoError(t, err)
-	t.Log(fields)
-}
-
-func TestGetFormField(t *testing.T) {
-	p := "./runtime/x.pdf"
-	doc, _, err := reader.ParsePDFFile(p, reader.Options{})
-	require.NoError(t, err)
-
-	// form := doc.Catalog.AcroForm
-	// fmt.Println(form)
-
-	// 获取所有字段
-	var f1, f2 model.FormFieldInherited
-	for _, field := range doc.Catalog.AcroForm.Flatten() {
-		f := field.Field
-		w := field.Field.Widgets[0]
-		if f.T == "fill_1" {
-			f1 = field
-			rect := w.Rect
-			// fmt.Println(f, w, rect)
-			fmt.Printf("%#v", rect)
-		}
-		if f.T == "fill_1_2" {
-			f2 = field
-			rect := w.Rect
-			// fmt.Println(f, w, rect)
-			fmt.Printf("%#v", rect)
-		}
-	}
-
-	fmt.Println(f1, f2)
-
-	// form.Fields = nil
-	// err = doc.WriteFile("runtime/x.output.pdf", nil)
-	// require.NoError(t, err)
-	// var ctx *model.Context
-	// ctx, err = pdfcpu.ReadFile(p, nil)
-	// require.NoError(t, err)
-	//
-	// fmt.Println(ctx)
-}
-
-func TestPdfRead(t *testing.T) {
-	p := "./runtime/x.pdf"
-	b, err := os.ReadFile(p)
-	require.NoError(t, err)
-
-	fmt.Println(b)
-}
-
-func TestPdfFillForm(t *testing.T) {
-	filled, err := PdfFillForm("runtime/input-s.pdf", "runtime", map[string]*pb.ContractFromField{
-		"toggle_1": {
-			Value: &pb.ContractFromField_Checkbox{
-				Checkbox: true,
-			},
-		},
-		"fill_1": {
-			Value: &pb.ContractFromField_Text{
-				Text: "Hello, World!",
-			},
-		},
-	})
-	require.NoError(t, err)
-	t.Log(filled)
-}
 
 func TestPdft(t *testing.T) {
 	pt := new(pdft.PDFt)
@@ -134,7 +59,7 @@ func TestGoPdf(t *testing.T) {
 	pdf := gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
 
-	err = pdf.ImportPagesFromFile("./runtime/template.pdf", "/MediaBox")
+	err = pdf.ImportPagesFromSource("./runtime/template.pdf", "/MediaBox")
 	require.NoError(t, err)
 
 	err = pdf.AddTTFFont("Song", "./runtime/HuawenFangSong.ttf")

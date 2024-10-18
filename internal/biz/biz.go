@@ -24,6 +24,7 @@ var (
 )
 
 // GetTemplate 根据ID返回模板路径以及配置
+// 如果缓存中不存在则加载模板后保存到缓存
 func GetTemplate(id string) (*model.Template, error) {
 	data, ok := templates.Load(id)
 	if !ok {
@@ -32,6 +33,7 @@ func GetTemplate(id string) (*model.Template, error) {
 		if err != nil {
 			return nil, err
 		}
+		templates.Store(id, data)
 	}
 	return data.(*model.Template), nil
 }
@@ -55,6 +57,11 @@ func loadTemplateConfig(id string) (*model.Template, error) {
 		return nil, errors.New("模板未找到")
 	}
 
+	// 读取模板内容
+	err = template.LoadContent()
+	if err != nil {
+		return nil, err
+	}
 	return template, nil
 }
 

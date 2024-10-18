@@ -13,7 +13,7 @@ service Contract {
 }
 
 // 创建合同字段
-message ContractFromField {
+message ContractFormField {
   oneof value {
     string text = 1; // 文本
     bool checkbox = 2; // 勾选
@@ -22,8 +22,20 @@ message ContractFromField {
 }
 
 message ContractTable {
-  repeated string columns = 1; // 表格列名
+  repeated ContractTableColumn columns = 1; // 表格列配置
   repeated ContractTableRow rows = 2; // 表格行数据
+}
+
+message ContractTableColumn {
+  string header = 1; // 表格头名称
+  double scale = 2; // 列宽度百分比
+  optional ContractTableAlign align = 3; // 列对齐方式
+}
+
+enum ContractTableAlign {
+  left = 0;
+  center = 1;
+  right = 2;
 }
 
 message ContractTableRow {
@@ -33,7 +45,7 @@ message ContractTableRow {
 // 创建合同请求
 message ContractCreateRequest {
   string template_id = 1; // 模板编号
-  map<string, ContractFromField> values = 2; // 合同模板字段，key为字段名，value为字段值
+  map<string, ContractFormField> values = 2; // 合同模板字段，key为字段名，value为字段值
   string idcard = 3; // 用户身份证号
   int64 expire = 4; // 合同有效截止日期（北京时间，时间戳）
 }

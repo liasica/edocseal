@@ -4,7 +4,11 @@
 
 package model
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+	"os"
+)
 
 // TemplateFieldType 模板字段类型
 type TemplateFieldType string
@@ -74,6 +78,17 @@ type Template struct {
 	ID     string                   `json:"id"`     // 模板ID
 	File   string                   `json:"file"`   // 模板文件
 	Fields map[string]TemplateField `json:"fields"` // 字段列表
+
+	rs io.ReadSeeker // 模板内容
+}
+
+func (t *Template) LoadContent() (err error) {
+	t.rs, err = os.Open(t.File)
+	return
+}
+
+func (t *Template) ReadSeeker() io.ReadSeeker {
+	return t.rs
 }
 
 // TemplateField 模板字段

@@ -10,7 +10,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/google/uuid"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cobra"
 
@@ -32,14 +31,16 @@ func templateCommand() *cobra.Command {
 		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		Run: func(_ *cobra.Command, args []string) {
 			// 获取模板文件md5
-			fileId, err := edocseal.FileMd5(args[0])
+			templateId, err := edocseal.FileMd5(args[0])
 			if err != nil {
 				fmt.Printf("模板MD5获取失败: %v\n", err)
 				os.Exit(1)
 			}
 
+			templateId = strings.ToUpper(templateId)
+
 			// 重命名模板文档
-			templateFile, _ := filepath.Abs(filepath.Join(path, fileId+".pdf"))
+			templateFile, _ := filepath.Abs(filepath.Join(path, templateId+".pdf"))
 			if !edocseal.FileExists(templateFile) {
 				_ = os.Rename(args[0], templateFile)
 			}
@@ -53,15 +54,14 @@ func templateCommand() *cobra.Command {
 			}
 
 			// 获取表单数据
-			var form edocseal.Form
-			err = jsoniter.Unmarshal(b, &form)
+			var fd edocseal.Form
+			err = jsoniter.Unmarshal(b, &fd)
 			if err != nil {
 				fmt.Printf("表单数据解析失败: %v\n", err)
 				os.Exit(1)
 			}
 
 			// 生成模板ID
-			templateId := strings.ToUpper(strings.ReplaceAll(uuid.New().String(), "-", ""))
 			template := model.Template{
 				ID:     templateId,
 				File:   templateFile,
@@ -70,14 +70,15 @@ func templateCommand() *cobra.Command {
 
 			// 模板数据
 			var hasEnt, hasRider bool
-			for _, field := range form.Acroform.Fields {
-				m := form.Objects[1]["obj:"+field.Annotation.Object]
+			for _, field := range fd.Acroform.Fields {
+				m := fd.Objects[1]["obj:"+field.Annotation.Object]
 				mb, _ := jsoniter.Marshal(m)
 				var data edocseal.FormFieldObject
 				_ = jsoniter.Unmarshal(mb, &data)
 
-				fmt.Printf("%20.20s %10.10s\t\t%6.2f, %6.2f, %6.2f, %6.2f\n",
+				fmt.Printf("%20.20s %10.10s\t%10.10s\t\t%6.2f, %6.2f, %6.2f, %6.2f\n",
 					field.Fullname,
+					field.Alternativename,
 					field.Fieldtype,
 					data.Value.Rect[0],
 					data.Value.Rect[1],

@@ -32,23 +32,48 @@ func TestCreateDocument(t *testing.T) {
 	err = jsoniter.Unmarshal([]byte(`{"address":{"Value":{"Text":"北京市天安门左边第三个通道中间第十六块砖"}},"aurDate":{"Value":{"Text":"2024年04月14日"}},"city":{"Value":{"Text":"北京市"}},"ebikeBattery":{"Value":{"Text":"时光驹电池"}},"ebikeBrand":{"Value":{"Text":"大风车"}},"ebikeColor":{"Value":{"Text":"橘黄"}},"ebikeModel":{"Value":{"Text":"60V30AH"}},"ebikeSN":{"Value":{"Text":"121621907801271"}},"ebikeScheme1":{"Value":{"Checkbox":true}},"ebikeScheme1PayMonth":{"Value":{"Text":"0"}},"ebikeScheme1PayTotal":{"Value":{"Text":"9.00"}},"ebikeScheme1Price":{"Value":{"Text":"9.00"}},"ebikeScheme1Start":{"Value":{"Text":"2024年04月14日"}},"ebikeScheme1Stop":{"Value":{"Text":"2024年04月23日"}},"idcard":{"Value":{"Text":"410881199504096034"}},"name":{"Value":{"Text":"王亚飞"}},"payMonth":{"Value":{"Text":"0"}},"phone":{"Value":{"Text":"18563171523"}},"riderContact":{"Value":{"Text":"[其他]计算 - 17566668888"}},"riderDate":{"Value":{"Text":"2024年04月14日"}},"riderSign":{"Value":{"Text":"王亚飞"}},"schemaEbike":{"Value":{"Checkbox":true}},"sn":{"Value":{"Text":"20240414092857796"}}}`), &data)
 	require.NoError(t, err)
 
-	values := make(map[string]*pb.ContractFromField)
+	values := make(map[string]*pb.ContractFormField)
 	for k, v := range data {
 		value := v.(map[string]any)["Value"].(map[string]any)
 		if check, ok := value["Checkbox"]; ok {
-			values[k] = &pb.ContractFromField{
-				Value: &pb.ContractFromField_Checkbox{Checkbox: check.(bool)},
+			values[k] = &pb.ContractFormField{
+				Value: &pb.ContractFormField_Checkbox{Checkbox: check.(bool)},
 			}
 		} else {
-			values[k] = &pb.ContractFromField{Value: &pb.ContractFromField_Text{Text: value["Text"].(string)}}
+			values[k] = &pb.ContractFormField{Value: &pb.ContractFormField_Text{Text: value["Text"].(string)}}
 		}
 	}
-	var (
-		doc *ent.Document
-	)
+
+	installment := &pb.ContractFormField_Table{
+		Table: &pb.ContractTable{
+			Columns: []*pb.ContractTableColumn{
+				{Header: "分期期数", Scale: 0.2},
+				{Header: "付款日期", Scale: 0.4},
+				{Header: "付款金额", Scale: 0.4},
+			},
+			Rows: []*pb.ContractTableRow{
+				{Cells: []string{"1", "2024年01月14日", "119.00"}},
+				{Cells: []string{"2", "2024年02月14日", "119.00"}},
+				{Cells: []string{"3", "2024年03月14日", "119.00"}},
+				{Cells: []string{"4", "2024年04月14日", "119.00"}},
+				{Cells: []string{"5", "2024年05月14日", "119.00"}},
+				{Cells: []string{"6", "2024年06月14日", "119.00"}},
+				{Cells: []string{"7", "2024年07月14日", "119.00"}},
+				{Cells: []string{"8", "2024年08月14日", "119.00"}},
+				{Cells: []string{"9", "2024年09月14日", "119.00"}},
+				{Cells: []string{"10", "2024年10月14日", "119.00"}},
+				{Cells: []string{"11", "2024年11月14日", "119.00"}},
+				{Cells: []string{"12", "2024年12月14日", "119.00"}},
+			},
+		},
+	}
+
+	values["installment"] = &pb.ContractFormField{Value: installment}
+
+	var doc *ent.Document
 	req := &pb.ContractCreateRequest{
 		Idcard:     "110101199003070000",
-		TemplateId: "C1455B9383BF453082B7341226EC60B3",
+		TemplateId: "D93E9BED766A997371B1297E5E42EC01",
 		Values:     values,
 		Expire:     time.Date(2024, 12, 12, 12, 12, 12, 12, time.Local).Unix(),
 	}

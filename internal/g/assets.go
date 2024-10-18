@@ -5,28 +5,38 @@
 package g
 
 import (
-	"embed"
+	"bytes"
 	_ "embed"
-	"io/fs"
-)
-
-const (
-	FontSong = "Song"
+	"image"
+	"image/png"
+	"io"
 )
 
 var (
 	//go:embed assets/check.png
-	check []byte
+	checkImageBytes []byte
+	check           image.Image
 
-	//go:embed assets/fonts/*
-	fonts embed.FS
+	//go:embed assets/fonts/Song.ttf
+	fontSongBytes []byte
+	fontSong      io.Reader
 )
 
 // GetCheckImage 获取勾选图片
-func GetCheckImage() []byte {
+func GetCheckImage() image.Image {
 	return check
 }
 
-func GetFont(name string) (fs.File, error) {
-	return fonts.Open("assets/fonts/" + name + ".ttf")
+func GetFontSong() (string, io.Reader) {
+	return "Song", fontSong
+}
+
+func init() {
+	var err error
+	check, err = png.Decode(bytes.NewReader(checkImageBytes))
+	if err != nil {
+		panic(err)
+	}
+
+	fontSong = bytes.NewReader(fontSongBytes)
 }
