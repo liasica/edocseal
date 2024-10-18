@@ -19,7 +19,6 @@ var (
 
 	//go:embed assets/fonts/Song.ttf
 	fontSongBytes []byte
-	fontSong      io.Reader
 )
 
 // GetCheckImage 获取勾选图片
@@ -28,7 +27,7 @@ func GetCheckImage() image.Image {
 }
 
 func GetFontSong() (string, io.Reader) {
-	return "Song", fontSong
+	return "Song", bytes.NewReader(fontSongBytes)
 }
 
 func init() {
@@ -37,6 +36,4 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	fontSong = bytes.NewReader(fontSongBytes)
 }

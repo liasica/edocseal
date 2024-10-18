@@ -41,6 +41,7 @@ func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, value
 		// 设置页面
 		err = pdf.SetPage(c.Page)
 		if err != nil {
+			zap.L().Info("页面设置失败", zap.Error(err))
 			return
 		}
 
@@ -114,6 +115,7 @@ func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, value
 			err = table.DrawTable()
 		}
 		if err != nil {
+			zap.L().Info("表单填充失败", zap.Error(err))
 			return
 		}
 	}
@@ -177,10 +179,11 @@ func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Docume
 
 	// 创建PDF
 	var b []byte
-	b, err = creator.CreatePDF(paths.UnSigned, tmpl.ReadSeeker(), func(pdf *gopdf.GoPdf) error {
+	b, err = creator.CreatePDF(paths.UnSigned, tmpl.Content(), func(pdf *gopdf.GoPdf) error {
 		return FillDocument(pdf, tmpl.Fields, req.Values)
 	})
 	if err != nil {
+		zap.L().Info("创建PDF失败", zap.Error(err))
 		return
 	}
 

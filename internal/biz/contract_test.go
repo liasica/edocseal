@@ -79,7 +79,7 @@ func TestCreateDocument(t *testing.T) {
 	}
 	doc, err = CreateDocument(req, false)
 	require.NoError(t, err)
-	t.Logf("文档已创建, 文档ID: %s", doc.ID)
+	t.Logf("<1> 文档已创建, 文档ID: %s", doc.ID)
 }
 
 func TestSignDocument(t *testing.T) {

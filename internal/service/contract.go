@@ -50,7 +50,7 @@ func (*ContractService) Create(_ context.Context, req *pb.ContractCreateRequest)
 
 		res.Url = doc.UnsignedURL
 		res.DocId = doc.ID
-		return nil
+		return
 	})
 
 	return res, err

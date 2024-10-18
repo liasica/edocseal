@@ -6,7 +6,6 @@ package model
 
 import (
 	"fmt"
-	"io"
 	"os"
 )
 
@@ -79,16 +78,16 @@ type Template struct {
 	File   string                   `json:"file"`   // 模板文件
 	Fields map[string]TemplateField `json:"fields"` // 字段列表
 
-	rs io.ReadSeeker // 模板内容
+	content []byte
 }
 
 func (t *Template) LoadContent() (err error) {
-	t.rs, err = os.Open(t.File)
+	t.content, err = os.ReadFile(t.File)
 	return
 }
 
-func (t *Template) ReadSeeker() io.ReadSeeker {
-	return t.rs
+func (t *Template) Content() []byte {
+	return t.content
 }
 
 // TemplateField 模板字段

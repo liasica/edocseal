@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/signintech/gopdf"
+	"go.uber.org/zap"
 )
 
 const DefaultMediaBox = "/MediaBox"
@@ -72,7 +73,7 @@ func NewPdfCreator(opts ...PdfCreateOption) *PdfCreator {
 }
 
 // CreatePDF 创建并处理PDF
-func (creator *PdfCreator) CreatePDF(out string, source io.ReadSeeker, process func(*gopdf.GoPdf) error) (b []byte, err error) {
+func (creator *PdfCreator) CreatePDF(out string, source []byte, process func(*gopdf.GoPdf) error) (b []byte, err error) {
 	// 创建PDF
 	pdf := &gopdf.GoPdf{}
 	pdf.Start(gopdf.Config{PageSize: *gopdf.PageSizeA4})
@@ -80,6 +81,7 @@ func (creator *PdfCreator) CreatePDF(out string, source io.ReadSeeker, process f
 	// 导入页面
 	err = pdf.ImportPagesFromSource(source, creator.box)
 	if err != nil {
+		zap.L().Info("PDF导入失败", zap.Error(err))
 		return
 	}
 
@@ -87,6 +89,7 @@ func (creator *PdfCreator) CreatePDF(out string, source io.ReadSeeker, process f
 	for name, font := range creator.fonts {
 		err = pdf.AddTTFFontByReader(name, font)
 		if err != nil {
+			zap.L().Info("字体添加失败", zap.Error(err))
 			return
 		}
 	}
@@ -95,6 +98,7 @@ func (creator *PdfCreator) CreatePDF(out string, source io.ReadSeeker, process f
 	if creator.font != nil {
 		err = pdf.SetFont(creator.font.Name, creator.font.Style, creator.font.Size)
 		if err != nil {
+			zap.L().Info("默认字体设置失败", zap.Error(err))
 			return
 		}
 	}
@@ -102,6 +106,7 @@ func (creator *PdfCreator) CreatePDF(out string, source io.ReadSeeker, process f
 	// 处理PDF
 	err = process(pdf)
 	if err != nil {
+		zap.L().Info("PDF文档处理失败", zap.Error(err))
 		return
 	}
 
@@ -109,11 +114,15 @@ func (creator *PdfCreator) CreatePDF(out string, source io.ReadSeeker, process f
 	buf := new(bytes.Buffer)
 	_, err = pdf.WriteTo(buf)
 	if err != nil {
+		zap.L().Info("文档写入缓冲失败", zap.Error(err))
 		return
 	}
 
 	// 保存文档
 	b = buf.Bytes()
 	err = os.WriteFile(out, b, os.ModePerm)
+	if err != nil {
+		zap.L().Info("文档保存失败", zap.Error(err))
+	}
 	return
 }
