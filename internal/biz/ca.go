@@ -22,7 +22,7 @@ import (
 	"github.com/liasica/edocseal/third/snca"
 )
 
-func certificatePaths(idcard string) (keypath string, capath string) {
+func CertificatePaths(idcard string) (keypath string, capath string) {
 	return filepath.Join(g.GetCertificateDir(), idcard+"_key.pem"), filepath.Join(g.GetCertificateDir(), idcard+"_cert.pem")
 }
 
@@ -46,7 +46,7 @@ func RequestCertificae(name, province, city, address, phone, idcard string) (cer
 		}
 	}
 
-	kp, cp := certificatePaths(idcard)
+	kp, cp := CertificatePaths(idcard)
 
 	// 保存私钥
 	err = ca.SaveToFile(kp, key, ca.BlocTypePrivateKey)
