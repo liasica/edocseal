@@ -28,7 +28,7 @@ func InterceptorLogger(l *zap.Logger) logging.Logger {
 			case bool:
 				f = append(f, zap.Bool(key.(string), v))
 			default:
-				f = append(f, zap.Any(key.(string), v))
+				f = append(f, zap.Reflect(key.(string), v))
 			}
 		}
 
