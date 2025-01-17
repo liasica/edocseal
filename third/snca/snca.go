@@ -107,7 +107,7 @@ func (s *Snca) BusinessDataFinish(typ CertType, name, personName, phone, idcard,
 	if err != nil {
 		return
 	}
-	zap.L().Info("组装数据请求结果", zap.String("response", string(res.Body())))
+	zap.L().Info("组装数据请求结果", zap.ByteString("response", res.Body()))
 
 	if result.Result != "true" {
 		err = errors.New(result.ResultMsg)
