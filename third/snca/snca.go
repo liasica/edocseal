@@ -138,7 +138,7 @@ func (s *Snca) ApplySealCert(randomB, appId, name, csr string) (b []byte, err er
 		return
 	}
 
-	zap.L().Info("机构签发证书返回", zap.String("response", string(res.Body())))
+	zap.L().Info("机构签发证书返回", zap.ByteString("response", res.Body()))
 
 	if result.ResultCode != "0" {
 		err = errors.New(result.ResultCodeMsg)
