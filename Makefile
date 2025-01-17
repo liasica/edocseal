@@ -1,3 +1,5 @@
+.PHONY: dev, prod, generate-ent
+
 dev:
 	bash ./deploy.sh dev
 
