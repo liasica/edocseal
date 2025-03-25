@@ -8,9 +8,9 @@ if [ "$1" = "prod" ]; then
 	PORT=26610
 fi
 
-GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -tags=jsoniter,poll_opt -gcflags "all=-N -l" -o build/release/edocseal cmd/edocseal/main.go
-docker build --platform=linux/amd64 -t "$REGISTRY" .
-docker push "$REGISTRY"
+#GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -tags=jsoniter,poll_opt -gcflags "all=-N -l" -o build/release/edocseal cmd/edocseal/main.go
+#docker build --platform=linux/amd64 -t "$REGISTRY" .
+#docker push "$REGISTRY"
 
 ssh root@118.116.4.16 -p $PORT "
 	cd /var/www
