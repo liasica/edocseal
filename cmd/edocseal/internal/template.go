@@ -25,8 +25,8 @@ func templateCommand() *cobra.Command {
 
 	cmd := &cobra.Command{
 		Use:               "template <input>",
-		Short:             "添加模板",
-		Example:           "edocpdf template ./template.pdf",
+		Short:             "添加模板\ninput: 空白合同文件\n  --form: 表单文件\n  --path: 模板路径",
+		Example:           "edocseal template ./contract.pdf --form ./form.pdf --path ./templates",
 		Args:              cobra.ExactArgs(1),
 		CompletionOptions: cobra.CompletionOptions{DisableDefaultCmd: true},
 		Run: func(_ *cobra.Command, args []string) {
@@ -42,7 +42,11 @@ func templateCommand() *cobra.Command {
 			// 重命名模板文档
 			templateFile, _ := filepath.Abs(filepath.Join(path, templateId+".pdf"))
 			if !edocseal.FileExists(templateFile) {
-				_ = os.Rename(args[0], templateFile)
+				err = copyFileContents(args[0], templateFile)
+				if err != nil {
+					fmt.Printf("模板文件复制失败: %v\n", err)
+					os.Exit(1)
+				}
 			}
 
 			// 获取表单属性
@@ -76,7 +80,7 @@ func templateCommand() *cobra.Command {
 				var data edocseal.FormFieldObject
 				_ = jsoniter.Unmarshal(mb, &data)
 
-				fmt.Printf("%20.20s %10.10s\t%10.10s\t\t%6.2f, %6.2f, %6.2f, %6.2f\n",
+				fmt.Printf("%20.20s %20.20s\t%10.10s\t\t%6.2f, %6.2f, %6.2f, %6.2f\n",
 					field.Fullname,
 					field.Alternativename,
 					field.Fieldtype,
