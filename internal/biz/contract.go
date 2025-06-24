@@ -69,7 +69,7 @@ func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, value
 				if w > 1 {
 					return errors.New("表格宽度溢出")
 				}
-				align := pb.ContractTableAlign_center
+				align := pb.TextAlign_TEXT_ALIGN_CENTER
 				if col.Align != nil {
 					align = *col.Align
 				}
@@ -123,7 +123,7 @@ func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, value
 }
 
 // CreateDocument 根据模板创建待签约文档
-func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Document, err error) {
+func CreateDocument(req *pb.ContractServiceCreateRequest, upload bool) (doc *ent.Document, err error) {
 	expire := time.Unix(req.Expire, 0)
 
 	// 查询文档防止重复创建
@@ -213,7 +213,7 @@ func CreateDocument(req *pb.ContractCreateRequest, upload bool) (doc *ent.Docume
 }
 
 // SignDocument 文档签约
-func SignDocument(req *pb.ContractSignRequest, upload bool) (url string, err error) {
+func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, err error) {
 	doc, _ := QueryDocument(req.DocId)
 	if doc == nil {
 		return "", errors.New("未找到待签约文档")
