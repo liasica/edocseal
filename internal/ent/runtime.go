@@ -3,9 +3,9 @@
 package ent
 
 import (
-	"github.com/liasica/edocseal/internal/ent/certification"
-	"github.com/liasica/edocseal/internal/ent/document"
-	"github.com/liasica/edocseal/internal/ent/schema"
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/ent/schema"
 )
 
 // The init function reads all schema descriptors with runtime code

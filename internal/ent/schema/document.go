@@ -7,7 +7,7 @@ import (
 	"entgo.io/ent/schema/field"
 	"entgo.io/ent/schema/index"
 
-	"github.com/liasica/edocseal/internal/model"
+	"auroraride.com/edocseal/internal/model"
 )
 
 // Document holds the schema definition for the Document entity.

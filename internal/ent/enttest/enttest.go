@@ -5,12 +5,12 @@ package enttest
 import (
 	"context"
 
-	"github.com/liasica/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/ent"
 	// required by schema hooks.
-	_ "github.com/liasica/edocseal/internal/ent/runtime"
+	_ "auroraride.com/edocseal/internal/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
-	"github.com/liasica/edocseal/internal/ent/migrate"
+	"auroraride.com/edocseal/internal/ent/migrate"
 )
 
 type (

@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal/ca"
-	"github.com/liasica/edocseal/internal/g"
+	"auroraride.com/edocseal/ca"
+	"auroraride.com/edocseal/internal/g"
 )
 
 func TestSnca_RequestCACert(t *testing.T) {

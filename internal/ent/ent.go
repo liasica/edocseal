@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"github.com/liasica/edocseal/internal/ent/certification"
-	"github.com/liasica/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/document"
 )
 
 // ent aliases to avoid import conflicts in user's code.

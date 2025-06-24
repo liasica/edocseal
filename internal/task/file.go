@@ -9,10 +9,10 @@ import (
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal"
-	"github.com/liasica/edocseal/internal/ent"
-	documenEnt "github.com/liasica/edocseal/internal/ent/document"
-	"github.com/liasica/edocseal/internal/g"
+	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/internal/ent"
+	documenEnt "auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/g"
 )
 
 type FileTask struct {

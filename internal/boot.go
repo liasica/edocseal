@@ -10,9 +10,9 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal"
-	"github.com/liasica/edocseal/internal/ent"
-	"github.com/liasica/edocseal/internal/g"
+	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/g"
 )
 
 func Boot() {

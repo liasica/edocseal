@@ -790,8 +790,8 @@ const file_contract_proto_rawDesc = "" +
 	"\x10SIGN_STATUS_FAIL\x10\x022\xad\x01\n" +
 	"\x0fContractService\x12O\n" +
 	"\x06Create\x12 .pb.ContractServiceCreateRequest\x1a!.pb.ContractServiceCreateResponse\"\x00\x12I\n" +
-	"\x04Sign\x12\x1e.pb.ContractServiceSignRequest\x1a\x1f.pb.ContractServiceSignResponse\"\x00B_\n" +
-	"\x06com.pbB\rContractProtoP\x01Z\x1egithub.com/liasica/edocseal/pb\xa2\x02\x03PXX\xaa\x02\x02Pb\xca\x02\x02Pb\xe2\x02\x0ePb\\GPBMetadata\xea\x02\x02Pbb\x06proto3"
+	"\x04Sign\x12\x1e.pb.ContractServiceSignRequest\x1a\x1f.pb.ContractServiceSignResponse\"\x00B[\n" +
+	"\x06com.pbB\rContractProtoP\x01Z\x1aauroraride.com/edocseal/pb\xa2\x02\x03PXX\xaa\x02\x02Pb\xca\x02\x02Pb\xe2\x02\x0ePb\\GPBMetadata\xea\x02\x02Pbb\x06proto3"
 
 var (
 	file_contract_proto_rawDescOnce sync.Once

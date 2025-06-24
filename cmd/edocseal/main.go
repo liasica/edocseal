@@ -5,7 +5,7 @@
 package main
 
 import (
-	"github.com/liasica/edocseal/cmd/edocseal/internal"
+	"auroraride.com/edocseal/cmd/edocseal/internal"
 )
 
 func main() {

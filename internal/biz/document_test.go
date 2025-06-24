@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/liasica/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/g"
 )
 
 func TestGetDocumentPaths(t *testing.T) {

@@ -10,8 +10,8 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/liasica/edocseal/internal/ent/document"
-	"github.com/liasica/edocseal/internal/model"
+	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/model"
 )
 
 // Document is the model entity for the Document schema.

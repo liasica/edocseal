@@ -13,9 +13,9 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	bolt "go.etcd.io/bbolt"
 
-	"github.com/liasica/edocseal"
-	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/internal/model"
+	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/model"
 )
 
 var (

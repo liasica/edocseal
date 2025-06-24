@@ -9,13 +9,13 @@ import (
 	"log"
 	"reflect"
 
-	"github.com/liasica/edocseal/internal/ent/migrate"
+	"auroraride.com/edocseal/internal/ent/migrate"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"github.com/liasica/edocseal/internal/ent/certification"
-	"github.com/liasica/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/document"
 
 	stdsql "database/sql"
 )

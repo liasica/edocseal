@@ -12,11 +12,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal"
-	"github.com/liasica/edocseal/internal"
-	"github.com/liasica/edocseal/internal/ent"
-	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/pb"
+	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/internal"
+	"auroraride.com/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/pb"
 )
 
 func TestCreateDocument(t *testing.T) {

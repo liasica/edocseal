@@ -14,7 +14,7 @@ import (
 	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal"
+	"auroraride.com/edocseal"
 )
 
 type Snca struct {

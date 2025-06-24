@@ -10,9 +10,9 @@ import (
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal/ca"
-	"github.com/liasica/edocseal/internal/biz"
-	"github.com/liasica/edocseal/internal/g"
+	"auroraride.com/edocseal/ca"
+	"auroraride.com/edocseal/internal/biz"
+	"auroraride.com/edocseal/internal/g"
 )
 
 type EnterpriseTask struct{}
