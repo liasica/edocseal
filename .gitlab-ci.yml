@@ -1,33 +1,33 @@
-stages:
-  - build
-
-build:
-  stage: build
-  tags:
-    - shell
-  before_script:
-    - docker info
-    - go version
-    - go env
-  rules:
-    - if: $CI_COMMIT_BRANCH
-  script: |
-    echo "Compiling the code..."
-    GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -tags=jsoniter,poll_opt -gcflags "all=-N -l" -o build/release/edocseal cmd/edocseal/main.go
-    echo "Compile complete."
-
-    TAG=dev
-    if [ "$CI_COMMIT_BRANCH" = "master" ]; then
-      TAG=prod
-    fi
-    DOCKER_TAG="harbor.liasica.com/auroraride/edocseal:${TAG}"
-    echo "DOCKER_TAG=${DOCKER_TAG}"
-    echo "Building image with tag <$DOCKER_TAG>"
-    docker build --platform=linux/amd64 -t $DOCKER_TAG .
-    echo "Image built."
-
-    echo "Logging in to <$HARBOR_URL>..."
-    echo "$HARBOR_PASSWORD" | docker login $HARBOR_HOST -u $HARBOR_USERNAME --password-stdin
-    echo "Pushing image to <$DOCKER_TAG>..."
-    docker push $DOCKER_TAG
-    echo "Image pushed."
+#stages:
+#  - build
+#
+#build:
+#  stage: build
+#  tags:
+#    - shell
+#  before_script:
+#    - docker info
+#    - go version
+#    - go env
+#  rules:
+#    - if: $CI_COMMIT_BRANCH
+#  script: |
+#    echo "Compiling the code..."
+#    GO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -trimpath -tags=jsoniter,poll_opt -gcflags "all=-N -l" -o build/release/edocseal cmd/edocseal/main.go
+#    echo "Compile complete."
+#
+#    TAG=dev
+#    if [ "$CI_COMMIT_BRANCH" = "master" ]; then
+#      TAG=prod
+#    fi
+#    DOCKER_TAG="harbor.liasica.com/auroraride/edocseal:${TAG}"
+#    echo "DOCKER_TAG=${DOCKER_TAG}"
+#    echo "Building image with tag <$DOCKER_TAG>"
+#    docker build --platform=linux/amd64 -t $DOCKER_TAG .
+#    echo "Image built."
+#
+#    echo "Logging in to <$HARBOR_URL>..."
+#    echo "$HARBOR_PASSWORD" | docker login $HARBOR_HOST -u $HARBOR_USERNAME --password-stdin
+#    echo "Pushing image to <$DOCKER_TAG>..."
+#    docker push $DOCKER_TAG
+#    echo "Image pushed."
