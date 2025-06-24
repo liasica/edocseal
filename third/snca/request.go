@@ -20,5 +20,8 @@ func (s *Snca) request() *resty.Client {
 			if err != nil {
 				res.Request.URL = s.urlFallback
 			}
+		}).
+		AddRetryCondition(func(r *resty.Response, err error) bool {
+			return r.IsError() || err != nil
 		})
 }

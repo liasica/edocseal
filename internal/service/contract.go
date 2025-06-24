@@ -20,12 +20,12 @@ func GracefulStartGrpcServer() {
 }
 
 type ContractService struct {
-	pb.UnimplementedContractServer
+	pb.UnimplementedContractServiceServer
 }
 
 // Create 创建合同
-func (*ContractService) Create(_ context.Context, req *pb.ContractCreateRequest) (*pb.ContractCreateResponse, error) {
-	res := &pb.ContractCreateResponse{}
+func (*ContractService) Create(_ context.Context, req *pb.ContractServiceCreateRequest) (*pb.ContractServiceCreateResponse, error) {
+	res := &pb.ContractServiceCreateResponse{}
 
 	err := <-task.DocumentTask().AddJob(func() (err error) {
 		level := zap.InfoLevel
@@ -57,8 +57,8 @@ func (*ContractService) Create(_ context.Context, req *pb.ContractCreateRequest)
 }
 
 // Sign 合同签署
-func (*ContractService) Sign(_ context.Context, req *pb.ContractSignRequest) (*pb.ContractSignResponse, error) {
-	res := &pb.ContractSignResponse{}
+func (*ContractService) Sign(_ context.Context, req *pb.ContractServiceSignRequest) (*pb.ContractServiceSignResponse, error) {
+	res := &pb.ContractServiceSignResponse{}
 
 	w := task.SignTask().AddJob(func() (err error) {
 		level := zap.InfoLevel
@@ -89,14 +89,14 @@ func (*ContractService) Sign(_ context.Context, req *pb.ContractSignRequest) (*p
 			return
 		}
 
-		res.Status = pb.ContractSignStatus_SUCCESS
+		res.Status = pb.SignStatus_SIGN_STATUS_SUCCESS
 		res.Url = url
 		return
 	})
 
 	err := <-w
 	if err != nil {
-		res.Status = pb.ContractSignStatus_FAIL
+		res.Status = pb.SignStatus_SIGN_STATUS_FAIL
 		res.Message = err.Error()
 	}
 

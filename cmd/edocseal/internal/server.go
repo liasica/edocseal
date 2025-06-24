@@ -54,7 +54,7 @@ func serverCommand() *cobra.Command {
 			)
 			defer s.GracefulStop()
 
-			pb.RegisterContractServer(s, &service.ContractService{})
+			pb.RegisterContractServiceServer(s, &service.ContractService{})
 			zap.L().Info("RPC启动", zap.String("bind", g.GetRPCBind()))
 
 			// 启动服务

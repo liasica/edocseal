@@ -1,15 +1,15 @@
 syntax = "proto3";
 
-option go_package = "github.com/liasica/edocseal/pb;pb";
-
 package pb;
 
-service Contract {
+option go_package = "github.com/liasica/edocseal/pb;pb";
+
+service ContractService {
   // 创建合同
-  rpc create(ContractCreateRequest) returns (ContractCreateResponse) {}
+  rpc Create(ContractServiceCreateRequest) returns (ContractServiceCreateResponse) {}
 
   // 合同签署
-  rpc sign(ContractSignRequest) returns (ContractSignResponse) {}
+  rpc Sign(ContractServiceSignRequest) returns (ContractServiceSignResponse) {}
 }
 
 // 创建合同字段
@@ -18,6 +18,7 @@ message ContractFormField {
     string text = 1; // 文本
     bool checkbox = 2; // 勾选
     ContractTable table = 3; // 表格
+    ContractUrlAttachment url_attachment = 4; // 附件URL
   }
 }
 
@@ -26,16 +27,22 @@ message ContractTable {
   repeated ContractTableRow rows = 2; // 表格行数据
 }
 
+message ContractUrlAttachment {
+  string url = 1; // 附件URL
+  string name = 2; // 附件名称
+}
+
 message ContractTableColumn {
   string header = 1; // 表格头名称
   double scale = 2; // 列宽度百分比
-  optional ContractTableAlign align = 3; // 列对齐方式
+  optional TextAlign align = 3; // 列对齐方式
 }
 
-enum ContractTableAlign {
-  left = 0;
-  center = 1;
-  right = 2;
+enum TextAlign {
+  TEXT_ALIGN_UNSPECIFIED = 0; // 未知对齐方式
+  TEXT_ALIGN_LEFT = 1; // 左对齐
+  TEXT_ALIGN_CENTER = 2; // 居中对齐
+  TEXT_ALIGN_RIGHT = 3; // 右对齐
 }
 
 message ContractTableRow {
@@ -43,7 +50,7 @@ message ContractTableRow {
 }
 
 // 创建合同请求
-message ContractCreateRequest {
+message ContractServiceCreateRequest {
   string template_id = 1; // 模板编号
   map<string, ContractFormField> values = 2; // 合同模板字段，key为字段名，value为字段值
   string idcard = 3; // 用户身份证号
@@ -51,13 +58,13 @@ message ContractCreateRequest {
 }
 
 // 创建合同响应
-message ContractCreateResponse {
+message ContractServiceCreateResponse {
   string url = 1; // 创建合同合同文件地址
   string doc_id = 2; // 待签约文档编号
 }
 
 // 合同签署请求
-message ContractSignRequest {
+message ContractServiceSignRequest {
   string doc_id = 1; // 待签约文档编号
   string image = 2; // 个人签章图片（base64编码）
   string name = 3; // 签署人
@@ -68,14 +75,15 @@ message ContractSignRequest {
   string idcard = 8; // 身份证号
 }
 
-enum ContractSignStatus {
-  SUCCESS = 0;
-  FAIL = 1;
+enum SignStatus {
+  SIGN_STATUS_UNSPECIFIED = 0; // 未知状态
+  SIGN_STATUS_SUCCESS = 1; // 签署成功
+  SIGN_STATUS_FAIL = 2; // 签署失败
 }
 
 // 合同签署响应
-message ContractSignResponse {
-  ContractSignStatus status = 1; // 签署状态 0:成功，1:失败
+message ContractServiceSignResponse {
+  SignStatus status = 1; // 签署状态 0:成功，1:失败
   string url = 2; // 已签署合同文件地址
   string message = 3; // 其他消息，例如错误消息，成功时为空
 }

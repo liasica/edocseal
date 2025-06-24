@@ -1,0 +1,19 @@
+# For details on buf.yaml configuration, visit https://buf.build/docs/configuration/v2/buf-yaml
+version: v2
+modules:
+  - path: pb
+
+# https://buf.build/docs/lint/rules
+lint:
+  use:
+    - STANDARD
+  except:
+    - PACKAGE_DIRECTORY_MATCH
+    - PACKAGE_VERSION_SUFFIX
+
+# https://buf.build/docs/breaking/rules/
+breaking:
+  use:
+    - FILE
+  except:
+    - FIELD_SAME_TYPE
