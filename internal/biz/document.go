@@ -8,10 +8,10 @@ import (
 	"context"
 	"path/filepath"
 
-	"github.com/liasica/edocseal/internal/ent"
-	"github.com/liasica/edocseal/internal/ent/document"
-	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/internal/model"
+	"auroraride.com/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/model"
 )
 
 func QueryDocument(docId string) (*ent.Document, error) {

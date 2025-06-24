@@ -10,7 +10,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/liasica/edocseal/internal/biz"
+	"auroraride.com/edocseal/internal/biz"
 )
 
 func shorturlCommand() *cobra.Command {

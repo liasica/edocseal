@@ -14,10 +14,10 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 
-	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/internal/service"
-	"github.com/liasica/edocseal/internal/task"
-	"github.com/liasica/edocseal/pb"
+	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/service"
+	"auroraride.com/edocseal/internal/task"
+	"auroraride.com/edocseal/pb"
 )
 
 func serverCommand() *cobra.Command {

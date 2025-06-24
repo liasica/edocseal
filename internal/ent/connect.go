@@ -10,7 +10,7 @@ import (
 
 	_ "github.com/lib/pq"
 
-	"github.com/liasica/edocseal/internal/ent/migrate"
+	"auroraride.com/edocseal/internal/ent/migrate"
 )
 
 var db *Client

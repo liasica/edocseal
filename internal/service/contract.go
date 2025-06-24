@@ -9,10 +9,10 @@ import (
 
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal/internal/biz"
-	"github.com/liasica/edocseal/internal/ent"
-	"github.com/liasica/edocseal/internal/task"
-	"github.com/liasica/edocseal/pb"
+	"auroraride.com/edocseal/internal/biz"
+	"auroraride.com/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/task"
+	"auroraride.com/edocseal/pb"
 )
 
 // GracefulStartGrpcServer TODO: 优雅启动和停止grpc服务

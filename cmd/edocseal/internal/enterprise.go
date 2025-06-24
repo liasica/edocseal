@@ -12,10 +12,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/liasica/edocseal"
-	"github.com/liasica/edocseal/ca"
-	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/third/snca"
+	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/ca"
+	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/third/snca"
 )
 
 type Enterprise struct{}

@@ -8,8 +8,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/liasica/edocseal/internal/ent/document"
-	"github.com/liasica/edocseal/internal/ent/predicate"
+	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/ent/predicate"
 )
 
 // DocumentDelete is the builder for deleting a Document entity.

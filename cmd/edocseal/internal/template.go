@@ -13,8 +13,8 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"github.com/spf13/cobra"
 
-	"github.com/liasica/edocseal"
-	"github.com/liasica/edocseal/internal/model"
+	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/internal/model"
 )
 
 func templateCommand() *cobra.Command {

@@ -3,7 +3,7 @@ managed:
   enabled: true
   override:
     - file_option: go_package_prefix
-      value: github.com/liasica/edocseal/pb
+      value: auroraride.com/edocseal/pb
 
 plugins:
   - remote: buf.build/protocolbuffers/go

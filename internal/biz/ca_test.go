@@ -9,7 +9,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/liasica/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/g"
 )
 
 func TestAgencyIssueCertificate(t *testing.T) {

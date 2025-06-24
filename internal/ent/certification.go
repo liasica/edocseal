@@ -9,7 +9,7 @@ import (
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"github.com/liasica/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/certification"
 )
 
 // Certification is the model entity for the Certification schema.

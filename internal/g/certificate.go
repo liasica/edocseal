@@ -8,7 +8,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 
-	"github.com/liasica/edocseal/ca"
+	"auroraride.com/edocseal/ca"
 )
 
 var (

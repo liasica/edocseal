@@ -13,9 +13,9 @@ import (
 	"github.com/gorilla/mux"
 	"go.uber.org/zap"
 
-	"github.com/liasica/edocseal/internal/biz"
-	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/internal/task"
+	"auroraride.com/edocseal/internal/biz"
+	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/task"
 )
 
 func StartHttpServer() {

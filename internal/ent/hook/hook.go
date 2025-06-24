@@ -6,7 +6,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/liasica/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/ent"
 )
 
 // The CertificationFunc type is an adapter to allow the use of ordinary

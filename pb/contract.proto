@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package pb;
 
-option go_package = "github.com/liasica/edocseal/pb;pb";
+option go_package = "auroraride.com/edocseal/pb;pb";
 
 service ContractService {
   // 创建合同

@@ -7,8 +7,8 @@ package internal
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/liasica/edocseal/internal"
-	"github.com/liasica/edocseal/internal/g"
+	"auroraride.com/edocseal/internal"
+	"auroraride.com/edocseal/internal/g"
 )
 
 func RunCommand() {

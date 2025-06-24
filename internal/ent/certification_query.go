@@ -10,8 +10,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"github.com/liasica/edocseal/internal/ent/certification"
-	"github.com/liasica/edocseal/internal/ent/predicate"
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/predicate"
 )
 
 // CertificationQuery is the builder for querying Certification entities.

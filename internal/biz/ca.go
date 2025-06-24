@@ -15,11 +15,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/liasica/edocseal/ca"
-	"github.com/liasica/edocseal/internal/ent"
-	"github.com/liasica/edocseal/internal/ent/certification"
-	"github.com/liasica/edocseal/internal/g"
-	"github.com/liasica/edocseal/third/snca"
+	"auroraride.com/edocseal/ca"
+	"auroraride.com/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/third/snca"
 )
 
 func CertificatePaths(idcard string) (keypath string, capath string) {

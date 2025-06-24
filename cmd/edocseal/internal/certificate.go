@@ -16,8 +16,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/liasica/edocseal"
-	"github.com/liasica/edocseal/ca"
+	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/ca"
 )
 
 type Certificate struct{}
