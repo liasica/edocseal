@@ -72,6 +72,10 @@ func NewPdfCreator(opts ...PdfCreateOption) *PdfCreator {
 	return c
 }
 
+func (creator *PdfCreator) GetDefaultFont() *PdfFont {
+	return creator.font
+}
+
 // CreatePDF 创建并处理PDF
 func (creator *PdfCreator) CreatePDF(out string, source []byte, process func(*gopdf.GoPdf) error) (b []byte, err error) {
 	// 创建PDF

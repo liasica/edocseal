@@ -42,7 +42,7 @@ func FileNameWithoutExtension(fileName string) string {
 }
 
 // DownloadFile 下载文件
-func DownloadFile(url, dir string) (err error, sn, path string) {
+func DownloadFile(url, dir string) (sn, path string, err error) {
 	var resp *http.Response
 	resp, err = http.Get(url)
 	if err != nil {
@@ -54,7 +54,8 @@ func DownloadFile(url, dir string) (err error, sn, path string) {
 	}(resp.Body)
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("文档请求失败，StatusCode = %s", resp.Status), "", ""
+		err = fmt.Errorf("文档请求失败，StatusCode = %s", resp.Status)
+		return
 	}
 
 	// 获取文件md5

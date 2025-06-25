@@ -129,8 +129,6 @@ type ContractFormField struct {
 	//
 	//	*ContractFormField_Text
 	//	*ContractFormField_Checkbox
-	//	*ContractFormField_Table
-	//	*ContractFormField_UrlAttachment
 	Value         isContractFormField_Value `protobuf_oneof:"value"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -191,24 +189,6 @@ func (x *ContractFormField) GetCheckbox() bool {
 	return false
 }
 
-func (x *ContractFormField) GetTable() *ContractTable {
-	if x != nil {
-		if x, ok := x.Value.(*ContractFormField_Table); ok {
-			return x.Table
-		}
-	}
-	return nil
-}
-
-func (x *ContractFormField) GetUrlAttachment() *ContractUrlAttachment {
-	if x != nil {
-		if x, ok := x.Value.(*ContractFormField_UrlAttachment); ok {
-			return x.UrlAttachment
-		}
-	}
-	return nil
-}
-
 type isContractFormField_Value interface {
 	isContractFormField_Value()
 }
@@ -221,127 +201,11 @@ type ContractFormField_Checkbox struct {
 	Checkbox bool `protobuf:"varint,2,opt,name=checkbox,proto3,oneof"` // 勾选
 }
 
-type ContractFormField_Table struct {
-	Table *ContractTable `protobuf:"bytes,3,opt,name=table,proto3,oneof"` // 表格
-}
-
-type ContractFormField_UrlAttachment struct {
-	UrlAttachment *ContractUrlAttachment `protobuf:"bytes,4,opt,name=url_attachment,json=urlAttachment,proto3,oneof"` // 附件URL
-}
-
 func (*ContractFormField_Text) isContractFormField_Value() {}
 
 func (*ContractFormField_Checkbox) isContractFormField_Value() {}
 
-func (*ContractFormField_Table) isContractFormField_Value() {}
-
-func (*ContractFormField_UrlAttachment) isContractFormField_Value() {}
-
-type ContractTable struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Columns       []*ContractTableColumn `protobuf:"bytes,1,rep,name=columns,proto3" json:"columns,omitempty"` // 表格列配置
-	Rows          []*ContractTableRow    `protobuf:"bytes,2,rep,name=rows,proto3" json:"rows,omitempty"`       // 表格行数据
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ContractTable) Reset() {
-	*x = ContractTable{}
-	mi := &file_contract_proto_msgTypes[1]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ContractTable) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ContractTable) ProtoMessage() {}
-
-func (x *ContractTable) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_proto_msgTypes[1]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ContractTable.ProtoReflect.Descriptor instead.
-func (*ContractTable) Descriptor() ([]byte, []int) {
-	return file_contract_proto_rawDescGZIP(), []int{1}
-}
-
-func (x *ContractTable) GetColumns() []*ContractTableColumn {
-	if x != nil {
-		return x.Columns
-	}
-	return nil
-}
-
-func (x *ContractTable) GetRows() []*ContractTableRow {
-	if x != nil {
-		return x.Rows
-	}
-	return nil
-}
-
-type ContractUrlAttachment struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`   // 附件URL
-	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"` // 附件名称
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *ContractUrlAttachment) Reset() {
-	*x = ContractUrlAttachment{}
-	mi := &file_contract_proto_msgTypes[2]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *ContractUrlAttachment) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*ContractUrlAttachment) ProtoMessage() {}
-
-func (x *ContractUrlAttachment) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_proto_msgTypes[2]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use ContractUrlAttachment.ProtoReflect.Descriptor instead.
-func (*ContractUrlAttachment) Descriptor() ([]byte, []int) {
-	return file_contract_proto_rawDescGZIP(), []int{2}
-}
-
-func (x *ContractUrlAttachment) GetUrl() string {
-	if x != nil {
-		return x.Url
-	}
-	return ""
-}
-
-func (x *ContractUrlAttachment) GetName() string {
-	if x != nil {
-		return x.Name
-	}
-	return ""
-}
-
-type ContractTableColumn struct {
+type TableColumn struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Header        string                 `protobuf:"bytes,1,opt,name=header,proto3" json:"header,omitempty"`                        // 表格头名称
 	Scale         float64                `protobuf:"fixed64,2,opt,name=scale,proto3" json:"scale,omitempty"`                        // 列宽度百分比
@@ -350,21 +214,21 @@ type ContractTableColumn struct {
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ContractTableColumn) Reset() {
-	*x = ContractTableColumn{}
-	mi := &file_contract_proto_msgTypes[3]
+func (x *TableColumn) Reset() {
+	*x = TableColumn{}
+	mi := &file_contract_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ContractTableColumn) String() string {
+func (x *TableColumn) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ContractTableColumn) ProtoMessage() {}
+func (*TableColumn) ProtoMessage() {}
 
-func (x *ContractTableColumn) ProtoReflect() protoreflect.Message {
-	mi := &file_contract_proto_msgTypes[3]
+func (x *TableColumn) ProtoReflect() protoreflect.Message {
+	mi := &file_contract_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -375,53 +239,158 @@ func (x *ContractTableColumn) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ContractTableColumn.ProtoReflect.Descriptor instead.
-func (*ContractTableColumn) Descriptor() ([]byte, []int) {
-	return file_contract_proto_rawDescGZIP(), []int{3}
+// Deprecated: Use TableColumn.ProtoReflect.Descriptor instead.
+func (*TableColumn) Descriptor() ([]byte, []int) {
+	return file_contract_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *ContractTableColumn) GetHeader() string {
+func (x *TableColumn) GetHeader() string {
 	if x != nil {
 		return x.Header
 	}
 	return ""
 }
 
-func (x *ContractTableColumn) GetScale() float64 {
+func (x *TableColumn) GetScale() float64 {
 	if x != nil {
 		return x.Scale
 	}
 	return 0
 }
 
-func (x *ContractTableColumn) GetAlign() TextAlign {
+func (x *TableColumn) GetAlign() TextAlign {
 	if x != nil && x.Align != nil {
 		return *x.Align
 	}
 	return TextAlign_TEXT_ALIGN_UNSPECIFIED
 }
 
-type ContractTableRow struct {
+type TableRow struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Cells         []string               `protobuf:"bytes,1,rep,name=cells,proto3" json:"cells,omitempty"` // 表格行数据
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *ContractTableRow) Reset() {
-	*x = ContractTableRow{}
+func (x *TableRow) Reset() {
+	*x = TableRow{}
+	mi := &file_contract_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TableRow) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TableRow) ProtoMessage() {}
+
+func (x *TableRow) ProtoReflect() protoreflect.Message {
+	mi := &file_contract_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TableRow.ProtoReflect.Descriptor instead.
+func (*TableRow) Descriptor() ([]byte, []int) {
+	return file_contract_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *TableRow) GetCells() []string {
+	if x != nil {
+		return x.Cells
+	}
+	return nil
+}
+
+type TableAttachment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"`     // 表格附件名称
+	Columns       []*TableColumn         `protobuf:"bytes,2,rep,name=columns,proto3" json:"columns,omitempty"` // 表格列配置
+	Rows          []*TableRow            `protobuf:"bytes,3,rep,name=rows,proto3" json:"rows,omitempty"`       // 表格行数据
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TableAttachment) Reset() {
+	*x = TableAttachment{}
+	mi := &file_contract_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TableAttachment) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TableAttachment) ProtoMessage() {}
+
+func (x *TableAttachment) ProtoReflect() protoreflect.Message {
+	mi := &file_contract_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TableAttachment.ProtoReflect.Descriptor instead.
+func (*TableAttachment) Descriptor() ([]byte, []int) {
+	return file_contract_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TableAttachment) GetTitle() string {
+	if x != nil {
+		return x.Title
+	}
+	return ""
+}
+
+func (x *TableAttachment) GetColumns() []*TableColumn {
+	if x != nil {
+		return x.Columns
+	}
+	return nil
+}
+
+func (x *TableAttachment) GetRows() []*TableRow {
+	if x != nil {
+		return x.Rows
+	}
+	return nil
+}
+
+type ImageAttachment struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Title         string                 `protobuf:"bytes,1,opt,name=title,proto3" json:"title,omitempty"` // 图片附件名称
+	Url           []string               `protobuf:"bytes,2,rep,name=url,proto3" json:"url,omitempty"`     // 图片附件URL列表
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ImageAttachment) Reset() {
+	*x = ImageAttachment{}
 	mi := &file_contract_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *ContractTableRow) String() string {
+func (x *ImageAttachment) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*ContractTableRow) ProtoMessage() {}
+func (*ImageAttachment) ProtoMessage() {}
 
-func (x *ContractTableRow) ProtoReflect() protoreflect.Message {
+func (x *ImageAttachment) ProtoReflect() protoreflect.Message {
 	mi := &file_contract_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -433,27 +402,36 @@ func (x *ContractTableRow) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use ContractTableRow.ProtoReflect.Descriptor instead.
-func (*ContractTableRow) Descriptor() ([]byte, []int) {
+// Deprecated: Use ImageAttachment.ProtoReflect.Descriptor instead.
+func (*ImageAttachment) Descriptor() ([]byte, []int) {
 	return file_contract_proto_rawDescGZIP(), []int{4}
 }
 
-func (x *ContractTableRow) GetCells() []string {
+func (x *ImageAttachment) GetTitle() string {
 	if x != nil {
-		return x.Cells
+		return x.Title
+	}
+	return ""
+}
+
+func (x *ImageAttachment) GetUrl() []string {
+	if x != nil {
+		return x.Url
 	}
 	return nil
 }
 
 // 创建合同请求
 type ContractServiceCreateRequest struct {
-	state         protoimpl.MessageState        `protogen:"open.v1"`
-	TemplateId    string                        `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`                                                 // 模板编号
-	Values        map[string]*ContractFormField `protobuf:"bytes,2,rep,name=values,proto3" json:"values,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // 合同模板字段，key为字段名，value为字段值
-	Idcard        string                        `protobuf:"bytes,3,opt,name=idcard,proto3" json:"idcard,omitempty"`                                                                           // 用户身份证号
-	Expire        int64                         `protobuf:"varint,4,opt,name=expire,proto3" json:"expire,omitempty"`                                                                          // 合同有效截止日期（北京时间，时间戳）
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state            protoimpl.MessageState        `protogen:"open.v1"`
+	TemplateId       string                        `protobuf:"bytes,1,opt,name=template_id,json=templateId,proto3" json:"template_id,omitempty"`                                                 // 模板编号
+	Values           map[string]*ContractFormField `protobuf:"bytes,2,rep,name=values,proto3" json:"values,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"` // 合同模板字段，key为字段名，value为字段值
+	Idcard           string                        `protobuf:"bytes,3,opt,name=idcard,proto3" json:"idcard,omitempty"`                                                                           // 用户身份证号
+	Expire           int64                         `protobuf:"varint,4,opt,name=expire,proto3" json:"expire,omitempty"`                                                                          // 合同有效截止日期（北京时间，时间戳）
+	TableAttachment  []*TableAttachment            `protobuf:"bytes,5,rep,name=table_attachment,json=tableAttachment,proto3" json:"table_attachment,omitempty"`                                  // 表格附件
+	ImageAttachments []*ImageAttachment            `protobuf:"bytes,6,rep,name=image_attachments,json=imageAttachments,proto3" json:"image_attachments,omitempty"`                               // URL图片附件列表
+	unknownFields    protoimpl.UnknownFields
+	sizeCache        protoimpl.SizeCache
 }
 
 func (x *ContractServiceCreateRequest) Reset() {
@@ -512,6 +490,20 @@ func (x *ContractServiceCreateRequest) GetExpire() int64 {
 		return x.Expire
 	}
 	return 0
+}
+
+func (x *ContractServiceCreateRequest) GetTableAttachment() []*TableAttachment {
+	if x != nil {
+		return x.TableAttachment
+	}
+	return nil
+}
+
+func (x *ContractServiceCreateRequest) GetImageAttachments() []*ImageAttachment {
+	if x != nil {
+		return x.ImageAttachments
+	}
+	return nil
 }
 
 // 创建合同响应
@@ -733,32 +725,33 @@ var File_contract_proto protoreflect.FileDescriptor
 
 const file_contract_proto_rawDesc = "" +
 	"\n" +
-	"\x0econtract.proto\x12\x02pb\"\xbf\x01\n" +
+	"\x0econtract.proto\x12\x02pb\"P\n" +
 	"\x11ContractFormField\x12\x14\n" +
 	"\x04text\x18\x01 \x01(\tH\x00R\x04text\x12\x1c\n" +
-	"\bcheckbox\x18\x02 \x01(\bH\x00R\bcheckbox\x12)\n" +
-	"\x05table\x18\x03 \x01(\v2\x11.pb.ContractTableH\x00R\x05table\x12B\n" +
-	"\x0eurl_attachment\x18\x04 \x01(\v2\x19.pb.ContractUrlAttachmentH\x00R\rurlAttachmentB\a\n" +
-	"\x05value\"l\n" +
-	"\rContractTable\x121\n" +
-	"\acolumns\x18\x01 \x03(\v2\x17.pb.ContractTableColumnR\acolumns\x12(\n" +
-	"\x04rows\x18\x02 \x03(\v2\x14.pb.ContractTableRowR\x04rows\"=\n" +
-	"\x15ContractUrlAttachment\x12\x10\n" +
-	"\x03url\x18\x01 \x01(\tR\x03url\x12\x12\n" +
-	"\x04name\x18\x02 \x01(\tR\x04name\"w\n" +
-	"\x13ContractTableColumn\x12\x16\n" +
+	"\bcheckbox\x18\x02 \x01(\bH\x00R\bcheckboxB\a\n" +
+	"\x05value\"o\n" +
+	"\vTableColumn\x12\x16\n" +
 	"\x06header\x18\x01 \x01(\tR\x06header\x12\x14\n" +
 	"\x05scale\x18\x02 \x01(\x01R\x05scale\x12(\n" +
 	"\x05align\x18\x03 \x01(\x0e2\r.pb.TextAlignH\x00R\x05align\x88\x01\x01B\b\n" +
-	"\x06_align\"(\n" +
-	"\x10ContractTableRow\x12\x14\n" +
-	"\x05cells\x18\x01 \x03(\tR\x05cells\"\x87\x02\n" +
+	"\x06_align\" \n" +
+	"\bTableRow\x12\x14\n" +
+	"\x05cells\x18\x01 \x03(\tR\x05cells\"t\n" +
+	"\x0fTableAttachment\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12)\n" +
+	"\acolumns\x18\x02 \x03(\v2\x0f.pb.TableColumnR\acolumns\x12 \n" +
+	"\x04rows\x18\x03 \x03(\v2\f.pb.TableRowR\x04rows\"9\n" +
+	"\x0fImageAttachment\x12\x14\n" +
+	"\x05title\x18\x01 \x01(\tR\x05title\x12\x10\n" +
+	"\x03url\x18\x02 \x03(\tR\x03url\"\x89\x03\n" +
 	"\x1cContractServiceCreateRequest\x12\x1f\n" +
 	"\vtemplate_id\x18\x01 \x01(\tR\n" +
 	"templateId\x12D\n" +
 	"\x06values\x18\x02 \x03(\v2,.pb.ContractServiceCreateRequest.ValuesEntryR\x06values\x12\x16\n" +
 	"\x06idcard\x18\x03 \x01(\tR\x06idcard\x12\x16\n" +
-	"\x06expire\x18\x04 \x01(\x03R\x06expire\x1aP\n" +
+	"\x06expire\x18\x04 \x01(\x03R\x06expire\x12>\n" +
+	"\x10table_attachment\x18\x05 \x03(\v2\x13.pb.TableAttachmentR\x0ftableAttachment\x12@\n" +
+	"\x11image_attachments\x18\x06 \x03(\v2\x13.pb.ImageAttachmentR\x10imageAttachments\x1aP\n" +
 	"\vValuesEntry\x12\x10\n" +
 	"\x03key\x18\x01 \x01(\tR\x03key\x12+\n" +
 	"\x05value\x18\x02 \x01(\v2\x15.pb.ContractFormFieldR\x05value:\x028\x01\"H\n" +
@@ -811,10 +804,10 @@ var file_contract_proto_goTypes = []any{
 	(TextAlign)(0),                        // 0: pb.TextAlign
 	(SignStatus)(0),                       // 1: pb.SignStatus
 	(*ContractFormField)(nil),             // 2: pb.ContractFormField
-	(*ContractTable)(nil),                 // 3: pb.ContractTable
-	(*ContractUrlAttachment)(nil),         // 4: pb.ContractUrlAttachment
-	(*ContractTableColumn)(nil),           // 5: pb.ContractTableColumn
-	(*ContractTableRow)(nil),              // 6: pb.ContractTableRow
+	(*TableColumn)(nil),                   // 3: pb.TableColumn
+	(*TableRow)(nil),                      // 4: pb.TableRow
+	(*TableAttachment)(nil),               // 5: pb.TableAttachment
+	(*ImageAttachment)(nil),               // 6: pb.ImageAttachment
 	(*ContractServiceCreateRequest)(nil),  // 7: pb.ContractServiceCreateRequest
 	(*ContractServiceCreateResponse)(nil), // 8: pb.ContractServiceCreateResponse
 	(*ContractServiceSignRequest)(nil),    // 9: pb.ContractServiceSignRequest
@@ -822,12 +815,12 @@ var file_contract_proto_goTypes = []any{
 	nil,                                   // 11: pb.ContractServiceCreateRequest.ValuesEntry
 }
 var file_contract_proto_depIdxs = []int32{
-	3,  // 0: pb.ContractFormField.table:type_name -> pb.ContractTable
-	4,  // 1: pb.ContractFormField.url_attachment:type_name -> pb.ContractUrlAttachment
-	5,  // 2: pb.ContractTable.columns:type_name -> pb.ContractTableColumn
-	6,  // 3: pb.ContractTable.rows:type_name -> pb.ContractTableRow
-	0,  // 4: pb.ContractTableColumn.align:type_name -> pb.TextAlign
-	11, // 5: pb.ContractServiceCreateRequest.values:type_name -> pb.ContractServiceCreateRequest.ValuesEntry
+	0,  // 0: pb.TableColumn.align:type_name -> pb.TextAlign
+	3,  // 1: pb.TableAttachment.columns:type_name -> pb.TableColumn
+	4,  // 2: pb.TableAttachment.rows:type_name -> pb.TableRow
+	11, // 3: pb.ContractServiceCreateRequest.values:type_name -> pb.ContractServiceCreateRequest.ValuesEntry
+	5,  // 4: pb.ContractServiceCreateRequest.table_attachment:type_name -> pb.TableAttachment
+	6,  // 5: pb.ContractServiceCreateRequest.image_attachments:type_name -> pb.ImageAttachment
 	1,  // 6: pb.ContractServiceSignResponse.status:type_name -> pb.SignStatus
 	2,  // 7: pb.ContractServiceCreateRequest.ValuesEntry.value:type_name -> pb.ContractFormField
 	7,  // 8: pb.ContractService.Create:input_type -> pb.ContractServiceCreateRequest
@@ -849,10 +842,8 @@ func file_contract_proto_init() {
 	file_contract_proto_msgTypes[0].OneofWrappers = []any{
 		(*ContractFormField_Text)(nil),
 		(*ContractFormField_Checkbox)(nil),
-		(*ContractFormField_Table)(nil),
-		(*ContractFormField_UrlAttachment)(nil),
 	}
-	file_contract_proto_msgTypes[3].OneofWrappers = []any{}
+	file_contract_proto_msgTypes[1].OneofWrappers = []any{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{

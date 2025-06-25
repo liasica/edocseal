@@ -17,3 +17,4 @@ breaking:
     - FILE
   except:
     - FIELD_SAME_TYPE
+    - FIELD_NO_DELETE

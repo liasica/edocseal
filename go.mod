@@ -14,8 +14,8 @@ require (
 	github.com/pdfcpu/pdfcpu v0.8.1
 	github.com/redis/go-redis/v9 v9.10.0
 	github.com/robfig/cron/v3 v3.0.1
-	github.com/signintech/gopdf v0.27.1
-	github.com/signintech/pdft v0.6.0
+	github.com/signintech/gopdf v0.32.0
+	github.com/signintech/pdft v0.6.1
 	github.com/sony/sonyflake v1.2.1
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/viper v1.20.1
@@ -75,9 +75,4 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-)
-
-replace (
-	github.com/signintech/gopdf v0.27.1 => github.com/liasica/gopdf v0.0.0-20241017062426-996989b8a752
-	github.com/signintech/pdft v0.6.0 => github.com/liasica/pdft v0.0.0-20241016080532-66407e936c16
 )

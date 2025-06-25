@@ -47,9 +47,12 @@ type Coordinate struct {
 	Y float64 `json:"y"`
 }
 
+// TemplateRectangle 模板矩形
+// 用于描述PDF页面上的矩形区域，通常用于定位字段位置
+// 注意：PDF坐标系的原点在左下角，Y轴向上，X轴向右
 type TemplateRectangle struct {
-	LeftBottom Coordinate `json:"lb,omitempty"` // 左下角坐标 (x,y)
-	RightTop   Coordinate `json:"rt,omitempty"` // 右上角坐标 (x,y)
+	LeftBottom Coordinate `json:"lb,omitempty"` // 左下角坐标 (x,y), 实际可读计算时需要取页面高度减去该值
+	RightTop   Coordinate `json:"rt,omitempty"` // 右上角坐标 (x,y), 实际可读计算时需要取页面高度减去该值
 }
 
 // Width 获取宽度
