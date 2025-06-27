@@ -159,6 +159,7 @@ func AddImageAttachments(pdf *gopdf.GoPdf, attachments []*pb.ImageAttachment, al
 			return
 		}
 
+		// TODO: 附件多张照片
 		for _, imageUrl := range a.Url {
 			var imagePath string
 			_, imagePath, err = edocseal.DownloadFile(imageUrl, iap)
@@ -194,6 +195,8 @@ func AddImageAttachments(pdf *gopdf.GoPdf, attachments []*pb.ImageAttachment, al
 				zap.L().Error("AddImageAttachments: 添加图片失败", zap.Error(err), zap.String("imagePath", imagePath), zap.String("url", imageUrl))
 				return
 			}
+
+			break
 		}
 	}
 
