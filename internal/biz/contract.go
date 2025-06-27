@@ -161,6 +161,10 @@ func AddImageAttachments(pdf *gopdf.GoPdf, attachments []*pb.ImageAttachment, al
 
 		// TODO: 附件多张照片
 		for _, imageUrl := range a.Url {
+			if !strings.HasPrefix(imageUrl, "http") {
+				imageUrl = "https://cdn.auroraride.com/" + imageUrl
+			}
+
 			var imagePath string
 			_, imagePath, err = edocseal.DownloadFile(imageUrl, iap)
 			if err != nil {
