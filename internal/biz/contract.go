@@ -10,12 +10,14 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/signintech/gopdf"
 	"go.uber.org/zap"
@@ -28,8 +30,187 @@ import (
 	"auroraride.com/edocseal/pb"
 )
 
-func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, values map[string]*pb.ContractFormField) (err error) {
+// AddAttachmentTitle 添加附件标题
+func AddAttachmentTitle(pdf *gopdf.GoPdf, title string) (err error) {
+	rect := edocseal.GetPageTitleRect(gopdf.PageSizeA4, edocseal.DefaultTitleFontSize)
+
+	// 设置字体
+	err = pdf.SetFontSize(22)
+	if err != nil {
+		zap.L().Error("AddAttachmentTitle: 字体设置失败", zap.Error(err))
+		return
+	}
+
+	// 插入标题
+	pdf.SetXY(rect.X, rect.Y)
+	err = pdf.CellWithOption(
+		&gopdf.Rect{W: rect.W, H: rect.H},
+		fmt.Sprintf("附件：《%s》", title),
+		gopdf.CellOption{Align: gopdf.Center | gopdf.Middle},
+	)
+	if err != nil {
+		zap.L().Error("AddAttachmentTitle: 标题添加失败", zap.Error(err), zap.String("title", title))
+		return
+	}
+
+	// 还原默认字体大小
+	err = pdf.SetFontSize(edocseal.DefaultFontSize)
+	if err != nil {
+		zap.L().Error("AddAttachmentTitle: 恢复默认字体大小失败", zap.Error(err))
+		return
+	}
+	return
+}
+
+// AddTableAttachments 添加表格附件
+func AddTableAttachments(pdf *gopdf.GoPdf, attachments []*pb.TableAttachment) (err error) {
+	rect := edocseal.GetPageWithoutTitleRect(gopdf.PageSizeA4, edocseal.DefaultTitleFontSize, edocseal.DefaultTitleMargin)
+
+	for _, a := range attachments {
+		// 添加页面
+		pdf.AddPage()
+
+		err = AddAttachmentTitle(pdf, a.Title)
+		if err != nil {
+			return
+		}
+
+		table := pdf.NewTableLayout(rect.X, rect.Y, edocseal.DefaultTableRowHeight, len(a.Rows))
+		w := 0.0
+		// 添加并配置表格列
+		for _, col := range a.Columns {
+			w += col.Scale
+			if w > 1 {
+				zap.L().Error("AddTableAttachments: 表格列宽度溢出", zap.String("title", a.Title), zap.Float64("width", w))
+				return errors.New("表格宽度溢出")
+			}
+			align := pb.TextAlign_TEXT_ALIGN_CENTER
+			if col.Align != nil {
+				align = *col.Align
+			}
+			table.AddColumn(col.Header, col.Scale*rect.W, align.String())
+		}
+
+		// 添加表格行
+		for _, row := range a.Rows {
+			table.AddRow(row.Cells)
+		}
+
+		// 设置表格头样式
+		table.SetHeaderStyle(gopdf.CellStyle{
+			BorderStyle: gopdf.BorderStyle{
+				Top:      true,
+				Left:     true,
+				Bottom:   true,
+				Right:    true,
+				Width:    2.0,
+				RGBColor: gopdf.RGBColor{R: 166, G: 166, B: 166},
+			},
+			FillColor: gopdf.RGBColor{R: 220, G: 220, B: 220},
+			TextColor: gopdf.RGBColor{R: 0, G: 0, B: 0},
+			FontSize:  12,
+		})
+
+		// 设置表格样式
+		table.SetTableStyle(gopdf.CellStyle{
+			BorderStyle: gopdf.BorderStyle{
+				Top:      true,
+				Left:     true,
+				Bottom:   true,
+				Right:    true,
+				Width:    1.0,
+				RGBColor: gopdf.RGBColor{R: 166, G: 166, B: 166},
+			},
+			FillColor: gopdf.RGBColor{R: 255, G: 255, B: 255},
+			TextColor: gopdf.RGBColor{R: 0, G: 0, B: 0},
+			FontSize:  10,
+		})
+
+		// 绘制表格
+		err = table.DrawTable()
+		if err != nil {
+			zap.L().Error("AddTableAttachments: 绘制表格失败", zap.Error(err), zap.String("title", a.Title))
+			return err
+		}
+	}
+
+	return
+}
+
+// AddImageAttachments 添加图片附件
+// TODO: 单页面多张图
+func AddImageAttachments(pdf *gopdf.GoPdf, attachments []*pb.ImageAttachment, align int) (err error) {
 	size := gopdf.PageSizeA4
+
+	iap := filepath.Join(g.GetRuntimeDir(), uuid.NewString())
+	_ = os.MkdirAll(iap, os.ModePerm)
+	defer func(name string) {
+		_ = os.Remove(name)
+	}(iap)
+
+	rect := edocseal.GetPageWithoutTitleRect(size, edocseal.DefaultTitleFontSize, edocseal.DefaultTitleMargin)
+
+	for _, a := range attachments {
+		pdf.AddPage()
+
+		// 插入标题
+		err = AddAttachmentTitle(pdf, a.Title)
+		if err != nil {
+			return
+		}
+
+		// TODO: 附件多张照片
+		for _, imageUrl := range a.Url {
+			if !strings.HasPrefix(imageUrl, "http") {
+				imageUrl = "https://cdn.auroraride.com/" + imageUrl
+			}
+
+			var imagePath string
+			_, imagePath, err = edocseal.DownloadFile(imageUrl, iap)
+			if err != nil {
+				zap.L().Error("AddImageAttachments: 下载图片失败", zap.Error(err), zap.String("url", imageUrl))
+				return
+			}
+
+			// 获取图片大小
+			var iw, ih int
+			iw, ih, err = edocseal.GetImageSize(imagePath)
+			if err != nil {
+				zap.L().Error("AddImageAttachments: 获取图片大小失败", zap.Error(err), zap.String("imagePath", imagePath), zap.String("url", imageUrl))
+				return
+			}
+
+			r := &gopdf.Rect{}
+			r.W, r.H = edocseal.ScaleRect(float64(iw), float64(ih), rect.W, rect.H)
+
+			x, y := rect.X, rect.Y
+			// 水平居中
+			if align&gopdf.Center == gopdf.Center {
+				x = rect.X + (rect.W-r.W)/2
+			}
+			// 垂直居中
+			if align&gopdf.Middle == gopdf.Middle {
+				y = rect.Y + (rect.H-r.H)/2
+			}
+
+			// 添加图片
+			err = pdf.Image(imagePath, x, y, r)
+			if err != nil {
+				zap.L().Error("AddImageAttachments: 添加图片失败", zap.Error(err), zap.String("imagePath", imagePath), zap.String("url", imageUrl))
+				return
+			}
+
+			break
+		}
+	}
+
+	return
+}
+
+// FillForm 填充PDF表单
+func FillForm(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, values map[string]*pb.ContractFormField) (err error) {
+	size := gopdf.PageSizeA4
+
 	// 填充字段
 	for k, v := range values {
 		c, ok := fields[k]
@@ -41,7 +222,7 @@ func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, value
 		// 设置页面
 		err = pdf.SetPage(c.Page)
 		if err != nil {
-			zap.L().Info("页面设置失败", zap.Error(err))
+			zap.L().Info("填充字段 - 页面设置失败", zap.Error(err))
 			return
 		}
 
@@ -60,59 +241,6 @@ func FillDocument(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, value
 			err = pdf.CellWithOption(&gopdf.Rect{W: w, H: rect.Height()}, val.Text, gopdf.CellOption{Align: gopdf.Left | gopdf.Middle})
 		case *pb.ContractFormField_Checkbox:
 			err = pdf.ImageFrom(g.GetCheckImage(), x, y, &gopdf.Rect{W: rect.Width(), H: rect.Height()})
-		case *pb.ContractFormField_Table:
-			table := pdf.NewTableLayout(x, y, 20, len(val.Table.Rows))
-			w := 0.0
-			// 添加并配置表格列
-			for _, col := range val.Table.Columns {
-				w += col.Scale
-				if w > 1 {
-					return errors.New("表格宽度溢出")
-				}
-				align := pb.TextAlign_TEXT_ALIGN_CENTER
-				if col.Align != nil {
-					align = *col.Align
-				}
-				table.AddColumn(col.Header, col.Scale*rect.Width(), align.String())
-			}
-
-			// 添加表格行
-			for _, row := range val.Table.Rows {
-				table.AddRow(row.Cells)
-			}
-
-			// 设置表格头样式
-			table.SetHeaderStyle(gopdf.CellStyle{
-				BorderStyle: gopdf.BorderStyle{
-					Top:      true,
-					Left:     true,
-					Bottom:   true,
-					Right:    true,
-					Width:    2.0,
-					RGBColor: gopdf.RGBColor{R: 166, G: 166, B: 166},
-				},
-				FillColor: gopdf.RGBColor{R: 220, G: 220, B: 220},
-				TextColor: gopdf.RGBColor{R: 0, G: 0, B: 0},
-				FontSize:  12,
-			})
-
-			// 设置表格样式
-			table.SetTableStyle(gopdf.CellStyle{
-				BorderStyle: gopdf.BorderStyle{
-					Top:      true,
-					Left:     true,
-					Bottom:   true,
-					Right:    true,
-					Width:    1.0,
-					RGBColor: gopdf.RGBColor{R: 166, G: 166, B: 166},
-				},
-				FillColor: gopdf.RGBColor{R: 255, G: 255, B: 255},
-				TextColor: gopdf.RGBColor{R: 0, G: 0, B: 0},
-				FontSize:  10,
-			})
-
-			// 绘制表格
-			err = table.DrawTable()
 		}
 		if err != nil {
 			zap.L().Info("表单填充失败", zap.Error(err))
@@ -171,16 +299,31 @@ func CreateDocument(req *pb.ContractServiceCreateRequest, upload bool) (doc *ent
 		return
 	}
 
-	song, font := g.GetFontSong()
+	simfang, font := g.GetFontSimFang()
 	creator := edocseal.NewPdfCreator(
-		edocseal.WithFont(song, font),
-		edocseal.WithDefaultFont(song, "", 10),
+		edocseal.WithFont(simfang, font),
+		edocseal.WithDefaultFont(simfang, "", edocseal.DefaultFontSize),
 	)
 
 	// 创建PDF
 	var b []byte
 	b, err = creator.CreatePDF(paths.UnSigned, tmpl.Content(), func(pdf *gopdf.GoPdf) error {
-		return FillDocument(pdf, tmpl.Fields, req.Values)
+		err = FillForm(pdf, tmpl.Fields, req.Values)
+		if err != nil {
+			return err
+		}
+		// 添加表格附件
+		if len(req.TableAttachment) > 0 {
+			err = AddTableAttachments(pdf, req.TableAttachment)
+			if err != nil {
+				return err
+			}
+		}
+		// 添加图片附件
+		if len(req.ImageAttachments) > 0 {
+			return AddImageAttachments(pdf, req.ImageAttachments, gopdf.Center)
+		}
+		return nil
 	})
 	if err != nil {
 		zap.L().Info("创建PDF失败", zap.Error(err))

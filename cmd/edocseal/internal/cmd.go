@@ -29,10 +29,18 @@ func RunCommand() {
 
 	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", "config/config.yaml", "配置文件")
 
+	cmd.AddGroup(&cobra.Group{
+		ID:    "template",
+		Title: "合同模板相关命令",
+	})
+
+	tmpl := NewTemplate()
+	cmd.AddGroup(tmpl.Group())
+
 	cmd.AddCommand(
 		certificateCommand(),
 		serverCommand(),
-		templateCommand(),
+		tmpl.Command(),
 		shorturlCommand(),
 		enterpriseCommand(),
 	)

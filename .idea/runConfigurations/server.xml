@@ -4,7 +4,7 @@
     <working_directory value="$PROJECT_DIR$" />
     <parameters value="server" />
     <kind value="PACKAGE" />
-    <package value="github.com/liasica/edocseal/cmd/edocseal" />
+    <package value="auroraride.com/edocseal/cmd/edocseal" />
     <directory value="$PROJECT_DIR$" />
     <filePath value="$PROJECT_DIR$/cmd/edocpdf/main.go" />
     <method v="2" />

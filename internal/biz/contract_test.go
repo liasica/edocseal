@@ -5,16 +5,19 @@
 package biz
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	jsoniter "github.com/json-iterator/go"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"auroraride.com/edocseal"
 	"auroraride.com/edocseal/internal"
 	"auroraride.com/edocseal/internal/ent"
+	"auroraride.com/edocseal/internal/ent/document"
 	"auroraride.com/edocseal/internal/g"
 	"auroraride.com/edocseal/pb"
 )
@@ -23,9 +26,11 @@ func TestCreateDocument(t *testing.T) {
 	g.LoadConfig("config/config.yaml")
 	internal.Boot()
 
+	_, _ = ent.NewDatabase().Document.Delete().Where(document.IDCardNumber("110101199003070000")).Exec(context.Background())
+
 	err := edocseal.CreateDirectory(g.GetDocumentDir())
 	require.NoError(t, err)
-	l, _ := zap.NewDevelopment()
+	l, _ := zap.NewDevelopment(zap.IncreaseLevel(zapcore.ErrorLevel))
 	zap.ReplaceGlobals(l)
 
 	var data map[string]any
@@ -44,38 +49,53 @@ func TestCreateDocument(t *testing.T) {
 		}
 	}
 
-	installment := &pb.ContractFormField_Table{
-		Table: &pb.ContractTable{
-			Columns: []*pb.ContractTableColumn{
-				{Header: "分期期数", Scale: 0.2},
-				{Header: "付款日期", Scale: 0.4},
-				{Header: "付款金额", Scale: 0.4},
-			},
-			Rows: []*pb.ContractTableRow{
-				{Cells: []string{"1", "2024年01月14日", "119.00"}},
-				{Cells: []string{"2", "2024年02月14日", "119.00"}},
-				{Cells: []string{"3", "2024年03月14日", "119.00"}},
-				{Cells: []string{"4", "2024年04月14日", "119.00"}},
-				{Cells: []string{"5", "2024年05月14日", "119.00"}},
-				{Cells: []string{"6", "2024年06月14日", "119.00"}},
-				{Cells: []string{"7", "2024年07月14日", "119.00"}},
-				{Cells: []string{"8", "2024年08月14日", "119.00"}},
-				{Cells: []string{"9", "2024年09月14日", "119.00"}},
-				{Cells: []string{"10", "2024年10月14日", "119.00"}},
-				{Cells: []string{"11", "2024年11月14日", "119.00"}},
-				{Cells: []string{"12", "2024年12月14日", "119.00"}},
-			},
-		},
-	}
-
-	values["installment"] = &pb.ContractFormField{Value: installment}
-
 	var doc *ent.Document
 	req := &pb.ContractServiceCreateRequest{
 		Idcard:     "110101199003070000",
 		TemplateId: "D93E9BED766A997371B1297E5E42EC01",
 		Values:     values,
 		Expire:     time.Date(2024, 12, 12, 12, 12, 12, 12, time.Local).Unix(),
+		TableAttachment: []*pb.TableAttachment{
+			{
+				Title: "分期付款方案",
+				Columns: []*pb.TableColumn{
+					{Header: "分期期数", Scale: 0.2},
+					{Header: "付款日期", Scale: 0.4},
+					{Header: "付款金额", Scale: 0.4},
+				},
+				Rows: []*pb.TableRow{
+					{Cells: []string{"1", "2024年01月14日", "119.00"}},
+					{Cells: []string{"2", "2024年02月14日", "119.00"}},
+					{Cells: []string{"3", "2024年03月14日", "119.00"}},
+					{Cells: []string{"4", "2024年04月14日", "119.00"}},
+					{Cells: []string{"5", "2024年05月14日", "119.00"}},
+					{Cells: []string{"6", "2024年06月14日", "119.00"}},
+					{Cells: []string{"7", "2024年07月14日", "119.00"}},
+					{Cells: []string{"8", "2024年08月14日", "119.00"}},
+					{Cells: []string{"9", "2024年09月14日", "119.00"}},
+					{Cells: []string{"10", "2024年10月14日", "119.00"}},
+					{Cells: []string{"11", "2024年11月14日", "119.00"}},
+					{Cells: []string{"12", "2024年12月14日", "119.00"}},
+				},
+			},
+		},
+		ImageAttachments: []*pb.ImageAttachment{
+			// {
+			// 	Url: []string{"https://placehold.co/600x400@3x.png", "https://placehold.co/400x600@3x.png", "https://placehold.co/600x400@3x.png"},
+			// },
+			{
+				Title: "附件1",
+				Url:   []string{"https://placehold.co/600x400@3x.png"},
+			},
+			{
+				Title: "附件2",
+				Url:   []string{"https://placehold.co/400x600@3x.png"},
+			},
+			{
+				Title: "附件3",
+				Url:   []string{"https://placehold.co/100x100.png"},
+			},
+		},
 	}
 	doc, err = CreateDocument(req, false)
 	require.NoError(t, err)
