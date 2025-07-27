@@ -462,6 +462,10 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 		if err != nil {
 			return
 		}
+
+		// 上传签名图片
+		ao, _ := oss()
+		_ = ao.UploadBytes(doc.Paths.OssImage, img)
 	}
 
 	zap.L().Info("签名成功", zap.String("docId", req.DocId), zap.String("url", url))
