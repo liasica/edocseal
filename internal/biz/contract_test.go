@@ -6,6 +6,9 @@ package biz
 
 import (
 	"context"
+	"fmt"
+	"log"
+	"os"
 	"testing"
 	"time"
 
@@ -13,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"google.golang.org/protobuf/encoding/protojson"
 
 	"auroraride.com/edocseal"
 	"auroraride.com/edocseal/internal"
@@ -97,7 +101,7 @@ func TestCreateDocument(t *testing.T) {
 			},
 		},
 	}
-	doc, err = CreateDocument(req, false)
+	doc, err = CreateDocument("", req, false)
 	require.NoError(t, err)
 	t.Logf("<1> 文档已创建, 文档ID: %s", doc.ID)
 }
@@ -120,4 +124,60 @@ func TestSignDocument(t *testing.T) {
 	}, false)
 	require.NoError(t, err)
 	t.Logf("%#v", url)
+}
+
+func TestFix(t *testing.T) {
+	g.LoadConfig("config/config.yaml")
+	internal.Boot()
+
+	type Sign struct {
+		Address  string `json:"address"`
+		City     string `json:"city"`
+		Idcard   string `json:"idcard"`
+		Name     string `json:"name"`
+		Phone    string `json:"phone"`
+		Province string `json:"province"`
+	}
+
+	// ctx := context.Background()
+	b, _ := os.ReadFile("./runtime/payload.json")
+	payloads := make(map[string][]byte)
+	err := jsoniter.Unmarshal(b, &payloads)
+	require.NoError(t, err)
+
+	b, _ = os.ReadFile("./runtime/sign.json")
+	signs := make(map[string]Sign)
+	err = jsoniter.Unmarshal(b, &signs)
+	require.NoError(t, err)
+
+	b, _ = os.ReadFile("./runtime/seal.json")
+	seals := make(map[string]string)
+	err = jsoniter.Unmarshal(b, &seals)
+	require.NoError(t, err)
+
+	for docId, payload := range payloads {
+		req := &pb.ContractServiceCreateRequest{}
+		err = protojson.Unmarshal(payload, req)
+		if err != nil {
+			log.Fatal(err)
+		}
+		var doc *ent.Document
+		doc, err = CreateDocument(docId, req, false)
+		require.NoError(t, err)
+		fmt.Println(doc.ID)
+
+		var url string
+		url, err = SignDocument(&pb.ContractServiceSignRequest{
+			DocId:    docId,
+			Image:    seals[docId],
+			Name:     signs[docId].Name,
+			Province: signs[docId].Province,
+			City:     signs[docId].City,
+			Address:  signs[docId].Address,
+			Phone:    signs[docId].Phone,
+			Idcard:   signs[docId].Idcard,
+		}, true)
+		require.NoError(t, err)
+		fmt.Printf("签署完成, 文档ID: %s, 签署链接: %s\n", doc.ID, url)
+	}
 }

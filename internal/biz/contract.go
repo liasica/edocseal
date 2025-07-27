@@ -251,7 +251,7 @@ func FillForm(pdf *gopdf.GoPdf, fields map[string]model.TemplateField, values ma
 }
 
 // CreateDocument 根据模板创建待签约文档
-func CreateDocument(req *pb.ContractServiceCreateRequest, upload bool) (doc *ent.Document, err error) {
+func CreateDocument(docId string, req *pb.ContractServiceCreateRequest, upload bool) (doc *ent.Document, err error) {
 	expire := time.Unix(req.Expire, 0)
 
 	// 查询文档防止重复创建
@@ -268,18 +268,18 @@ func CreateDocument(req *pb.ContractServiceCreateRequest, upload bool) (doc *ent
 	hasher.Write(reqBytes)
 	hash := hex.EncodeToString(hasher.Sum(nil))
 
-	// 查找是否已存在未失效的未签约合同
-	doc, _ = ent.NewDatabase().Document.Query().
-		Where(
-			document.Hash(hash),
-			document.IDCardNumber(req.Idcard),
-			document.StatusIn(document.StatusUnsigned),
-			document.ExpiresAtGTE(expire),
-		).
-		First(context.Background())
-	if doc != nil {
-		return
-	}
+	// // 查找是否已存在未失效的未签约合同
+	// doc, _ = ent.NewDatabase().Document.Query().
+	// 	Where(
+	// 		document.Hash(hash),
+	// 		document.IDCardNumber(req.Idcard),
+	// 		document.StatusIn(document.StatusUnsigned),
+	// 		document.ExpiresAtGTE(expire),
+	// 	).
+	// 	First(context.Background())
+	// if doc != nil {
+	// 	return
+	// }
 
 	// 获取模板和配置
 	var tmpl *model.Template
@@ -289,7 +289,7 @@ func CreateDocument(req *pb.ContractServiceCreateRequest, upload bool) (doc *ent
 	}
 
 	// 生成文档ID
-	docId := time.Now().Format("20060102") + g.GetID()
+	// docId := time.Now().Format("20060102") + g.GetID()
 
 	paths := NewPaths(docId)
 
@@ -338,6 +338,8 @@ func CreateDocument(req *pb.ContractServiceCreateRequest, upload bool) (doc *ent
 			return
 		}
 	}
+
+	_, _ = ent.NewDatabase().Document.Delete().Where(document.ID(docId)).Exec(context.Background())
 
 	// 保存文档信息
 	doc, err = ent.NewDatabase().Document.Create().
@@ -391,16 +393,16 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 	}
 
 	// 获取证书
-	var cert *ent.Certification
-	cert, err = RequestCertificae(req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
-	if err != nil {
-		return
-	}
+	// var cert *ent.Certification
+	// cert, err = RequestCertificae(req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
+	// if err != nil {
+	// 	return
+	// }
 
 	// 保存配置
 	cfgPath, _ := filepath.Abs(filepath.Join(filepath.Dir(doc.Paths.UnSigned), "config.json"))
-	kp, _ := filepath.Abs(cert.PrivatePath)
-	cp, _ := filepath.Abs(cert.CertPath)
+	kp, _ := filepath.Abs(filepath.Join(g.GetCertificateDir(), req.Idcard+"_key.pem"))
+	cp, _ := filepath.Abs(filepath.Join(g.GetCertificateDir(), req.Idcard+"_cert.pem"))
 
 	signed, _ := filepath.Abs(doc.Paths.Signed)
 	unsigned, _ := filepath.Abs(doc.Paths.UnSigned)
@@ -462,6 +464,10 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 		if err != nil {
 			return
 		}
+
+		// 上传签名图片
+		ao, _ := oss()
+		_ = ao.UploadBytes(doc.Paths.OssImage, img)
 	}
 
 	zap.L().Info("签名成功", zap.String("docId", req.DocId), zap.String("url", url))

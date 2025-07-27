@@ -29,5 +29,6 @@ func NewPaths(docId string) *model.Paths {
 		Image:       filepath.Join(g.GetDocumentDir(), prefix+"/image.png"),
 		OssUnSigned: "__contracts/" + prefix + "unsigned.pdf",
 		OssSigned:   "__contracts/" + prefix + "signed.pdf",
+		OssImage:    "__contracts/" + prefix + "image.png",
 	}
 }
