@@ -25,4 +25,5 @@ type Paths struct {
 	Image       string `json:"image"`       // 手写签名路径
 	OssUnSigned string `json:"ossUnSigned"` // 待签约文档OSS路径
 	OssSigned   string `json:"ossSigned"`   // 已签约文档OSS路径
+	OssImage    string `json:"ossImage"`    // 手写签名OSS路径
 }
