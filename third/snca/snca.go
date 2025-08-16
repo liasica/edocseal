@@ -11,8 +11,8 @@ import (
 	"math/rand"
 	"strings"
 
-	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
+	"resty.dev/v3"
 
 	"auroraride.com/edocseal"
 )
@@ -51,7 +51,7 @@ func (s *Snca) ApplyServiceRan() (randomB string, err error) {
 		return
 	}
 
-	zap.L().Info("获取服务端随机数返回结果", zap.String("response", string(res.Body())))
+	zap.L().Info("获取服务端随机数返回结果", zap.String("response", string(res.Bytes())))
 
 	if result.ResultCode != "0" {
 		err = errors.New(result.ResultCodeMsg)
@@ -107,7 +107,7 @@ func (s *Snca) BusinessDataFinish(typ CertType, name, personName, phone, idcard,
 	if err != nil {
 		return
 	}
-	zap.L().Info("组装数据请求结果", zap.ByteString("response", res.Body()))
+	zap.L().Info("组装数据请求结果", zap.ByteString("response", res.Bytes()))
 
 	if result.Result != "true" {
 		err = errors.New(result.ResultMsg)
@@ -138,7 +138,7 @@ func (s *Snca) ApplySealCert(randomB, appId, name, csr string) (b []byte, err er
 		return
 	}
 
-	zap.L().Info("机构签发证书返回", zap.ByteString("response", res.Body()))
+	zap.L().Info("机构签发证书返回", zap.ByteString("response", res.Bytes()))
 
 	if result.ResultCode != "0" {
 		err = errors.New(result.ResultCodeMsg)

@@ -15,6 +15,10 @@ import (
 	"strings"
 	"time"
 
+	"go.uber.org/zap"
+	"resty.dev/v3"
+
+	"auroraride.com/edocseal"
 	"auroraride.com/edocseal/ca"
 	"auroraride.com/edocseal/internal/ent"
 	"auroraride.com/edocseal/internal/ent/certification"
@@ -135,12 +139,13 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	return
 }
 
-// RequestEnterpriseCertAndUpdateConfig 申请企业证书并更新配置
-func RequestEnterpriseCertAndUpdateConfig() (err error) {
+// requestFromSnca 从SNCA申请证书
+// 返回私钥、证书内容和证书对象
+func requestFromSnca() (keyBytes []byte, crtBytes []byte, err error) {
 	cfg := g.GetEnterpriseConfig()
 
 	priKey := ca.GenerateRsaPrivateKey()
-	key, _ := x509.MarshalPKCS8PrivateKey(priKey)
+	keyBytes, _ = x509.MarshalPKCS8PrivateKey(priKey)
 
 	// 生成CSR请求
 	var csr []byte
@@ -153,8 +158,7 @@ func RequestEnterpriseCertAndUpdateConfig() (err error) {
 	}
 
 	// 签发证书
-	var b []byte
-	b, err = snca.NewSnca(g.GetSnca()).RequestCACert(
+	crtBytes, err = snca.NewSnca(g.GetSnca()).RequestCACert(
 		snca.CertTypeEnterprise,
 		csr,
 		cfg.Name,
@@ -165,29 +169,89 @@ func RequestEnterpriseCertAndUpdateConfig() (err error) {
 		cfg.City,
 		cfg.CreditCode,
 	)
+
+	return
+}
+
+// requestFromUrl 从指定URL获取证书和私钥
+func requestFromUrl(url string, name, serial string) (keyBytes []byte, crtBytes []byte, err error) {
+	// 若URL为空，则直接返回未找到企业证书错误
+	if url == "" {
+		return nil, nil, edocseal.ErrEnterpriseCertificateNotFound
+	}
+
+	// 发送HTTP请求获取证书和私钥
+	var result edocseal.EnterpriseCertificate
+	var resp *resty.Response
+	resp, err = resty.New().R().
+		SetResult(&result).
+		SetQueryParam("name", name).
+		SetQueryParam("serial", serial).
+		Get(url)
 	if err != nil {
 		return
 	}
 
-	// 读取证书
-	var crt *x509.Certificate
-	crt, err = x509.ParseCertificate(b)
+	if resp.IsSuccess() && (result.Key == "" || result.Cert == "") {
+		return
+	}
+
+	// 解析返回的证书和私钥
+	keyBytes = []byte(result.Key)
+	crtBytes = []byte(result.Cert)
+	return
+}
+
+// RequestEnterpriseCertAndUpdateConfig 申请企业证书并更新配置
+func RequestEnterpriseCertAndUpdateConfig() (err error) {
+	cfg := g.GetEnterpriseConfig()
+
+	var (
+		keyBytes []byte
+		crtBytes []byte
+		crt      *x509.Certificate
+	)
+
+	// 尝试从url中获取证书和私钥
+	keyBytes, crtBytes, err = requestFromUrl(cfg.Url, cfg.Name, cfg.GetCertificate().SerialNumber.String())
+	if err != nil {
+		// 如果返回错误是企业证书未找到，则尝试从SNCA申请
+		if !errors.Is(err, edocseal.ErrEnterpriseCertificateNotFound) {
+			keyBytes, crtBytes, err = requestFromSnca()
+		}
+	}
+
+	// 如果申请证书失败，则返回错误
 	if err != nil {
 		return
 	}
+
+	// 如果keyBytes和crtBytes都为nil，则表示无需更新
+	if keyBytes == nil && crtBytes == nil {
+		zap.L().Info("无需更新企业证书", zap.String("name", cfg.Name))
+		return
+	}
+
+	// 读取证书
+	crt, err = x509.ParseCertificate(crtBytes)
+	if err != nil {
+		return
+	}
+
+	zap.L().Info("申请企业证书成功", zap.String("name", cfg.Name), zap.Int64("serialNumber", crt.SerialNumber.Int64()), zap.Time("notBefore", crt.NotBefore), zap.Time("notAfter", crt.NotAfter))
 
 	dir := filepath.Dir(g.GetConfigFile())
 
 	// 私钥路径
 	kf := filepath.Join(dir, fmt.Sprintf("%s_%d_key.pem", cfg.Name, crt.SerialNumber))
-	err = ca.SaveToFile(kf, key, ca.BlocTypePrivateKey)
+	err = ca.SaveToFile(kf, keyBytes, ca.BlocTypePrivateKey)
 	if err != nil {
 		return
 	}
 
 	// 证书路径
 	cf := filepath.Join(dir, fmt.Sprintf("%s_%d_cert.pem", cfg.Name, crt.SerialNumber))
-	err = ca.SaveToFile(cf, b, ca.BlocTypeCertificate)
+	err = ca.SaveToFile(cf, crtBytes, ca.BlocTypeCertificate)
 	if err != nil {
 		return
 	}
@@ -197,7 +261,9 @@ func RequestEnterpriseCertAndUpdateConfig() (err error) {
 	str = strings.ReplaceAll(str, cfg.PrivateKey, kf)
 	str = strings.ReplaceAll(str, cfg.Certificate, cf)
 
-	g.UpdateEnterpriseConfig(kf, cf)
+	priKey, _ := ca.ParsePrivateKey(keyBytes)
+
+	g.UpdateEnterpriseConfig(kf, cf, crt, crtBytes, priKey, keyBytes)
 
 	return os.WriteFile(g.GetConfigFile(), []byte(str), os.ModePerm)
 }

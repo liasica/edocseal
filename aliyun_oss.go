@@ -9,7 +9,7 @@ import (
 	"encoding/base64"
 
 	"github.com/aliyun/aliyun-oss-go-sdk/oss"
-	"github.com/go-resty/resty/v2"
+	"resty.dev/v3"
 )
 
 type AliyunOss struct {
@@ -36,11 +36,12 @@ func NewAliyunOss(accessKeyId, accessKeySecret, endpoint, bucket string) (*Aliyu
 
 // UploadUrlFile 从URL获取资源并上传
 func (c *AliyunOss) UploadUrlFile(name string, url string) (err error) {
-	r, err := resty.New().R().Get(url)
+	var res *resty.Response
+	res, err = resty.New().R().Get(url)
 	if err != nil {
 		return err
 	}
-	return c.UploadBytes(name, r.Body())
+	return c.UploadBytes(name, res.Bytes())
 }
 
 // UploadBase64 上传jpg图片

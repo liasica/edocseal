@@ -7,21 +7,21 @@ package snca
 import (
 	"time"
 
-	"github.com/go-resty/resty/v2"
 	"go.uber.org/zap"
+	"resty.dev/v3"
 )
 
 func (s *Snca) request() *resty.Client {
 	return resty.New().
 		SetBaseURL(s.url).
 		SetTimeout(3 * time.Second).
-		AddRetryHook(func(res *resty.Response, err error) {
+		AddRetryHooks(func(res *resty.Response, err error) {
 			zap.L().Info("触发重试", zap.String("url", s.url), zap.Error(err), zap.Reflect("response", res))
 			if err != nil {
 				res.Request.URL = s.urlFallback
 			}
 		}).
-		AddRetryCondition(func(r *resty.Response, err error) bool {
+		AddRetryConditions(func(r *resty.Response, err error) bool {
 			return r.IsError() || err != nil
 		})
 }

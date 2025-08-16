@@ -30,3 +30,14 @@ func TestRequestEnterpriseCertAndUpdateConfig(t *testing.T) {
 
 	t.Logf("%#v", g.GetEnterpriseConfig())
 }
+
+func TestRequestFromUrl(t *testing.T) {
+	keyBytes, certBytes, err := requestFromUrl(
+		"http://localhost:5000/enterprise/cert/test",
+		"陕西极光换电科技有限责任公司",
+		"2316266469643792",
+	)
+	require.NoError(t, err)
+	t.Logf("key: %s", keyBytes)
+	t.Logf("cert: %s", certBytes)
+}
