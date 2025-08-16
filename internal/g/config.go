@@ -5,6 +5,8 @@
 package g
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
 	"errors"
 	"fmt"
 	"os"
@@ -12,6 +14,7 @@ import (
 	"github.com/spf13/viper"
 
 	"auroraride.com/edocseal"
+	"auroraride.com/edocseal/ca"
 )
 
 var (
@@ -50,6 +53,49 @@ type Enterprise struct {
 	City        string // 城市
 	CreditCode  string // 统一社会信用代码
 	Name        string // 企业名称
+	Url         string // 企业证书加载地址, 若为空则自动申请证书
+	Token       string // 企业证书提供token
+
+	certificate *x509.Certificate // 企业证书对象
+	privateKey  *rsa.PrivateKey   // 企业私钥对象
+	certBytes   []byte            // 企业证书字节
+	keyBytes    []byte            // 企业私钥字节
+}
+
+func (cfg *Enterprise) GetCertificate() *x509.Certificate {
+	return cfg.certificate
+}
+
+func (cfg *Enterprise) GetCertificateBytes() []byte {
+	return cfg.certBytes
+}
+
+func (cfg *Enterprise) GetPrivateKey() *rsa.PrivateKey {
+	return cfg.privateKey
+}
+
+func (cfg *Enterprise) GetPrivateKeyBytes() []byte {
+	return cfg.keyBytes
+}
+
+func (cfg *Enterprise) Load() (err error) {
+	cfg.certBytes, err = os.ReadFile(cfg.Certificate)
+	if err != nil {
+		return
+	}
+
+	cfg.certificate, err = ca.ParseCertificate(cfg.certBytes)
+	if err != nil {
+		return
+	}
+
+	cfg.keyBytes, err = os.ReadFile(cfg.PrivateKey)
+	if err != nil {
+		return
+	}
+
+	cfg.privateKey, err = ca.ParsePrivateKey(cfg.keyBytes)
+	return
 }
 
 type Config struct {
@@ -151,6 +197,11 @@ func readConfig() (err error) {
 	if !edocseal.FileExists(cfg.Enterprise.Certificate) {
 		return errors.New("企业证书不存在")
 	}
+
+	err = cfg.Enterprise.Load()
+	if err != nil {
+		return fmt.Errorf("企业证书加载失败: %s", err)
+	}
 	return
 }
 
@@ -199,9 +250,13 @@ func GetEnterpriseConfig() *Enterprise {
 }
 
 // UpdateEnterpriseConfig 更新企业配置
-func UpdateEnterpriseConfig(key, cert string) {
+func UpdateEnterpriseConfig(key, cert string, crt *x509.Certificate, certBytes []byte, privateKey *rsa.PrivateKey, keyBytes []byte) {
 	cfg.Enterprise.PrivateKey = key
 	cfg.Enterprise.Certificate = cert
+	cfg.Enterprise.certificate = crt
+	cfg.Enterprise.certBytes = certBytes
+	cfg.Enterprise.privateKey = privateKey
+	cfg.Enterprise.keyBytes = keyBytes
 }
 
 // GetShortUrlPrefix 获取短链接前缀

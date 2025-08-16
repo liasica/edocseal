@@ -134,3 +134,15 @@ func FileCopy(src, dst string) error {
 func DeleteDirectory(dir string) (err error) {
 	return os.RemoveAll(dir)
 }
+
+// GetFileName 获取文件名
+// 如果params不为空，则使用params[0]作为扩展名
+func GetFileName(filename string, params ...string) (name string) {
+	basename := filepath.Base(filename)
+	ext := filepath.Ext(basename)
+	if len(params) > 0 {
+		ext = params[0] + ext
+	}
+	name = strings.TrimSuffix(basename, ext)
+	return
+}
