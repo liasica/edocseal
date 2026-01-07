@@ -205,6 +205,8 @@ func (*Template) scan() *cobra.Command {
 				os.Exit(1)
 			}
 
+			var list []string
+
 			for _, f := range files {
 				// 跳过目录、非PDF后缀文件、表单文件
 				if f.IsDir() || !strings.HasSuffix(f.Name(), ".pdf") || strings.HasSuffix(f.Name(), "-form.pdf") {
@@ -236,8 +238,17 @@ func (*Template) scan() *cobra.Command {
 				}
 
 				// 生成模板
-				fmt.Printf("生成模板: %s\n", templateId)
+				message := fmt.Sprintf("%s: %s", name, templateId)
+				fmt.Printf("生成模板: %s\n", message)
 				generateTemplate(pdf, form, templates)
+				list = append(list, message)
+
+				fmt.Println("-------------------------")
+			}
+
+			fmt.Printf("完成模板扫描，共生成 %d 个模板:\n", len(list))
+			for _, l := range list {
+				fmt.Printf(" - %s\n", l)
 			}
 		},
 	}
