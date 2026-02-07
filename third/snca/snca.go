@@ -10,6 +10,7 @@ import (
 	"math/big"
 	"math/rand"
 	"strings"
+	"sync"
 
 	"go.uber.org/zap"
 	"resty.dev/v3"
@@ -17,19 +18,33 @@ import (
 	"auroraride.com/edocseal"
 )
 
+var (
+	instance *Snca
+	once     sync.Once
+)
+
 type Snca struct {
-	url          string
-	urlFallback  string
 	source       string
 	customerType string
+
+	client *resty.Client
 }
 
-func NewSnca(url, source, customerType string) *Snca {
-	return &Snca{
-		url:          strings.TrimSuffix(url, "/"),
-		source:       source,
-		customerType: customerType,
-	}
+func Setup(url, urlFallback, source, customerType string) {
+	once.Do(func() {
+		failover := NewUrlFailover(strings.TrimSuffix(url, "/"), strings.TrimSuffix(urlFallback, "/"))
+
+		instance = &Snca{
+			source:       source,
+			customerType: customerType,
+
+			client: createRestyClient(failover),
+		}
+	})
+}
+
+func New() *Snca {
+	return instance
 }
 
 // ApplyServiceRan 获取服务端随机数

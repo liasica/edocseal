@@ -315,8 +315,8 @@ func GetAliyunOss() *AliyunOss {
 }
 
 // GetSnca 获取SNCA配置
-func GetSnca() (url, source, customerType string) {
-	return cfg.Snca.Url, cfg.Snca.Source, cfg.Snca.CustomerType
+func GetSnca() (url, urlFallback, source, customerType string) {
+	return cfg.Snca.Url, cfg.Snca.UrlFallback, cfg.Snca.Source, cfg.Snca.CustomerType
 }
 
 // GetPostgresConfig 获取Postgresql配置

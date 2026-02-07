@@ -124,7 +124,7 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	}
 
 	// 申请证书
-	crt, err = snca.NewSnca(g.GetSnca()).RequestCACert(
+	crt, err = snca.New().RequestCACert(
 		snca.CertTypePersonal,
 		csr,
 		name,
@@ -158,7 +158,7 @@ func requestFromSnca() (keyBytes []byte, crtBytes []byte, err error) {
 	}
 
 	// 签发证书
-	crtBytes, err = snca.NewSnca(g.GetSnca()).RequestCACert(
+	crtBytes, err = snca.New().RequestCACert(
 		snca.CertTypeEnterprise,
 		csr,
 		cfg.Name,

@@ -13,6 +13,7 @@ import (
 	"auroraride.com/edocseal"
 	"auroraride.com/edocseal/internal/ent"
 	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/third/snca"
 )
 
 func Boot() {
@@ -57,6 +58,9 @@ func Boot() {
 
 	// 初始化证书
 	rootCrt := g.NewCertificate()
+
+	// 初始化snca
+	snca.Setup(g.GetSnca())
 
 	zap.L().Info(
 		"edocseal 初始化完成",
