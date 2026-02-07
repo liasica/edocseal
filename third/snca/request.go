@@ -64,8 +64,8 @@ func createRestyClient(failover *UrlFailover) *resty.Client {
 		SetTimeout(3 * time.Second).
 		SetRetryCount(1).
 		SetLoadBalancer(failover).
-		AddRequestMiddleware(func(c *resty.Client, r *resty.Request) error {
-			zap.L().Info("准备发送请求", zap.String("baseUrl", c.BaseURL()), zap.String("uri", r.URL))
+		AddRequestMiddleware(func(c *resty.Client, req *resty.Request) error {
+			zap.L().Info("准备发送请求", zap.String("baseUrl", c.BaseURL()), zap.String("uri", req.URL))
 			return nil
 		}).
 		AddRetryHooks(func(res *resty.Response, err error) {
@@ -96,6 +96,10 @@ func createRestyClient(failover *UrlFailover) *resty.Client {
 		}).
 		AddRetryConditions(func(r *resty.Response, err error) bool {
 			return err != nil || r == nil || (r != nil && r.IsError())
+		}).
+		AddResponseMiddleware(func(c *resty.Client, res *resty.Response) error {
+			zap.L().Info("收到响应", zap.String("baseUrl", c.BaseURL()), zap.String("uri", res.Request.URL), zap.ByteString("response", res.Bytes()))
+			return nil
 		})
 }
 
