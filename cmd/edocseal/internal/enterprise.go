@@ -14,7 +14,6 @@ import (
 
 	"auroraride.com/edocseal"
 	"auroraride.com/edocseal/ca"
-	"auroraride.com/edocseal/internal/g"
 	"auroraride.com/edocseal/third/snca"
 )
 
@@ -167,7 +166,7 @@ func generateEnterpriseCert(cPath, oName, pName, phone, idcard, provice, city, o
 
 	// 请求第三方申请企业证书
 	var cert []byte
-	cert, err = snca.NewSnca(g.GetSnca()).RequestCACert(
+	cert, err = snca.New().RequestCACert(
 		snca.CertTypeEnterprise,
 		csr,
 		oName,

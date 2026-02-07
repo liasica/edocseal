@@ -36,8 +36,8 @@ func TestSnca_RequestCACert(t *testing.T) {
 	require.NoError(t, err)
 
 	var b []byte
-	url, source, customerType := g.GetSnca()
-	b, err = NewSnca(url, source, customerType).RequestCACert(
+	Setup(g.GetSnca())
+	b, err = instance.RequestCACert(
 		CertTypePersonal,
 		csr,
 		name,
@@ -75,8 +75,8 @@ func TestSnca_RequestEnterpriseCACert(t *testing.T) {
 	require.NoError(t, err)
 
 	var b []byte
-	url, source, customerType := g.GetSnca()
-	b, err = NewSnca(url, source, customerType).RequestCACert(
+	Setup(g.GetSnca())
+	b, err = instance.RequestCACert(
 		CertTypeEnterprise,
 		csr,
 		name,
