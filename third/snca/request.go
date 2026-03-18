@@ -50,67 +50,32 @@ func (uf *UrlFailover) Close() error {
 }
 
 func createRestyClient(failover *UrlFailover) *resty.Client {
+	return createRestyClientWithTimeout(failover, 3*time.Second)
+}
+
+func createRestyClientWithTimeout(failover *UrlFailover, timeout time.Duration) *resty.Client {
 	client := resty.New().
 		SetBaseURL(failover.Current()).
-		SetTimeout(3 * time.Second).
-		SetRetryCount(1).
-		SetLoadBalancer(failover).
-		AddRetryConditions(func(r *resty.Response, err error) bool {
-			return err != nil || r == nil || (r != nil && r.IsError())
-		})
+		SetTimeout(timeout).
+		SetLoadBalancer(failover)
 
-	// 使用 AddRequestMiddleware 记录请求
-	client.AddRequestMiddleware(func(c *resty.Client, req *resty.Request) error {
-		zap.L().Info("准备发送请求",
-			zap.String("baseURL", c.BaseURL()),
-			zap.String("uri", req.URL))
+	client.AddRequestMiddleware(func(_ *resty.Client, request *resty.Request) error {
+		zap.L().Info("准备发送 SNCA 请求",
+			zap.String("url", requestURL(request)))
 		return nil
 	})
 
-	// 使用 OnSuccess 钩子记录成功响应
-	client.OnSuccess(func(c *resty.Client, res *resty.Response) {
-		zap.L().Info("收到响应",
-			zap.String("baseURL", c.BaseURL()),
-			zap.String("uri", res.Request.URL),
-			zap.Int("statusCode", res.StatusCode()),
-			zap.ByteString("response", res.Bytes()))
+	client.OnSuccess(func(_ *resty.Client, response *resty.Response) {
+		zap.L().Info("收到 SNCA 响应",
+			zap.String("url", requestURL(response.Request)),
+			zap.Int("statusCode", response.StatusCode()),
+			zap.ByteString("response", response.Bytes()))
 	})
 
-	// 使用 OnError 钩子记录错误
-	client.OnError(func(req *resty.Request, err error) {
-		zap.L().Error("请求失败",
-			zap.String("url", req.URL),
+	client.OnError(func(request *resty.Request, err error) {
+		zap.L().Error("SNCA 请求失败",
+			zap.String("url", requestURL(request)),
 			zap.Error(err))
-	})
-
-	// 添加重试钩子
-	client.AddRetryHooks(func(res *resty.Response, err error) {
-		var url string
-		var statusCode int
-		var hasRawResponse bool
-		if res != nil {
-			if res.Request != nil {
-				url = res.Request.URL
-			}
-			statusCode = res.StatusCode()
-			hasRawResponse = res.RawResponse != nil
-		}
-		zap.L().Info("触发重试",
-			zap.String("originalURL", url),
-			zap.Error(err),
-			zap.Bool("hasError", err != nil),
-			zap.Bool("hasRes", res != nil),
-			zap.Bool("hasRequest", res != nil && res.Request != nil),
-			zap.Int("statusCode", statusCode),
-			zap.Bool("hasRawResponse", hasRawResponse))
-
-		// 当没有 RawResponse 时，说明是网络错误（连接失败等）
-		if res != nil && res.RawResponse == nil {
-			failover.Switch()
-			zap.L().Info("触发切换URL",
-				zap.String("newURL", failover.Current()),
-				zap.String("previousURL", failover.Previous()))
-		}
 	})
 
 	return client
@@ -118,4 +83,48 @@ func createRestyClient(failover *UrlFailover) *resty.Client {
 
 func (s *Snca) request() *resty.Client {
 	return s.client
+}
+
+func requestURL(request *resty.Request) string {
+	if request == nil {
+		return ""
+	}
+
+	if request.RawRequest != nil && request.RawRequest.URL != nil {
+		return request.RawRequest.URL.String()
+	}
+
+	return request.URL
+}
+
+func shouldSwitchRequestURL(response *resty.Response, err error) bool {
+	if err == nil || response == nil {
+		return false
+	}
+
+	return response.RawResponse == nil
+}
+
+func (s *Snca) executeRequestWithURLFailover(sendRequest func() (*resty.Response, error)) (response *resty.Response, err error) {
+	response, err = sendRequest()
+	if s.urlFailover == nil || !shouldSwitchRequestURL(response, err) {
+		return
+	}
+
+	failedURL := ""
+	if response != nil {
+		failedURL = requestURL(response.Request)
+	}
+
+	previousURL := s.urlFailover.Current()
+	s.urlFailover.Switch()
+
+	zap.L().Warn("SNCA 请求发生传输错误，切换到备用 URL",
+		zap.String("failedURL", failedURL),
+		zap.String("previousURL", previousURL),
+		zap.String("currentURL", s.urlFailover.Current()),
+		zap.Error(err))
+
+	response, err = sendRequest()
+	return
 }

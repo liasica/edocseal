@@ -27,7 +27,8 @@ type Snca struct {
 	source       string
 	customerType string
 
-	client *resty.Client
+	client      *resty.Client
+	urlFailover *UrlFailover
 }
 
 func Setup(url, urlFallback, source, customerType string) {
@@ -38,7 +39,8 @@ func Setup(url, urlFallback, source, customerType string) {
 			source:       source,
 			customerType: customerType,
 
-			client: createRestyClient(failover),
+			client:      createRestyClient(failover),
+			urlFailover: failover,
 		}
 	})
 }
@@ -55,12 +57,14 @@ func (s *Snca) ApplyServiceRan() (randomB string, err error) {
 		result ApplyServiceRandomResponse
 	)
 
-	res, err = s.request().R().
-		SetBody(&ApplyServiceRandomRequest{
-			Source: s.source,
-		}).
-		SetResult(&result).
-		Post(UrlApplyServiceRandom)
+	res, err = s.executeRequestWithURLFailover(func() (*resty.Response, error) {
+		return s.request().R().
+			SetBody(&ApplyServiceRandomRequest{
+				Source: s.source,
+			}).
+			SetResult(&result).
+			Post(UrlApplyServiceRandom)
+	})
 
 	if err != nil {
 		return
@@ -115,10 +119,12 @@ func (s *Snca) BusinessDataFinish(typ CertType, name, personName, phone, idcard,
 		res    *resty.Response
 		result BusinessDataFinishResponse
 	)
-	res, err = s.request().R().
-		SetBody(req).
-		SetResult(&result).
-		Post(UrlBusinessDataFinish)
+	res, err = s.executeRequestWithURLFailover(func() (*resty.Response, error) {
+		return s.request().R().
+			SetBody(req).
+			SetResult(&result).
+			Post(UrlBusinessDataFinish)
+	})
 	if err != nil {
 		return
 	}
@@ -141,14 +147,16 @@ func (s *Snca) ApplySealCert(randomB, appId, name, csr string) (b []byte, err er
 		result ApplySealCertResponse
 	)
 
-	res, err = s.request().R().
-		SetBody(ApplySealCertRequest{
-			TokenInfo:  edocseal.RandStr(16) + randomB + "SNCA" + appId,
-			CommonName: name,
-			P10:        csr,
-		}).
-		SetResult(&result).
-		Post(UrlApplySealCert)
+	res, err = s.executeRequestWithURLFailover(func() (*resty.Response, error) {
+		return s.request().R().
+			SetBody(ApplySealCertRequest{
+				TokenInfo:  edocseal.RandStr(16) + randomB + "SNCA" + appId,
+				CommonName: name,
+				P10:        csr,
+			}).
+			SetResult(&result).
+			Post(UrlApplySealCert)
+	})
 	if err != nil {
 		return
 	}

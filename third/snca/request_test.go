@@ -5,17 +5,88 @@
 package snca
 
 import (
+	"net/http"
+	"net/http/httptest"
+	"sync/atomic"
 	"testing"
+	"time"
 
-	"go.uber.org/zap"
+	"github.com/stretchr/testify/require"
 )
 
-func TestRequest(t *testing.T) {
-	failover := NewUrlFailover("http://localhost:5555", "https://www.baidu.com")
+func TestSncaApplyServiceRanSwitchesURLOnTimeout(t *testing.T) {
+	var primaryRequestCount atomic.Int32
+	primaryServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		primaryRequestCount.Add(1)
+		require.Equal(t, http.MethodPost, request.Method)
+		require.Equal(t, UrlApplyServiceRandom, request.URL.Path)
 
-	l, _ := zap.NewDevelopment()
-	zap.ReplaceGlobals(l)
+		time.Sleep(120 * time.Millisecond)
+	}))
+	defer primaryServer.Close()
 
-	resp, err := createRestyClient(failover).R().Get("s?wd=“冰雪大国”是怎么炼成的&sa=fyb_n_homepage&rsv_dl=fyb_n_homepage&from=super&cl=3&tn=baidutop10&fr=top1000&rsv_idx=2&hisfilter=1")
-	t.Log(resp, err)
+	var fallbackRequestCount atomic.Int32
+	fallbackServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fallbackRequestCount.Add(1)
+		require.Equal(t, http.MethodPost, request.Method)
+		require.Equal(t, UrlApplyServiceRandom, request.URL.Path)
+
+		writer.Header().Set("Content-Type", "application/json")
+
+		_, err := writer.Write([]byte(`{"resultCode":"0","resultCodeMsg":"ok","randomB":"random-b"}`))
+		require.NoError(t, err)
+	}))
+	defer fallbackServer.Close()
+
+	failover := NewUrlFailover(primaryServer.URL, fallbackServer.URL)
+	sncaClient := &Snca{
+		source:       "aurora",
+		client:       createRestyClientWithTimeout(failover, 40*time.Millisecond),
+		urlFailover:  failover,
+		customerType: "ride",
+	}
+
+	randomB, err := sncaClient.ApplyServiceRan()
+	require.NoError(t, err)
+	require.Equal(t, "random-b", randomB)
+	require.Equal(t, int32(1), primaryRequestCount.Load())
+	require.Equal(t, int32(1), fallbackRequestCount.Load())
+	require.Equal(t, fallbackServer.URL, failover.Current())
+}
+
+func TestSncaApplyServiceRanDoesNotSwitchURLOnBusinessError(t *testing.T) {
+	var primaryRequestCount atomic.Int32
+	primaryServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		primaryRequestCount.Add(1)
+		require.Equal(t, http.MethodPost, request.Method)
+		require.Equal(t, UrlApplyServiceRandom, request.URL.Path)
+
+		writer.Header().Set("Content-Type", "application/json")
+
+		_, err := writer.Write([]byte(`{"resultCode":"1","resultCodeMsg":"business failed"}`))
+		require.NoError(t, err)
+	}))
+	defer primaryServer.Close()
+
+	var fallbackRequestCount atomic.Int32
+	fallbackServer := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		fallbackRequestCount.Add(1)
+		t.Fatal("fallback URL should not be called on business error")
+	}))
+	defer fallbackServer.Close()
+
+	failover := NewUrlFailover(primaryServer.URL, fallbackServer.URL)
+	sncaClient := &Snca{
+		source:       "aurora",
+		client:       createRestyClientWithTimeout(failover, 40*time.Millisecond),
+		urlFailover:  failover,
+		customerType: "ride",
+	}
+
+	randomB, err := sncaClient.ApplyServiceRan()
+	require.Empty(t, randomB)
+	require.EqualError(t, err, "business failed")
+	require.Equal(t, int32(1), primaryRequestCount.Load())
+	require.Equal(t, int32(0), fallbackRequestCount.Load())
+	require.Equal(t, primaryServer.URL, failover.Current())
 }
