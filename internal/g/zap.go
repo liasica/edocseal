@@ -5,31 +5,16 @@
 package g
 
 import (
-	"context"
 	"os"
 
-	"github.com/redis/go-redis/v9"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
 
-type zapRedisWriter struct {
-	cli *redis.Client
-	key string
-}
-
-func (w *zapRedisWriter) Write(p []byte) (int, error) {
-	n, err := w.cli.RPush(context.Background(), w.key, p).Result()
-	return int(n), err
-}
-
-// 日志写入Redis
-func zapRedisCore() zapcore.Core {
+// 日志投递 Kafka
+func zapKafkaCore() zapcore.Core {
 	jsonEnc := zapcore.NewJSONEncoder(zap.NewProductionEncoderConfig())
-	syncer := zapcore.AddSync(&zapRedisWriter{
-		cli: NewRedis(),
-		key: cfg.Logger.RedisKey,
-	})
+	syncer := zapcore.AddSync(newKafkaWriter(cfg.Kafka.Addresses))
 	return zapcore.NewCore(jsonEnc, syncer, zap.NewAtomicLevelAt(zap.DebugLevel))
 }
 
@@ -42,8 +27,8 @@ func zapConsoleCore() zapcore.Core {
 func NewZap() *zap.Logger {
 	// 集成多个 core
 	var cores []zapcore.Core
-	if cfg.Logger.Redis {
-		cores = append(cores, zapRedisCore())
+	if cfg.Logger.Kafka {
+		cores = append(cores, zapKafkaCore())
 	}
 	if cfg.Logger.Console {
 		cores = append(cores, zapConsoleCore())
