@@ -141,8 +141,7 @@ type Config struct {
 	// 日志配置
 	Logger struct {
 		Console    bool   // 是否输出至控制台
-		Redis      bool   // 是否输出至Redis
-		RedisKey   string // Redis输出key
+		Kafka      bool   // 是否投递至 Kafka
 		LoggerName string // 日志名称
 	}
 
@@ -156,11 +155,9 @@ type Config struct {
 		Bind string // 绑定地址
 	}
 
-	// Redis配置
-	Redis struct {
-		Addr     string // 地址
-		Password string // 密码
-		DB       int    // 数据库
+	// Kafka 配置
+	Kafka struct {
+		Addresses []string // broker 地址
 	}
 
 	Aliyun struct {
