@@ -222,6 +222,11 @@ func GetCertificateDir() string {
 	return cfg.Dir.Certificate
 }
 
+// GetRootCertificatePath 获取根证书与私钥路径
+func GetRootCertificatePath() CertificatePath {
+	return cfg.RootCertificate
+}
+
 // GetSealDir 获取企业签章目录
 func GetSealDir() string {
 	if cfg.Dir.Seal != "" {

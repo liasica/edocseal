@@ -6,8 +6,10 @@ package internal
 
 import (
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 
 	"auroraride.com/edocseal/internal"
+	"auroraride.com/edocseal/internal/biz"
 	"auroraride.com/edocseal/internal/g"
 )
 
@@ -24,6 +26,12 @@ func RunCommand() {
 
 			// 初始化
 			internal.Boot()
+
+			// 加载签约企业与企业证书
+			err := biz.LoadEnterprises()
+			if err != nil {
+				zap.L().Fatal("签约企业加载失败", zap.Error(err))
+			}
 		},
 	}
 

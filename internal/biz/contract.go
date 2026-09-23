@@ -392,9 +392,9 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 
 	issuer := ResolveCertificateIssuer(req.CertificateIssuer)
 
-	// 获取签约企业、企业证书与签章
+	// 获取当前签约企业、企业证书与签章
 	var ep *ent.Enterprise
-	ep, err = QueryEnterprise(req.EnterpriseCode)
+	ep, err = QueryEnterprise("")
 	if err != nil {
 		return
 	}

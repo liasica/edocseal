@@ -75,7 +75,6 @@ message ContractServiceSignRequest {
   string phone = 7; // 手机号
   string idcard = 8; // 身份证号
   string certificate_issuer = 9; // 证书生成方式：SELF 自签、SNCA 陕西CA、SNCA_V2 陕西CA 新接口，为空时按服务配置
-  string enterprise_code = 10; // 签约企业统一社会信用代码，为空时使用默认企业
 }
 
 enum SignStatus {

@@ -1,0 +1,84 @@
+syntax = "proto3";
+
+package pb;
+
+option go_package = "auroraride.com/edocseal/pb;pb";
+
+service EnterpriseService {
+  // 签约企业列表
+  rpc List(EnterpriseListRequest) returns (EnterpriseListResponse) {}
+
+  // 新增或更新签约企业
+  rpc Save(EnterpriseSaveRequest) returns (EnterpriseEmptyResponse) {}
+
+  // 删除签约企业
+  rpc Delete(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
+
+  // 设为签约企业
+  rpc SetDefault(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
+
+  // 作废企业证书，下次签约时重新签发
+  rpc RevokeCertificates(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
+
+  // 根证书信息
+  rpc RootCertificate(EnterpriseEmptyRequest) returns (RootCertificateResponse) {}
+
+  // 重新生成根证书
+  rpc RegenerateRootCertificate(EnterpriseEmptyRequest) returns (RootCertificateResponse) {}
+}
+
+// 企业证书
+message EnterpriseCertificateInfo {
+  string issuer = 1; // 证书生成方式：SELF 自签、SNCA 陕西CA
+  string serial = 2; // 序列号（十六进制）
+  int64 not_before = 3; // 生效时间（秒级时间戳）
+  int64 not_after = 4; // 到期时间（秒级时间戳）
+  string issuer_name = 5; // 颁发者通用名
+}
+
+// 签约企业
+message Enterprise {
+  string credit_code = 1; // 统一社会信用代码
+  string name = 2; // 企业名称
+  string province = 3; // 省份
+  string city = 4; // 城市
+  string person_name = 5; // 代办人姓名，向陕西CA 申请证书时使用
+  string phone = 6; // 代办人手机号，向陕西CA 申请证书时使用
+  string idcard = 7; // 代办人身份证号，向陕西CA 申请证书时使用
+  bool is_default = 8; // 是否为当前签约企业
+  bytes seal = 9; // 签章图片（PNG）
+  repeated EnterpriseCertificateInfo certificates = 10; // 企业证书
+}
+
+message EnterpriseListRequest {}
+
+message EnterpriseListResponse {
+  repeated Enterprise items = 1;
+}
+
+message EnterpriseSaveRequest {
+  string credit_code = 1; // 统一社会信用代码
+  string name = 2; // 企业名称
+  string province = 3; // 省份
+  string city = 4; // 城市
+  string person_name = 5; // 代办人姓名
+  string phone = 6; // 代办人手机号
+  string idcard = 7; // 代办人身份证号
+  bytes seal = 8; // 签章图片（PNG），为空时保留原签章
+}
+
+message EnterpriseCodeRequest {
+  string credit_code = 1; // 统一社会信用代码
+}
+
+message EnterpriseEmptyRequest {}
+
+message EnterpriseEmptyResponse {}
+
+// 根证书信息
+message RootCertificateResponse {
+  string subject = 1; // 主题
+  string serial = 2; // 序列号（十六进制）
+  int64 not_before = 3; // 生效时间（秒级时间戳）
+  int64 not_after = 4; // 到期时间（秒级时间戳）
+}
