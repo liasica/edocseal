@@ -12,7 +12,7 @@ import (
 func enterpriseCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "enterprise",
-		Short: "签约企业查询，新增、修改、切换与作废证书在管理后台操作",
+		Short: "签约企业查询，新增、修改、切换与生成证书在管理后台操作",
 	}
 
 	cmd.AddCommand(&cobra.Command{
