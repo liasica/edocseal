@@ -80,12 +80,12 @@ func (*Certificate) root() *cobra.Command {
 			// 生成根证书并保存
 			var rootCertificate []byte
 			rootCertificate, err = ca.GenerateRootCertificate(priKey, pkix.Name{
-				Country:            []string{"中国"},                                    // 国家
-				Province:           []string{"北京市"},                                   // 省份
-				Locality:           []string{"东城区"},                                   // 城市
-				Organization:       []string{"Tianjin NonEntia Technology Co., Ltd."}, // 证书持有者组织名称
-				OrganizationalUnit: []string{"NonEntiaLtd"},                           // 证书持有者组织唯一标识
-				CommonName:         "NonEntia Root CA",                                // 证书持有者通用名，需保持唯一，否则验证会失败
+				Country:            []string{"CN"},                 // 国家
+				Province:           []string{"陕西省"},                // 省份
+				Locality:           []string{"西安市"},                // 城市
+				Organization:       []string{"陕西极光换电科技有限责任公司"},     // 证书持有者组织名称
+				OrganizationalUnit: []string{"91610103MACUXL1W1A"}, // 证书持有者组织唯一标识
+				CommonName:         "陕西极光换电科技有限责任公司 Root CA",       // 证书持有者通用名，需保持唯一，否则验证会失败
 			})
 			if err != nil {
 				fmt.Printf("生成根证书失败：%s", err)
