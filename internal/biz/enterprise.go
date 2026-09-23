@@ -757,6 +757,17 @@ func issueEnterpriseCertificate(e *ent.Enterprise, issuer string) (cert *ent.Ent
 		return
 	}
 
+	// 签发或拉取到的证书须未过期且属于该企业
+	if !crt.NotAfter.After(time.Now()) {
+		err = fmt.Errorf("获取到的证书已过期，到期时间 %s", crt.NotAfter.Local().Format(time.DateTime))
+		return
+	}
+
+	if crt.Subject.CommonName != e.Name {
+		err = fmt.Errorf("获取到的证书不属于该企业，证书主题为 %s", crt.Subject.CommonName)
+		return
+	}
+
 	// 校验私钥与证书是否匹配
 	_, err = tls.X509KeyPair(ca.PEMEncoding(crtBytes, ca.BlocTypeCertificate), ca.PEMEncoding(keyBytes, ca.BlocTypePrivateKey))
 	if err != nil {
