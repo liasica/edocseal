@@ -494,9 +494,6 @@ func UploadDocument(path string, b []byte) (url string, err error) {
 	if err != nil {
 		return
 	}
-	if !strings.HasSuffix(url, "/") {
-		url += "/"
-	}
 
 	return CreateShortUrl(g.GetAliyunOss().GetUrl(path))
 }
