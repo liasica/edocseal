@@ -73,6 +73,7 @@ func (*ContractService) Sign(_ context.Context, req *pb.ContractServiceSignReque
 					"phone":             req.Phone,
 					"idcard":            req.Idcard,
 					"certificateIssuer": req.CertificateIssuer,
+					"enterpriseCode":    req.EnterpriseCode,
 				}),
 				zap.Reflect("response", res),
 			}

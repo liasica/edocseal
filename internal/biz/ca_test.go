@@ -22,23 +22,9 @@ func TestAgencyIssueCertificate(t *testing.T) {
 	t.Logf("key: %s", key)
 }
 
-func TestRequestEnterpriseCertAndUpdateConfig(t *testing.T) {
-	g.LoadConfig("config/config.yaml")
-
-	renewed, err := RequestEnterpriseCertAndUpdateConfig()
-	require.NoError(t, err)
-	t.Logf("renewed: %t", renewed)
-
-	t.Logf("%#v", g.GetEnterpriseConfig())
-}
-
 func TestRequestFromUrl(t *testing.T) {
-	keyBytes, certBytes, err := requestFromUrl(
-		"http://localhost:5000/enterprise/cert/test",
-		"陕西极光换电科技有限责任公司",
-		"2316266469643792",
-	)
+	crt, key, err := requestFromUrl("http://localhost:5000/enterprise/cert/test", "91610103MACUXL1W1A")
 	require.NoError(t, err)
-	t.Logf("key: %s", keyBytes)
-	t.Logf("cert: %s", certBytes)
+	t.Logf("cert: %x", crt)
+	t.Logf("key: %x", key)
 }

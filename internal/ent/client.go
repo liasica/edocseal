@@ -13,6 +13,8 @@ import (
 
 	"auroraride.com/edocseal/internal/ent/certification"
 	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/ent/enterprise"
+	"auroraride.com/edocseal/internal/ent/enterprisecertification"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -29,6 +31,10 @@ type Client struct {
 	Certification *CertificationClient
 	// Document is the client for interacting with the Document builders.
 	Document *DocumentClient
+	// Enterprise is the client for interacting with the Enterprise builders.
+	Enterprise *EnterpriseClient
+	// EnterpriseCertification is the client for interacting with the EnterpriseCertification builders.
+	EnterpriseCertification *EnterpriseCertificationClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -42,6 +48,8 @@ func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
 	c.Certification = NewCertificationClient(c.config)
 	c.Document = NewDocumentClient(c.config)
+	c.Enterprise = NewEnterpriseClient(c.config)
+	c.EnterpriseCertification = NewEnterpriseCertificationClient(c.config)
 }
 
 type (
@@ -132,10 +140,12 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	cfg := c.config
 	cfg.driver = tx
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		Certification: NewCertificationClient(cfg),
-		Document:      NewDocumentClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Certification:           NewCertificationClient(cfg),
+		Document:                NewDocumentClient(cfg),
+		Enterprise:              NewEnterpriseClient(cfg),
+		EnterpriseCertification: NewEnterpriseCertificationClient(cfg),
 	}, nil
 }
 
@@ -153,10 +163,12 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := c.config
 	cfg.driver = &txDriver{tx: tx, drv: c.driver}
 	return &Tx{
-		ctx:           ctx,
-		config:        cfg,
-		Certification: NewCertificationClient(cfg),
-		Document:      NewDocumentClient(cfg),
+		ctx:                     ctx,
+		config:                  cfg,
+		Certification:           NewCertificationClient(cfg),
+		Document:                NewDocumentClient(cfg),
+		Enterprise:              NewEnterpriseClient(cfg),
+		EnterpriseCertification: NewEnterpriseCertificationClient(cfg),
 	}, nil
 }
 
@@ -187,6 +199,8 @@ func (c *Client) Close() error {
 func (c *Client) Use(hooks ...Hook) {
 	c.Certification.Use(hooks...)
 	c.Document.Use(hooks...)
+	c.Enterprise.Use(hooks...)
+	c.EnterpriseCertification.Use(hooks...)
 }
 
 // Intercept adds the query interceptors to all the entity clients.
@@ -194,6 +208,8 @@ func (c *Client) Use(hooks ...Hook) {
 func (c *Client) Intercept(interceptors ...Interceptor) {
 	c.Certification.Intercept(interceptors...)
 	c.Document.Intercept(interceptors...)
+	c.Enterprise.Intercept(interceptors...)
+	c.EnterpriseCertification.Intercept(interceptors...)
 }
 
 // Mutate implements the ent.Mutator interface.
@@ -203,6 +219,10 @@ func (c *Client) Mutate(ctx context.Context, m Mutation) (Value, error) {
 		return c.Certification.mutate(ctx, m)
 	case *DocumentMutation:
 		return c.Document.mutate(ctx, m)
+	case *EnterpriseMutation:
+		return c.Enterprise.mutate(ctx, m)
+	case *EnterpriseCertificationMutation:
+		return c.EnterpriseCertification.mutate(ctx, m)
 	default:
 		return nil, fmt.Errorf("ent: unknown mutation type %T", m)
 	}
@@ -474,13 +494,279 @@ func (c *DocumentClient) mutate(ctx context.Context, m *DocumentMutation) (Value
 	}
 }
 
+// EnterpriseClient is a client for the Enterprise schema.
+type EnterpriseClient struct {
+	config
+}
+
+// NewEnterpriseClient returns a client for the Enterprise from the given config.
+func NewEnterpriseClient(c config) *EnterpriseClient {
+	return &EnterpriseClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `enterprise.Hooks(f(g(h())))`.
+func (c *EnterpriseClient) Use(hooks ...Hook) {
+	c.hooks.Enterprise = append(c.hooks.Enterprise, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `enterprise.Intercept(f(g(h())))`.
+func (c *EnterpriseClient) Intercept(interceptors ...Interceptor) {
+	c.inters.Enterprise = append(c.inters.Enterprise, interceptors...)
+}
+
+// Create returns a builder for creating a Enterprise entity.
+func (c *EnterpriseClient) Create() *EnterpriseCreate {
+	mutation := newEnterpriseMutation(c.config, OpCreate)
+	return &EnterpriseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of Enterprise entities.
+func (c *EnterpriseClient) CreateBulk(builders ...*EnterpriseCreate) *EnterpriseCreateBulk {
+	return &EnterpriseCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EnterpriseClient) MapCreateBulk(slice any, setFunc func(*EnterpriseCreate, int)) *EnterpriseCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EnterpriseCreateBulk{err: fmt.Errorf("calling to EnterpriseClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EnterpriseCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EnterpriseCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for Enterprise.
+func (c *EnterpriseClient) Update() *EnterpriseUpdate {
+	mutation := newEnterpriseMutation(c.config, OpUpdate)
+	return &EnterpriseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EnterpriseClient) UpdateOne(_m *Enterprise) *EnterpriseUpdateOne {
+	mutation := newEnterpriseMutation(c.config, OpUpdateOne, withEnterprise(_m))
+	return &EnterpriseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EnterpriseClient) UpdateOneID(id int) *EnterpriseUpdateOne {
+	mutation := newEnterpriseMutation(c.config, OpUpdateOne, withEnterpriseID(id))
+	return &EnterpriseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for Enterprise.
+func (c *EnterpriseClient) Delete() *EnterpriseDelete {
+	mutation := newEnterpriseMutation(c.config, OpDelete)
+	return &EnterpriseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EnterpriseClient) DeleteOne(_m *Enterprise) *EnterpriseDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EnterpriseClient) DeleteOneID(id int) *EnterpriseDeleteOne {
+	builder := c.Delete().Where(enterprise.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EnterpriseDeleteOne{builder}
+}
+
+// Query returns a query builder for Enterprise.
+func (c *EnterpriseClient) Query() *EnterpriseQuery {
+	return &EnterpriseQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEnterprise},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a Enterprise entity by its id.
+func (c *EnterpriseClient) Get(ctx context.Context, id int) (*Enterprise, error) {
+	return c.Query().Where(enterprise.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EnterpriseClient) GetX(ctx context.Context, id int) *Enterprise {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *EnterpriseClient) Hooks() []Hook {
+	return c.hooks.Enterprise
+}
+
+// Interceptors returns the client interceptors.
+func (c *EnterpriseClient) Interceptors() []Interceptor {
+	return c.inters.Enterprise
+}
+
+func (c *EnterpriseClient) mutate(ctx context.Context, m *EnterpriseMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EnterpriseCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EnterpriseUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EnterpriseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EnterpriseDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown Enterprise mutation op: %q", m.Op())
+	}
+}
+
+// EnterpriseCertificationClient is a client for the EnterpriseCertification schema.
+type EnterpriseCertificationClient struct {
+	config
+}
+
+// NewEnterpriseCertificationClient returns a client for the EnterpriseCertification from the given config.
+func NewEnterpriseCertificationClient(c config) *EnterpriseCertificationClient {
+	return &EnterpriseCertificationClient{config: c}
+}
+
+// Use adds a list of mutation hooks to the hooks stack.
+// A call to `Use(f, g, h)` equals to `enterprisecertification.Hooks(f(g(h())))`.
+func (c *EnterpriseCertificationClient) Use(hooks ...Hook) {
+	c.hooks.EnterpriseCertification = append(c.hooks.EnterpriseCertification, hooks...)
+}
+
+// Intercept adds a list of query interceptors to the interceptors stack.
+// A call to `Intercept(f, g, h)` equals to `enterprisecertification.Intercept(f(g(h())))`.
+func (c *EnterpriseCertificationClient) Intercept(interceptors ...Interceptor) {
+	c.inters.EnterpriseCertification = append(c.inters.EnterpriseCertification, interceptors...)
+}
+
+// Create returns a builder for creating a EnterpriseCertification entity.
+func (c *EnterpriseCertificationClient) Create() *EnterpriseCertificationCreate {
+	mutation := newEnterpriseCertificationMutation(c.config, OpCreate)
+	return &EnterpriseCertificationCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// CreateBulk returns a builder for creating a bulk of EnterpriseCertification entities.
+func (c *EnterpriseCertificationClient) CreateBulk(builders ...*EnterpriseCertificationCreate) *EnterpriseCertificationCreateBulk {
+	return &EnterpriseCertificationCreateBulk{config: c.config, builders: builders}
+}
+
+// MapCreateBulk creates a bulk creation builder from the given slice. For each item in the slice, the function creates
+// a builder and applies setFunc on it.
+func (c *EnterpriseCertificationClient) MapCreateBulk(slice any, setFunc func(*EnterpriseCertificationCreate, int)) *EnterpriseCertificationCreateBulk {
+	rv := reflect.ValueOf(slice)
+	if rv.Kind() != reflect.Slice {
+		return &EnterpriseCertificationCreateBulk{err: fmt.Errorf("calling to EnterpriseCertificationClient.MapCreateBulk with wrong type %T, need slice", slice)}
+	}
+	builders := make([]*EnterpriseCertificationCreate, rv.Len())
+	for i := 0; i < rv.Len(); i++ {
+		builders[i] = c.Create()
+		setFunc(builders[i], i)
+	}
+	return &EnterpriseCertificationCreateBulk{config: c.config, builders: builders}
+}
+
+// Update returns an update builder for EnterpriseCertification.
+func (c *EnterpriseCertificationClient) Update() *EnterpriseCertificationUpdate {
+	mutation := newEnterpriseCertificationMutation(c.config, OpUpdate)
+	return &EnterpriseCertificationUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOne returns an update builder for the given entity.
+func (c *EnterpriseCertificationClient) UpdateOne(_m *EnterpriseCertification) *EnterpriseCertificationUpdateOne {
+	mutation := newEnterpriseCertificationMutation(c.config, OpUpdateOne, withEnterpriseCertification(_m))
+	return &EnterpriseCertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// UpdateOneID returns an update builder for the given id.
+func (c *EnterpriseCertificationClient) UpdateOneID(id int) *EnterpriseCertificationUpdateOne {
+	mutation := newEnterpriseCertificationMutation(c.config, OpUpdateOne, withEnterpriseCertificationID(id))
+	return &EnterpriseCertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// Delete returns a delete builder for EnterpriseCertification.
+func (c *EnterpriseCertificationClient) Delete() *EnterpriseCertificationDelete {
+	mutation := newEnterpriseCertificationMutation(c.config, OpDelete)
+	return &EnterpriseCertificationDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+}
+
+// DeleteOne returns a builder for deleting the given entity.
+func (c *EnterpriseCertificationClient) DeleteOne(_m *EnterpriseCertification) *EnterpriseCertificationDeleteOne {
+	return c.DeleteOneID(_m.ID)
+}
+
+// DeleteOneID returns a builder for deleting the given entity by its id.
+func (c *EnterpriseCertificationClient) DeleteOneID(id int) *EnterpriseCertificationDeleteOne {
+	builder := c.Delete().Where(enterprisecertification.ID(id))
+	builder.mutation.id = &id
+	builder.mutation.op = OpDeleteOne
+	return &EnterpriseCertificationDeleteOne{builder}
+}
+
+// Query returns a query builder for EnterpriseCertification.
+func (c *EnterpriseCertificationClient) Query() *EnterpriseCertificationQuery {
+	return &EnterpriseCertificationQuery{
+		config: c.config,
+		ctx:    &QueryContext{Type: TypeEnterpriseCertification},
+		inters: c.Interceptors(),
+	}
+}
+
+// Get returns a EnterpriseCertification entity by its id.
+func (c *EnterpriseCertificationClient) Get(ctx context.Context, id int) (*EnterpriseCertification, error) {
+	return c.Query().Where(enterprisecertification.ID(id)).Only(ctx)
+}
+
+// GetX is like Get, but panics if an error occurs.
+func (c *EnterpriseCertificationClient) GetX(ctx context.Context, id int) *EnterpriseCertification {
+	obj, err := c.Get(ctx, id)
+	if err != nil {
+		panic(err)
+	}
+	return obj
+}
+
+// Hooks returns the client hooks.
+func (c *EnterpriseCertificationClient) Hooks() []Hook {
+	return c.hooks.EnterpriseCertification
+}
+
+// Interceptors returns the client interceptors.
+func (c *EnterpriseCertificationClient) Interceptors() []Interceptor {
+	return c.inters.EnterpriseCertification
+}
+
+func (c *EnterpriseCertificationClient) mutate(ctx context.Context, m *EnterpriseCertificationMutation) (Value, error) {
+	switch m.Op() {
+	case OpCreate:
+		return (&EnterpriseCertificationCreate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdate:
+		return (&EnterpriseCertificationUpdate{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpUpdateOne:
+		return (&EnterpriseCertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: m}).Save(ctx)
+	case OpDelete, OpDeleteOne:
+		return (&EnterpriseCertificationDelete{config: c.config, hooks: c.Hooks(), mutation: m}).Exec(ctx)
+	default:
+		return nil, fmt.Errorf("ent: unknown EnterpriseCertification mutation op: %q", m.Op())
+	}
+}
+
 // hooks and interceptors per client, for fast access.
 type (
 	hooks struct {
-		Certification, Document []ent.Hook
+		Certification, Document, Enterprise, EnterpriseCertification []ent.Hook
 	}
 	inters struct {
-		Certification, Document []ent.Interceptor
+		Certification, Document, Enterprise, EnterpriseCertification []ent.Interceptor
 	}
 )
 

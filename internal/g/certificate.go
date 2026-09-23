@@ -11,23 +11,15 @@ import (
 	"auroraride.com/edocseal/ca"
 )
 
-var (
-	rootCrt *Certificate
-)
-
 // Certificate 证书配置
 type Certificate struct {
 	certificate *x509.Certificate
 	privateKey  *rsa.PrivateKey
 }
 
-// NewCertificate 获取证书
-func NewCertificate() (root *Certificate) {
-	if rootCrt == nil {
-		rootCrt = loadCertificate(cfg.RootCertificate)
-	}
-
-	return rootCrt
+// LoadRootCertificate 每次从文件读取根证书，替换文件后无需重启
+func LoadRootCertificate() *Certificate {
+	return loadCertificate(cfg.RootCertificate)
 }
 
 // 加载证书

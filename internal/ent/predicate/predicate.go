@@ -11,3 +11,9 @@ type Certification func(*sql.Selector)
 
 // Document is the predicate function for document builders.
 type Document func(*sql.Selector)
+
+// Enterprise is the predicate function for enterprise builders.
+type Enterprise func(*sql.Selector)
+
+// EnterpriseCertification is the predicate function for enterprisecertification builders.
+type EnterpriseCertification func(*sql.Selector)

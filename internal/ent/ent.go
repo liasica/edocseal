@@ -11,6 +11,8 @@ import (
 
 	"auroraride.com/edocseal/internal/ent/certification"
 	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/ent/enterprise"
+	"auroraride.com/edocseal/internal/ent/enterprisecertification"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -74,8 +76,10 @@ var (
 func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
-			certification.Table: certification.ValidColumn,
-			document.Table:      document.ValidColumn,
+			certification.Table:           certification.ValidColumn,
+			document.Table:                document.ValidColumn,
+			enterprise.Table:              enterprise.ValidColumn,
+			enterprisecertification.Table: enterprisecertification.ValidColumn,
 		})
 	})
 	return columnCheck(t, c)

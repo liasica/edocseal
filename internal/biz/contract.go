@@ -390,9 +390,30 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 		return
 	}
 
-	// 获取证书
+	issuer := ResolveCertificateIssuer(req.CertificateIssuer)
+
+	// 获取签约企业、企业证书与签章
+	var ep *ent.Enterprise
+	ep, err = QueryEnterprise(req.EnterpriseCode)
+	if err != nil {
+		return
+	}
+
+	var ec *ent.EnterpriseCertification
+	ec, err = EnterpriseCertificate(ep, issuer)
+	if err != nil {
+		return
+	}
+
+	var sealPath string
+	sealPath, err = EnterpriseSealPath(ep.CreditCode)
+	if err != nil {
+		return
+	}
+
+	// 获取个人证书
 	var cert *ent.Certification
-	cert, err = RequestCertificae(req.CertificateIssuer, req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
+	cert, err = RequestCertificae(issuer, req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
 	if err != nil {
 		return
 	}
@@ -406,10 +427,9 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 	unsigned, _ := filepath.Abs(doc.Paths.UnSigned)
 	imgPath, _ := filepath.Abs(doc.Paths.Image)
 
-	ec := g.GetEnterpriseConfig()
-	eSeal, _ := filepath.Abs(ec.Seal)
-	eKey, _ := filepath.Abs(ec.PrivateKey)
-	eCert, _ := filepath.Abs(ec.Certificate)
+	eSeal, _ := filepath.Abs(sealPath)
+	eKey, _ := filepath.Abs(ec.PrivatePath)
+	eCert, _ := filepath.Abs(ec.CertPath)
 
 	sb, _ := jsoniter.Marshal(&model.Sign{
 		TemplateID: doc.TemplateID,

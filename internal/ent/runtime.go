@@ -5,6 +5,8 @@ package ent
 import (
 	"auroraride.com/edocseal/internal/ent/certification"
 	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/ent/enterprise"
+	"auroraride.com/edocseal/internal/ent/enterprisecertification"
 	"auroraride.com/edocseal/internal/ent/schema"
 )
 
@@ -38,4 +40,56 @@ func init() {
 	documentDescIDCardNumber := documentFields[4].Descriptor()
 	// document.IDCardNumberValidator is a validator for the "id_card_number" field. It is called by the builders before save.
 	document.IDCardNumberValidator = documentDescIDCardNumber.Validators[0].(func(string) error)
+	enterpriseFields := schema.Enterprise{}.Fields()
+	_ = enterpriseFields
+	// enterpriseDescCreditCode is the schema descriptor for credit_code field.
+	enterpriseDescCreditCode := enterpriseFields[0].Descriptor()
+	// enterprise.CreditCodeValidator is a validator for the "credit_code" field. It is called by the builders before save.
+	enterprise.CreditCodeValidator = enterpriseDescCreditCode.Validators[0].(func(string) error)
+	// enterpriseDescName is the schema descriptor for name field.
+	enterpriseDescName := enterpriseFields[1].Descriptor()
+	// enterprise.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	enterprise.NameValidator = enterpriseDescName.Validators[0].(func(string) error)
+	// enterpriseDescProvince is the schema descriptor for province field.
+	enterpriseDescProvince := enterpriseFields[2].Descriptor()
+	// enterprise.ProvinceValidator is a validator for the "province" field. It is called by the builders before save.
+	enterprise.ProvinceValidator = enterpriseDescProvince.Validators[0].(func(string) error)
+	// enterpriseDescCity is the schema descriptor for city field.
+	enterpriseDescCity := enterpriseFields[3].Descriptor()
+	// enterprise.CityValidator is a validator for the "city" field. It is called by the builders before save.
+	enterprise.CityValidator = enterpriseDescCity.Validators[0].(func(string) error)
+	// enterpriseDescPersonName is the schema descriptor for person_name field.
+	enterpriseDescPersonName := enterpriseFields[4].Descriptor()
+	// enterprise.PersonNameValidator is a validator for the "person_name" field. It is called by the builders before save.
+	enterprise.PersonNameValidator = enterpriseDescPersonName.Validators[0].(func(string) error)
+	// enterpriseDescPhone is the schema descriptor for phone field.
+	enterpriseDescPhone := enterpriseFields[5].Descriptor()
+	// enterprise.PhoneValidator is a validator for the "phone" field. It is called by the builders before save.
+	enterprise.PhoneValidator = enterpriseDescPhone.Validators[0].(func(string) error)
+	// enterpriseDescIdcard is the schema descriptor for idcard field.
+	enterpriseDescIdcard := enterpriseFields[6].Descriptor()
+	// enterprise.IdcardValidator is a validator for the "idcard" field. It is called by the builders before save.
+	enterprise.IdcardValidator = enterpriseDescIdcard.Validators[0].(func(string) error)
+	// enterpriseDescIsDefault is the schema descriptor for is_default field.
+	enterpriseDescIsDefault := enterpriseFields[7].Descriptor()
+	// enterprise.DefaultIsDefault holds the default value on creation for the is_default field.
+	enterprise.DefaultIsDefault = enterpriseDescIsDefault.Default.(bool)
+	enterprisecertificationFields := schema.EnterpriseCertification{}.Fields()
+	_ = enterprisecertificationFields
+	// enterprisecertificationDescCreditCode is the schema descriptor for credit_code field.
+	enterprisecertificationDescCreditCode := enterprisecertificationFields[0].Descriptor()
+	// enterprisecertification.CreditCodeValidator is a validator for the "credit_code" field. It is called by the builders before save.
+	enterprisecertification.CreditCodeValidator = enterprisecertificationDescCreditCode.Validators[0].(func(string) error)
+	// enterprisecertificationDescIssuer is the schema descriptor for issuer field.
+	enterprisecertificationDescIssuer := enterprisecertificationFields[1].Descriptor()
+	// enterprisecertification.IssuerValidator is a validator for the "issuer" field. It is called by the builders before save.
+	enterprisecertification.IssuerValidator = enterprisecertificationDescIssuer.Validators[0].(func(string) error)
+	// enterprisecertificationDescPrivatePath is the schema descriptor for private_path field.
+	enterprisecertificationDescPrivatePath := enterprisecertificationFields[2].Descriptor()
+	// enterprisecertification.PrivatePathValidator is a validator for the "private_path" field. It is called by the builders before save.
+	enterprisecertification.PrivatePathValidator = enterprisecertificationDescPrivatePath.Validators[0].(func(string) error)
+	// enterprisecertificationDescCertPath is the schema descriptor for cert_path field.
+	enterprisecertificationDescCertPath := enterprisecertificationFields[3].Descriptor()
+	// enterprisecertification.CertPathValidator is a validator for the "cert_path" field. It is called by the builders before save.
+	enterprisecertification.CertPathValidator = enterprisecertificationDescCertPath.Validators[0].(func(string) error)
 }

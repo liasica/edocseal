@@ -571,6 +571,7 @@ type ContractServiceSignRequest struct {
 	Phone             string                 `protobuf:"bytes,7,opt,name=phone,proto3" json:"phone,omitempty"`                                                  // 手机号
 	Idcard            string                 `protobuf:"bytes,8,opt,name=idcard,proto3" json:"idcard,omitempty"`                                                // 身份证号
 	CertificateIssuer string                 `protobuf:"bytes,9,opt,name=certificate_issuer,json=certificateIssuer,proto3" json:"certificate_issuer,omitempty"` // 证书生成方式：SELF 自签、SNCA 陕西CA、SNCA_V2 陕西CA 新接口，为空时按服务配置
+	EnterpriseCode    string                 `protobuf:"bytes,10,opt,name=enterprise_code,json=enterpriseCode,proto3" json:"enterprise_code,omitempty"`         // 签约企业统一社会信用代码，为空时使用默认企业
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -664,6 +665,13 @@ func (x *ContractServiceSignRequest) GetIdcard() string {
 func (x *ContractServiceSignRequest) GetCertificateIssuer() string {
 	if x != nil {
 		return x.CertificateIssuer
+	}
+	return ""
+}
+
+func (x *ContractServiceSignRequest) GetEnterpriseCode() string {
+	if x != nil {
+		return x.EnterpriseCode
 	}
 	return ""
 }
@@ -765,7 +773,7 @@ const file_contract_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\v2\x15.pb.ContractFormFieldR\x05value:\x028\x01\"H\n" +
 	"\x1dContractServiceCreateResponse\x12\x10\n" +
 	"\x03url\x18\x01 \x01(\tR\x03url\x12\x15\n" +
-	"\x06doc_id\x18\x02 \x01(\tR\x05docId\"\x84\x02\n" +
+	"\x06doc_id\x18\x02 \x01(\tR\x05docId\"\xad\x02\n" +
 	"\x1aContractServiceSignRequest\x12\x15\n" +
 	"\x06doc_id\x18\x01 \x01(\tR\x05docId\x12\x14\n" +
 	"\x05image\x18\x02 \x01(\tR\x05image\x12\x12\n" +
@@ -775,7 +783,9 @@ const file_contract_proto_rawDesc = "" +
 	"\aaddress\x18\x06 \x01(\tR\aaddress\x12\x14\n" +
 	"\x05phone\x18\a \x01(\tR\x05phone\x12\x16\n" +
 	"\x06idcard\x18\b \x01(\tR\x06idcard\x12-\n" +
-	"\x12certificate_issuer\x18\t \x01(\tR\x11certificateIssuer\"q\n" +
+	"\x12certificate_issuer\x18\t \x01(\tR\x11certificateIssuer\x12'\n" +
+	"\x0fenterprise_code\x18\n" +
+	" \x01(\tR\x0eenterpriseCode\"q\n" +
 	"\x1bContractServiceSignResponse\x12&\n" +
 	"\x06status\x18\x01 \x01(\x0e2\x0e.pb.SignStatusR\x06status\x12\x10\n" +
 	"\x03url\x18\x02 \x01(\tR\x03url\x12\x18\n" +

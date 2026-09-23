@@ -18,6 +18,10 @@ type Tx struct {
 	Certification *CertificationClient
 	// Document is the client for interacting with the Document builders.
 	Document *DocumentClient
+	// Enterprise is the client for interacting with the Enterprise builders.
+	Enterprise *EnterpriseClient
+	// EnterpriseCertification is the client for interacting with the EnterpriseCertification builders.
+	EnterpriseCertification *EnterpriseCertificationClient
 
 	// lazily loaded.
 	client     *Client
@@ -151,6 +155,8 @@ func (tx *Tx) Client() *Client {
 func (tx *Tx) init() {
 	tx.Certification = NewCertificationClient(tx.config)
 	tx.Document = NewDocumentClient(tx.config)
+	tx.Enterprise = NewEnterpriseClient(tx.config)
+	tx.EnterpriseCertification = NewEnterpriseCertificationClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
