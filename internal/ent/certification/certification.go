@@ -19,6 +19,8 @@ const (
 	FieldCertPath = "cert_path"
 	// FieldExpiresAt holds the string denoting the expires_at field in the database.
 	FieldExpiresAt = "expires_at"
+	// FieldIssuer holds the string denoting the issuer field in the database.
+	FieldIssuer = "issuer"
 	// Table holds the table name of the certification in the database.
 	Table = "certification"
 )
@@ -30,6 +32,7 @@ var Columns = []string{
 	FieldPrivatePath,
 	FieldCertPath,
 	FieldExpiresAt,
+	FieldIssuer,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -49,6 +52,10 @@ var (
 	PrivatePathValidator func(string) error
 	// CertPathValidator is a validator for the "cert_path" field. It is called by the builders before save.
 	CertPathValidator func(string) error
+	// DefaultIssuer holds the default value on creation for the "issuer" field.
+	DefaultIssuer string
+	// IssuerValidator is a validator for the "issuer" field. It is called by the builders before save.
+	IssuerValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Certification queries.
@@ -77,4 +84,9 @@ func ByCertPath(opts ...sql.OrderTermOption) OrderOption {
 // ByExpiresAt orders the results by the expires_at field.
 func ByExpiresAt(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldExpiresAt, opts...).ToFunc()
+}
+
+// ByIssuer orders the results by the issuer field.
+func ByIssuer(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldIssuer, opts...).ToFunc()
 }

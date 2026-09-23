@@ -8,10 +8,10 @@ import (
 	"fmt"
 	"time"
 
+	"auroraride.com/edocseal/internal/ent/certification"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"auroraride.com/edocseal/internal/ent/certification"
 )
 
 // CertificationCreate is the builder for creating a Certification entity.
@@ -23,42 +23,57 @@ type CertificationCreate struct {
 }
 
 // SetIDCardNumber sets the "id_card_number" field.
-func (cc *CertificationCreate) SetIDCardNumber(s string) *CertificationCreate {
-	cc.mutation.SetIDCardNumber(s)
-	return cc
+func (_c *CertificationCreate) SetIDCardNumber(v string) *CertificationCreate {
+	_c.mutation.SetIDCardNumber(v)
+	return _c
 }
 
 // SetPrivatePath sets the "private_path" field.
-func (cc *CertificationCreate) SetPrivatePath(s string) *CertificationCreate {
-	cc.mutation.SetPrivatePath(s)
-	return cc
+func (_c *CertificationCreate) SetPrivatePath(v string) *CertificationCreate {
+	_c.mutation.SetPrivatePath(v)
+	return _c
 }
 
 // SetCertPath sets the "cert_path" field.
-func (cc *CertificationCreate) SetCertPath(s string) *CertificationCreate {
-	cc.mutation.SetCertPath(s)
-	return cc
+func (_c *CertificationCreate) SetCertPath(v string) *CertificationCreate {
+	_c.mutation.SetCertPath(v)
+	return _c
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (cc *CertificationCreate) SetExpiresAt(t time.Time) *CertificationCreate {
-	cc.mutation.SetExpiresAt(t)
-	return cc
+func (_c *CertificationCreate) SetExpiresAt(v time.Time) *CertificationCreate {
+	_c.mutation.SetExpiresAt(v)
+	return _c
+}
+
+// SetIssuer sets the "issuer" field.
+func (_c *CertificationCreate) SetIssuer(v string) *CertificationCreate {
+	_c.mutation.SetIssuer(v)
+	return _c
+}
+
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (_c *CertificationCreate) SetNillableIssuer(v *string) *CertificationCreate {
+	if v != nil {
+		_c.SetIssuer(*v)
+	}
+	return _c
 }
 
 // Mutation returns the CertificationMutation object of the builder.
-func (cc *CertificationCreate) Mutation() *CertificationMutation {
-	return cc.mutation
+func (_c *CertificationCreate) Mutation() *CertificationMutation {
+	return _c.mutation
 }
 
 // Save creates the Certification in the database.
-func (cc *CertificationCreate) Save(ctx context.Context) (*Certification, error) {
-	return withHooks(ctx, cc.sqlSave, cc.mutation, cc.hooks)
+func (_c *CertificationCreate) Save(ctx context.Context) (*Certification, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CertificationCreate) SaveX(ctx context.Context) *Certification {
-	v, err := cc.Save(ctx)
+func (_c *CertificationCreate) SaveX(ctx context.Context) *Certification {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -66,56 +81,72 @@ func (cc *CertificationCreate) SaveX(ctx context.Context) *Certification {
 }
 
 // Exec executes the query.
-func (cc *CertificationCreate) Exec(ctx context.Context) error {
-	_, err := cc.Save(ctx)
+func (_c *CertificationCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CertificationCreate) ExecX(ctx context.Context) {
-	if err := cc.Exec(ctx); err != nil {
+func (_c *CertificationCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
+// defaults sets the default values of the builder before save.
+func (_c *CertificationCreate) defaults() {
+	if _, ok := _c.mutation.Issuer(); !ok {
+		v := certification.DefaultIssuer
+		_c.mutation.SetIssuer(v)
+	}
+}
+
 // check runs all checks and user-defined validators on the builder.
-func (cc *CertificationCreate) check() error {
-	if _, ok := cc.mutation.IDCardNumber(); !ok {
+func (_c *CertificationCreate) check() error {
+	if _, ok := _c.mutation.IDCardNumber(); !ok {
 		return &ValidationError{Name: "id_card_number", err: errors.New(`ent: missing required field "Certification.id_card_number"`)}
 	}
-	if v, ok := cc.mutation.IDCardNumber(); ok {
+	if v, ok := _c.mutation.IDCardNumber(); ok {
 		if err := certification.IDCardNumberValidator(v); err != nil {
 			return &ValidationError{Name: "id_card_number", err: fmt.Errorf(`ent: validator failed for field "Certification.id_card_number": %w`, err)}
 		}
 	}
-	if _, ok := cc.mutation.PrivatePath(); !ok {
+	if _, ok := _c.mutation.PrivatePath(); !ok {
 		return &ValidationError{Name: "private_path", err: errors.New(`ent: missing required field "Certification.private_path"`)}
 	}
-	if v, ok := cc.mutation.PrivatePath(); ok {
+	if v, ok := _c.mutation.PrivatePath(); ok {
 		if err := certification.PrivatePathValidator(v); err != nil {
 			return &ValidationError{Name: "private_path", err: fmt.Errorf(`ent: validator failed for field "Certification.private_path": %w`, err)}
 		}
 	}
-	if _, ok := cc.mutation.CertPath(); !ok {
+	if _, ok := _c.mutation.CertPath(); !ok {
 		return &ValidationError{Name: "cert_path", err: errors.New(`ent: missing required field "Certification.cert_path"`)}
 	}
-	if v, ok := cc.mutation.CertPath(); ok {
+	if v, ok := _c.mutation.CertPath(); ok {
 		if err := certification.CertPathValidator(v); err != nil {
 			return &ValidationError{Name: "cert_path", err: fmt.Errorf(`ent: validator failed for field "Certification.cert_path": %w`, err)}
 		}
 	}
-	if _, ok := cc.mutation.ExpiresAt(); !ok {
+	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expires_at", err: errors.New(`ent: missing required field "Certification.expires_at"`)}
+	}
+	if _, ok := _c.mutation.Issuer(); !ok {
+		return &ValidationError{Name: "issuer", err: errors.New(`ent: missing required field "Certification.issuer"`)}
+	}
+	if v, ok := _c.mutation.Issuer(); ok {
+		if err := certification.IssuerValidator(v); err != nil {
+			return &ValidationError{Name: "issuer", err: fmt.Errorf(`ent: validator failed for field "Certification.issuer": %w`, err)}
+		}
 	}
 	return nil
 }
 
-func (cc *CertificationCreate) sqlSave(ctx context.Context) (*Certification, error) {
-	if err := cc.check(); err != nil {
+func (_c *CertificationCreate) sqlSave(ctx context.Context) (*Certification, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := cc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -123,32 +154,36 @@ func (cc *CertificationCreate) sqlSave(ctx context.Context) (*Certification, err
 	}
 	id := _spec.ID.Value.(int64)
 	_node.ID = int(id)
-	cc.mutation.id = &_node.ID
-	cc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpec) {
+func (_c *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Certification{config: cc.config}
+		_node = &Certification{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(certification.Table, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
 	)
-	_spec.OnConflict = cc.conflict
-	if value, ok := cc.mutation.IDCardNumber(); ok {
+	_spec.OnConflict = _c.conflict
+	if value, ok := _c.mutation.IDCardNumber(); ok {
 		_spec.SetField(certification.FieldIDCardNumber, field.TypeString, value)
 		_node.IDCardNumber = value
 	}
-	if value, ok := cc.mutation.PrivatePath(); ok {
+	if value, ok := _c.mutation.PrivatePath(); ok {
 		_spec.SetField(certification.FieldPrivatePath, field.TypeString, value)
 		_node.PrivatePath = value
 	}
-	if value, ok := cc.mutation.CertPath(); ok {
+	if value, ok := _c.mutation.CertPath(); ok {
 		_spec.SetField(certification.FieldCertPath, field.TypeString, value)
 		_node.CertPath = value
 	}
-	if value, ok := cc.mutation.ExpiresAt(); ok {
+	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(certification.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
+	}
+	if value, ok := _c.mutation.Issuer(); ok {
+		_spec.SetField(certification.FieldIssuer, field.TypeString, value)
+		_node.Issuer = value
 	}
 	return _node, _spec
 }
@@ -169,10 +204,10 @@ func (cc *CertificationCreate) createSpec() (*Certification, *sqlgraph.CreateSpe
 //			SetIDCardNumber(v+v).
 //		}).
 //		Exec(ctx)
-func (cc *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertOne {
-	cc.conflict = opts
+func (_c *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertOne {
+	_c.conflict = opts
 	return &CertificationUpsertOne{
-		create: cc,
+		create: _c,
 	}
 }
 
@@ -182,10 +217,10 @@ func (cc *CertificationCreate) OnConflict(opts ...sql.ConflictOption) *Certifica
 //	client.Certification.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (cc *CertificationCreate) OnConflictColumns(columns ...string) *CertificationUpsertOne {
-	cc.conflict = append(cc.conflict, sql.ConflictColumns(columns...))
+func (_c *CertificationCreate) OnConflictColumns(columns ...string) *CertificationUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertificationUpsertOne{
-		create: cc,
+		create: _c,
 	}
 }
 
@@ -247,6 +282,18 @@ func (u *CertificationUpsert) SetExpiresAt(v time.Time) *CertificationUpsert {
 // UpdateExpiresAt sets the "expires_at" field to the value that was provided on create.
 func (u *CertificationUpsert) UpdateExpiresAt() *CertificationUpsert {
 	u.SetExcluded(certification.FieldExpiresAt)
+	return u
+}
+
+// SetIssuer sets the "issuer" field.
+func (u *CertificationUpsert) SetIssuer(v string) *CertificationUpsert {
+	u.Set(certification.FieldIssuer, v)
+	return u
+}
+
+// UpdateIssuer sets the "issuer" field to the value that was provided on create.
+func (u *CertificationUpsert) UpdateIssuer() *CertificationUpsert {
+	u.SetExcluded(certification.FieldIssuer)
 	return u
 }
 
@@ -346,6 +393,20 @@ func (u *CertificationUpsertOne) UpdateExpiresAt() *CertificationUpsertOne {
 	})
 }
 
+// SetIssuer sets the "issuer" field.
+func (u *CertificationUpsertOne) SetIssuer(v string) *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetIssuer(v)
+	})
+}
+
+// UpdateIssuer sets the "issuer" field to the value that was provided on create.
+func (u *CertificationUpsertOne) UpdateIssuer() *CertificationUpsertOne {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateIssuer()
+	})
+}
+
 // Exec executes the query.
 func (u *CertificationUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
@@ -396,16 +457,17 @@ type CertificationCreateBulk struct {
 }
 
 // Save creates the Certification entities in the database.
-func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification, error) {
-	if ccb.err != nil {
-		return nil, ccb.err
+func (_c *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Certification, len(ccb.builders))
-	mutators := make([]Mutator, len(ccb.builders))
-	for i := range ccb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Certification, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := ccb.builders[i]
+			builder := _c.builders[i]
+			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*CertificationMutation)
 				if !ok {
@@ -418,12 +480,12 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, ccb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = ccb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, ccb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -447,7 +509,7 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, ccb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -455,8 +517,8 @@ func (ccb *CertificationCreateBulk) Save(ctx context.Context) ([]*Certification,
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CertificationCreateBulk) SaveX(ctx context.Context) []*Certification {
-	v, err := ccb.Save(ctx)
+func (_c *CertificationCreateBulk) SaveX(ctx context.Context) []*Certification {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -464,14 +526,14 @@ func (ccb *CertificationCreateBulk) SaveX(ctx context.Context) []*Certification 
 }
 
 // Exec executes the query.
-func (ccb *CertificationCreateBulk) Exec(ctx context.Context) error {
-	_, err := ccb.Save(ctx)
+func (_c *CertificationCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CertificationCreateBulk) ExecX(ctx context.Context) {
-	if err := ccb.Exec(ctx); err != nil {
+func (_c *CertificationCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -491,10 +553,10 @@ func (ccb *CertificationCreateBulk) ExecX(ctx context.Context) {
 //			SetIDCardNumber(v+v).
 //		}).
 //		Exec(ctx)
-func (ccb *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertBulk {
-	ccb.conflict = opts
+func (_c *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *CertificationUpsertBulk {
+	_c.conflict = opts
 	return &CertificationUpsertBulk{
-		create: ccb,
+		create: _c,
 	}
 }
 
@@ -504,10 +566,10 @@ func (ccb *CertificationCreateBulk) OnConflict(opts ...sql.ConflictOption) *Cert
 //	client.Certification.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (ccb *CertificationCreateBulk) OnConflictColumns(columns ...string) *CertificationUpsertBulk {
-	ccb.conflict = append(ccb.conflict, sql.ConflictColumns(columns...))
+func (_c *CertificationCreateBulk) OnConflictColumns(columns ...string) *CertificationUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &CertificationUpsertBulk{
-		create: ccb,
+		create: _c,
 	}
 }
 
@@ -610,6 +672,20 @@ func (u *CertificationUpsertBulk) SetExpiresAt(v time.Time) *CertificationUpsert
 func (u *CertificationUpsertBulk) UpdateExpiresAt() *CertificationUpsertBulk {
 	return u.Update(func(s *CertificationUpsert) {
 		s.UpdateExpiresAt()
+	})
+}
+
+// SetIssuer sets the "issuer" field.
+func (u *CertificationUpsertBulk) SetIssuer(v string) *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.SetIssuer(v)
+	})
+}
+
+// UpdateIssuer sets the "issuer" field to the value that was provided on create.
+func (u *CertificationUpsertBulk) UpdateIssuer() *CertificationUpsertBulk {
+	return u.Update(func(s *CertificationUpsert) {
+		s.UpdateIssuer()
 	})
 }
 

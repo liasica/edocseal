@@ -11,11 +11,11 @@ import (
 
 	"auroraride.com/edocseal/internal/ent/migrate"
 
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/document"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"auroraride.com/edocseal/internal/ent/certification"
-	"auroraride.com/edocseal/internal/ent/document"
 
 	stdsql "database/sql"
 )
@@ -263,8 +263,8 @@ func (c *CertificationClient) Update() *CertificationUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CertificationClient) UpdateOne(ce *Certification) *CertificationUpdateOne {
-	mutation := newCertificationMutation(c.config, OpUpdateOne, withCertification(ce))
+func (c *CertificationClient) UpdateOne(_m *Certification) *CertificationUpdateOne {
+	mutation := newCertificationMutation(c.config, OpUpdateOne, withCertification(_m))
 	return &CertificationUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -281,8 +281,8 @@ func (c *CertificationClient) Delete() *CertificationDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *CertificationClient) DeleteOne(ce *Certification) *CertificationDeleteOne {
-	return c.DeleteOneID(ce.ID)
+func (c *CertificationClient) DeleteOne(_m *Certification) *CertificationDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.
@@ -396,8 +396,8 @@ func (c *DocumentClient) Update() *DocumentUpdate {
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *DocumentClient) UpdateOne(d *Document) *DocumentUpdateOne {
-	mutation := newDocumentMutation(c.config, OpUpdateOne, withDocument(d))
+func (c *DocumentClient) UpdateOne(_m *Document) *DocumentUpdateOne {
+	mutation := newDocumentMutation(c.config, OpUpdateOne, withDocument(_m))
 	return &DocumentUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
@@ -414,8 +414,8 @@ func (c *DocumentClient) Delete() *DocumentDelete {
 }
 
 // DeleteOne returns a builder for deleting the given entity.
-func (c *DocumentClient) DeleteOne(d *Document) *DocumentDeleteOne {
-	return c.DeleteOneID(d.ID)
+func (c *DocumentClient) DeleteOne(_m *Document) *DocumentDeleteOne {
+	return c.DeleteOneID(_m.ID)
 }
 
 // DeleteOneID returns a builder for deleting the given entity by its id.

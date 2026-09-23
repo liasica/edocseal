@@ -24,6 +24,7 @@ import (
 	"auroraride.com/edocseal/internal/ent"
 	"auroraride.com/edocseal/internal/ent/certification"
 	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/model"
 	"auroraride.com/edocseal/third/snca"
 )
 
@@ -34,24 +35,40 @@ func CertificatePaths(idcard string) (keypath string, capath string) {
 	return filepath.Join(g.GetCertificateDir(), idcard+"_key.pem"), filepath.Join(g.GetCertificateDir(), idcard+"_cert.pem")
 }
 
-// RequestCertificae 申请证书
-func RequestCertificae(name, province, city, address, phone, idcard string) (cert *ent.Certification, err error) {
-	cert = queryCertification(idcard)
+// RequestCertificae 按证书生成方式申请证书，issuer 为空时按服务配置
+func RequestCertificae(
+	issuer string,
+	name string,
+	province string,
+	city string,
+	address string,
+	phone string,
+	idcard string,
+) (cert *ent.Certification, err error) {
+	if issuer == "" {
+		issuer = model.CertificateIssuerSnca
+		if g.IsSelfSign() {
+			issuer = model.CertificateIssuerSelf
+		}
+	}
+
+	// 生成方式切换后不复用其他方式签发的证书
+	cert = queryCertification(idcard, issuer)
 	if cert != nil {
 		return
 	}
 
 	var crt, key []byte
-	if g.IsSelfSign() {
+	switch issuer {
+	case model.CertificateIssuerSelf:
 		crt, key, err = selfIssueCertificate(name, province, city, address, phone, idcard)
-		if err != nil {
-			return
-		}
-	} else {
+	case model.CertificateIssuerSnca:
 		crt, key, err = agencyIssueCertificate(name, province, city, address, phone, idcard)
-		if err != nil {
-			return
-		}
+	default:
+		err = fmt.Errorf("不支持的证书生成方式: %s", issuer)
+	}
+	if err != nil {
+		return
 	}
 
 	kp, cp := CertificatePaths(idcard)
@@ -74,6 +91,7 @@ func RequestCertificae(name, province, city, address, phone, idcard string) (cer
 		SetPrivatePath(kp).
 		SetCertPath(cp).
 		SetExpiresAt(time.Now().Add(time.Hour*24 - time.Minute*10)). // 防止证书过期，有效期减少10分钟
+		SetIssuer(issuer).
 		OnConflictColumns(certification.FieldIDCardNumber).
 		UpdateNewValues().
 		Save(context.Background())
@@ -103,9 +121,13 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 }
 
 // 查询证书
-func queryCertification(idcard string) *ent.Certification {
+func queryCertification(idcard, issuer string) *ent.Certification {
 	cert, _ := ent.NewDatabase().Certification.Query().
-		Where(certification.IDCardNumber(idcard), certification.ExpiresAtGT(time.Now())).
+		Where(
+			certification.IDCardNumber(idcard),
+			certification.Issuer(issuer),
+			certification.ExpiresAtGT(time.Now()),
+		).
 		First(context.Background())
 
 	return cert

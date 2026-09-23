@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
+	"auroraride.com/edocseal/internal/ent/certification"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
-	"auroraride.com/edocseal/internal/ent/certification"
 )
 
 // Certification is the model entity for the Certification schema.
@@ -24,7 +24,9 @@ type Certification struct {
 	// 证书路径
 	CertPath string `json:"cert_path,omitempty"`
 	// 证书过期时间
-	ExpiresAt    time.Time `json:"expires_at,omitempty"`
+	ExpiresAt time.Time `json:"expires_at,omitempty"`
+	// 证书生成方式
+	Issuer       string `json:"issuer,omitempty"`
 	selectValues sql.SelectValues
 }
 
@@ -35,7 +37,7 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 		switch columns[i] {
 		case certification.FieldID:
 			values[i] = new(sql.NullInt64)
-		case certification.FieldIDCardNumber, certification.FieldPrivatePath, certification.FieldCertPath:
+		case certification.FieldIDCardNumber, certification.FieldPrivatePath, certification.FieldCertPath, certification.FieldIssuer:
 			values[i] = new(sql.NullString)
 		case certification.FieldExpiresAt:
 			values[i] = new(sql.NullTime)
@@ -48,7 +50,7 @@ func (*Certification) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Certification fields.
-func (c *Certification) assignValues(columns []string, values []any) error {
+func (_m *Certification) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -59,33 +61,39 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			c.ID = int(value.Int64)
+			_m.ID = int(value.Int64)
 		case certification.FieldIDCardNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id_card_number", values[i])
 			} else if value.Valid {
-				c.IDCardNumber = value.String
+				_m.IDCardNumber = value.String
 			}
 		case certification.FieldPrivatePath:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field private_path", values[i])
 			} else if value.Valid {
-				c.PrivatePath = value.String
+				_m.PrivatePath = value.String
 			}
 		case certification.FieldCertPath:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field cert_path", values[i])
 			} else if value.Valid {
-				c.CertPath = value.String
+				_m.CertPath = value.String
 			}
 		case certification.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				c.ExpiresAt = value.Time
+				_m.ExpiresAt = value.Time
+			}
+		case certification.FieldIssuer:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field issuer", values[i])
+			} else if value.Valid {
+				_m.Issuer = value.String
 			}
 		default:
-			c.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -93,44 +101,47 @@ func (c *Certification) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Certification.
 // This includes values selected through modifiers, order, etc.
-func (c *Certification) Value(name string) (ent.Value, error) {
-	return c.selectValues.Get(name)
+func (_m *Certification) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Certification.
 // Note that you need to call Certification.Unwrap() before calling this method if this Certification
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (c *Certification) Update() *CertificationUpdateOne {
-	return NewCertificationClient(c.config).UpdateOne(c)
+func (_m *Certification) Update() *CertificationUpdateOne {
+	return NewCertificationClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Certification entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (c *Certification) Unwrap() *Certification {
-	_tx, ok := c.config.driver.(*txDriver)
+func (_m *Certification) Unwrap() *Certification {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Certification is not a transactional entity")
 	}
-	c.config.driver = _tx.drv
-	return c
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (c *Certification) String() string {
+func (_m *Certification) String() string {
 	var builder strings.Builder
 	builder.WriteString("Certification(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", c.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("id_card_number=")
-	builder.WriteString(c.IDCardNumber)
+	builder.WriteString(_m.IDCardNumber)
 	builder.WriteString(", ")
 	builder.WriteString("private_path=")
-	builder.WriteString(c.PrivatePath)
+	builder.WriteString(_m.PrivatePath)
 	builder.WriteString(", ")
 	builder.WriteString("cert_path=")
-	builder.WriteString(c.CertPath)
+	builder.WriteString(_m.CertPath)
 	builder.WriteString(", ")
 	builder.WriteString("expires_at=")
-	builder.WriteString(c.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString(", ")
+	builder.WriteString("issuer=")
+	builder.WriteString(_m.Issuer)
 	builder.WriteByte(')')
 	return builder.String()
 }

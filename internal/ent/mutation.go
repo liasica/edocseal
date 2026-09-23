@@ -9,12 +9,12 @@ import (
 	"sync"
 	"time"
 
-	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql"
 	"auroraride.com/edocseal/internal/ent/certification"
 	"auroraride.com/edocseal/internal/ent/document"
 	"auroraride.com/edocseal/internal/ent/predicate"
 	"auroraride.com/edocseal/internal/model"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 )
 
 const (
@@ -40,6 +40,7 @@ type CertificationMutation struct {
 	private_path   *string
 	cert_path      *string
 	expires_at     *time.Time
+	issuer         *string
 	clearedFields  map[string]struct{}
 	done           bool
 	oldValue       func(context.Context) (*Certification, error)
@@ -288,6 +289,42 @@ func (m *CertificationMutation) ResetExpiresAt() {
 	m.expires_at = nil
 }
 
+// SetIssuer sets the "issuer" field.
+func (m *CertificationMutation) SetIssuer(s string) {
+	m.issuer = &s
+}
+
+// Issuer returns the value of the "issuer" field in the mutation.
+func (m *CertificationMutation) Issuer() (r string, exists bool) {
+	v := m.issuer
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIssuer returns the old "issuer" field's value of the Certification entity.
+// If the Certification object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *CertificationMutation) OldIssuer(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIssuer is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIssuer requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIssuer: %w", err)
+	}
+	return oldValue.Issuer, nil
+}
+
+// ResetIssuer resets all changes to the "issuer" field.
+func (m *CertificationMutation) ResetIssuer() {
+	m.issuer = nil
+}
+
 // Where appends a list predicates to the CertificationMutation builder.
 func (m *CertificationMutation) Where(ps ...predicate.Certification) {
 	m.predicates = append(m.predicates, ps...)
@@ -322,7 +359,7 @@ func (m *CertificationMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *CertificationMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 5)
 	if m.id_card_number != nil {
 		fields = append(fields, certification.FieldIDCardNumber)
 	}
@@ -334,6 +371,9 @@ func (m *CertificationMutation) Fields() []string {
 	}
 	if m.expires_at != nil {
 		fields = append(fields, certification.FieldExpiresAt)
+	}
+	if m.issuer != nil {
+		fields = append(fields, certification.FieldIssuer)
 	}
 	return fields
 }
@@ -351,6 +391,8 @@ func (m *CertificationMutation) Field(name string) (ent.Value, bool) {
 		return m.CertPath()
 	case certification.FieldExpiresAt:
 		return m.ExpiresAt()
+	case certification.FieldIssuer:
+		return m.Issuer()
 	}
 	return nil, false
 }
@@ -368,6 +410,8 @@ func (m *CertificationMutation) OldField(ctx context.Context, name string) (ent.
 		return m.OldCertPath(ctx)
 	case certification.FieldExpiresAt:
 		return m.OldExpiresAt(ctx)
+	case certification.FieldIssuer:
+		return m.OldIssuer(ctx)
 	}
 	return nil, fmt.Errorf("unknown Certification field %s", name)
 }
@@ -404,6 +448,13 @@ func (m *CertificationMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetExpiresAt(v)
+		return nil
+	case certification.FieldIssuer:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIssuer(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)
@@ -465,6 +516,9 @@ func (m *CertificationMutation) ResetField(name string) error {
 		return nil
 	case certification.FieldExpiresAt:
 		m.ResetExpiresAt()
+		return nil
+	case certification.FieldIssuer:
+		m.ResetIssuer()
 		return nil
 	}
 	return fmt.Errorf("unknown Certification field %s", name)

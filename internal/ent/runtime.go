@@ -26,6 +26,12 @@ func init() {
 	certificationDescCertPath := certificationFields[2].Descriptor()
 	// certification.CertPathValidator is a validator for the "cert_path" field. It is called by the builders before save.
 	certification.CertPathValidator = certificationDescCertPath.Validators[0].(func(string) error)
+	// certificationDescIssuer is the schema descriptor for issuer field.
+	certificationDescIssuer := certificationFields[4].Descriptor()
+	// certification.DefaultIssuer holds the default value on creation for the issuer field.
+	certification.DefaultIssuer = certificationDescIssuer.Default.(string)
+	// certification.IssuerValidator is a validator for the "issuer" field. It is called by the builders before save.
+	certification.IssuerValidator = certificationDescIssuer.Validators[0].(func(string) error)
 	documentFields := schema.Document{}.Fields()
 	_ = documentFields
 	// documentDescIDCardNumber is the schema descriptor for id_card_number field.

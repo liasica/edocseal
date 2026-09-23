@@ -16,6 +16,7 @@ var (
 		{Name: "private_path", Type: field.TypeString, Size: 255, Comment: "私钥路径"},
 		{Name: "cert_path", Type: field.TypeString, Size: 255, Comment: "证书路径"},
 		{Name: "expires_at", Type: field.TypeTime, Comment: "证书过期时间"},
+		{Name: "issuer", Type: field.TypeString, Size: 32, Comment: "证书生成方式", Default: "SNCA"},
 	}
 	// CertificationTable holds the schema information for the "certification" table.
 	CertificationTable = &schema.Table{

@@ -9,11 +9,11 @@ import (
 	"reflect"
 	"sync"
 
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/document"
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
-	"auroraride.com/edocseal/internal/ent/certification"
-	"auroraride.com/edocseal/internal/ent/document"
 )
 
 // ent aliases to avoid import conflicts in user's code.
@@ -70,15 +70,15 @@ var (
 	columnCheck sql.ColumnCheck
 )
 
-// columnChecker checks if the column exists in the given table.
-func checkColumn(table, column string) error {
+// checkColumn checks if the column exists in the given table.
+func checkColumn(t, c string) error {
 	initCheck.Do(func() {
 		columnCheck = sql.NewColumnCheck(map[string]func(string) bool{
 			certification.Table: certification.ValidColumn,
 			document.Table:      document.ValidColumn,
 		})
 	})
-	return columnCheck(table, column)
+	return columnCheck(t, c)
 }
 
 // Asc applies the given fields in ASC order.

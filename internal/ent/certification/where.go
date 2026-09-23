@@ -5,8 +5,8 @@ package certification
 import (
 	"time"
 
-	"entgo.io/ent/dialect/sql"
 	"auroraride.com/edocseal/internal/ent/predicate"
+	"entgo.io/ent/dialect/sql"
 )
 
 // ID filters vertices based on their ID field.
@@ -72,6 +72,11 @@ func CertPath(v string) predicate.Certification {
 // ExpiresAt applies equality check predicate on the "expires_at" field. It's identical to ExpiresAtEQ.
 func ExpiresAt(v time.Time) predicate.Certification {
 	return predicate.Certification(sql.FieldEQ(FieldExpiresAt, v))
+}
+
+// Issuer applies equality check predicate on the "issuer" field. It's identical to IssuerEQ.
+func Issuer(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldIssuer, v))
 }
 
 // IDCardNumberEQ applies the EQ predicate on the "id_card_number" field.
@@ -307,6 +312,71 @@ func ExpiresAtLT(v time.Time) predicate.Certification {
 // ExpiresAtLTE applies the LTE predicate on the "expires_at" field.
 func ExpiresAtLTE(v time.Time) predicate.Certification {
 	return predicate.Certification(sql.FieldLTE(FieldExpiresAt, v))
+}
+
+// IssuerEQ applies the EQ predicate on the "issuer" field.
+func IssuerEQ(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEQ(FieldIssuer, v))
+}
+
+// IssuerNEQ applies the NEQ predicate on the "issuer" field.
+func IssuerNEQ(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldNEQ(FieldIssuer, v))
+}
+
+// IssuerIn applies the In predicate on the "issuer" field.
+func IssuerIn(vs ...string) predicate.Certification {
+	return predicate.Certification(sql.FieldIn(FieldIssuer, vs...))
+}
+
+// IssuerNotIn applies the NotIn predicate on the "issuer" field.
+func IssuerNotIn(vs ...string) predicate.Certification {
+	return predicate.Certification(sql.FieldNotIn(FieldIssuer, vs...))
+}
+
+// IssuerGT applies the GT predicate on the "issuer" field.
+func IssuerGT(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldGT(FieldIssuer, v))
+}
+
+// IssuerGTE applies the GTE predicate on the "issuer" field.
+func IssuerGTE(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldGTE(FieldIssuer, v))
+}
+
+// IssuerLT applies the LT predicate on the "issuer" field.
+func IssuerLT(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldLT(FieldIssuer, v))
+}
+
+// IssuerLTE applies the LTE predicate on the "issuer" field.
+func IssuerLTE(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldLTE(FieldIssuer, v))
+}
+
+// IssuerContains applies the Contains predicate on the "issuer" field.
+func IssuerContains(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldContains(FieldIssuer, v))
+}
+
+// IssuerHasPrefix applies the HasPrefix predicate on the "issuer" field.
+func IssuerHasPrefix(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldHasPrefix(FieldIssuer, v))
+}
+
+// IssuerHasSuffix applies the HasSuffix predicate on the "issuer" field.
+func IssuerHasSuffix(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldHasSuffix(FieldIssuer, v))
+}
+
+// IssuerEqualFold applies the EqualFold predicate on the "issuer" field.
+func IssuerEqualFold(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldEqualFold(FieldIssuer, v))
+}
+
+// IssuerContainsFold applies the ContainsFold predicate on the "issuer" field.
+func IssuerContainsFold(v string) predicate.Certification {
+	return predicate.Certification(sql.FieldContainsFold(FieldIssuer, v))
 }
 
 // And groups predicates with the AND operator between them.

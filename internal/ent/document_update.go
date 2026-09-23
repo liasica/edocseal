@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"time"
 
-	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
-	"entgo.io/ent/schema/field"
 	"auroraride.com/edocseal/internal/ent/document"
 	"auroraride.com/edocseal/internal/ent/predicate"
 	"auroraride.com/edocseal/internal/model"
+	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
+	"entgo.io/ent/schema/field"
 )
 
 // DocumentUpdate is the builder for updating Document entities.
@@ -25,154 +25,154 @@ type DocumentUpdate struct {
 }
 
 // Where appends a list predicates to the DocumentUpdate builder.
-func (du *DocumentUpdate) Where(ps ...predicate.Document) *DocumentUpdate {
-	du.mutation.Where(ps...)
-	return du
+func (_u *DocumentUpdate) Where(ps ...predicate.Document) *DocumentUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetHash sets the "hash" field.
-func (du *DocumentUpdate) SetHash(s string) *DocumentUpdate {
-	du.mutation.SetHash(s)
-	return du
+func (_u *DocumentUpdate) SetHash(v string) *DocumentUpdate {
+	_u.mutation.SetHash(v)
+	return _u
 }
 
 // SetNillableHash sets the "hash" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableHash(s *string) *DocumentUpdate {
-	if s != nil {
-		du.SetHash(*s)
+func (_u *DocumentUpdate) SetNillableHash(v *string) *DocumentUpdate {
+	if v != nil {
+		_u.SetHash(*v)
 	}
-	return du
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (du *DocumentUpdate) SetStatus(d document.Status) *DocumentUpdate {
-	du.mutation.SetStatus(d)
-	return du
+func (_u *DocumentUpdate) SetStatus(v document.Status) *DocumentUpdate {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableStatus(d *document.Status) *DocumentUpdate {
-	if d != nil {
-		du.SetStatus(*d)
+func (_u *DocumentUpdate) SetNillableStatus(v *document.Status) *DocumentUpdate {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return du
+	return _u
 }
 
 // SetTemplateID sets the "template_id" field.
-func (du *DocumentUpdate) SetTemplateID(s string) *DocumentUpdate {
-	du.mutation.SetTemplateID(s)
-	return du
+func (_u *DocumentUpdate) SetTemplateID(v string) *DocumentUpdate {
+	_u.mutation.SetTemplateID(v)
+	return _u
 }
 
 // SetNillableTemplateID sets the "template_id" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableTemplateID(s *string) *DocumentUpdate {
-	if s != nil {
-		du.SetTemplateID(*s)
+func (_u *DocumentUpdate) SetNillableTemplateID(v *string) *DocumentUpdate {
+	if v != nil {
+		_u.SetTemplateID(*v)
 	}
-	return du
+	return _u
 }
 
 // SetIDCardNumber sets the "id_card_number" field.
-func (du *DocumentUpdate) SetIDCardNumber(s string) *DocumentUpdate {
-	du.mutation.SetIDCardNumber(s)
-	return du
+func (_u *DocumentUpdate) SetIDCardNumber(v string) *DocumentUpdate {
+	_u.mutation.SetIDCardNumber(v)
+	return _u
 }
 
 // SetNillableIDCardNumber sets the "id_card_number" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableIDCardNumber(s *string) *DocumentUpdate {
-	if s != nil {
-		du.SetIDCardNumber(*s)
+func (_u *DocumentUpdate) SetNillableIDCardNumber(v *string) *DocumentUpdate {
+	if v != nil {
+		_u.SetIDCardNumber(*v)
 	}
-	return du
+	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (du *DocumentUpdate) SetExpiresAt(t time.Time) *DocumentUpdate {
-	du.mutation.SetExpiresAt(t)
-	return du
+func (_u *DocumentUpdate) SetExpiresAt(v time.Time) *DocumentUpdate {
+	_u.mutation.SetExpiresAt(v)
+	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableExpiresAt(t *time.Time) *DocumentUpdate {
-	if t != nil {
-		du.SetExpiresAt(*t)
+func (_u *DocumentUpdate) SetNillableExpiresAt(v *time.Time) *DocumentUpdate {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
-	return du
+	return _u
 }
 
 // SetSignedURL sets the "signed_url" field.
-func (du *DocumentUpdate) SetSignedURL(s string) *DocumentUpdate {
-	du.mutation.SetSignedURL(s)
-	return du
+func (_u *DocumentUpdate) SetSignedURL(v string) *DocumentUpdate {
+	_u.mutation.SetSignedURL(v)
+	return _u
 }
 
 // SetNillableSignedURL sets the "signed_url" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableSignedURL(s *string) *DocumentUpdate {
-	if s != nil {
-		du.SetSignedURL(*s)
+func (_u *DocumentUpdate) SetNillableSignedURL(v *string) *DocumentUpdate {
+	if v != nil {
+		_u.SetSignedURL(*v)
 	}
-	return du
+	return _u
 }
 
 // ClearSignedURL clears the value of the "signed_url" field.
-func (du *DocumentUpdate) ClearSignedURL() *DocumentUpdate {
-	du.mutation.ClearSignedURL()
-	return du
+func (_u *DocumentUpdate) ClearSignedURL() *DocumentUpdate {
+	_u.mutation.ClearSignedURL()
+	return _u
 }
 
 // SetUnsignedURL sets the "unsigned_url" field.
-func (du *DocumentUpdate) SetUnsignedURL(s string) *DocumentUpdate {
-	du.mutation.SetUnsignedURL(s)
-	return du
+func (_u *DocumentUpdate) SetUnsignedURL(v string) *DocumentUpdate {
+	_u.mutation.SetUnsignedURL(v)
+	return _u
 }
 
 // SetNillableUnsignedURL sets the "unsigned_url" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableUnsignedURL(s *string) *DocumentUpdate {
-	if s != nil {
-		du.SetUnsignedURL(*s)
+func (_u *DocumentUpdate) SetNillableUnsignedURL(v *string) *DocumentUpdate {
+	if v != nil {
+		_u.SetUnsignedURL(*v)
 	}
-	return du
+	return _u
 }
 
 // ClearUnsignedURL clears the value of the "unsigned_url" field.
-func (du *DocumentUpdate) ClearUnsignedURL() *DocumentUpdate {
-	du.mutation.ClearUnsignedURL()
-	return du
+func (_u *DocumentUpdate) ClearUnsignedURL() *DocumentUpdate {
+	_u.mutation.ClearUnsignedURL()
+	return _u
 }
 
 // SetPaths sets the "paths" field.
-func (du *DocumentUpdate) SetPaths(m *model.Paths) *DocumentUpdate {
-	du.mutation.SetPaths(m)
-	return du
+func (_u *DocumentUpdate) SetPaths(v *model.Paths) *DocumentUpdate {
+	_u.mutation.SetPaths(v)
+	return _u
 }
 
 // SetCreateAt sets the "create_at" field.
-func (du *DocumentUpdate) SetCreateAt(t time.Time) *DocumentUpdate {
-	du.mutation.SetCreateAt(t)
-	return du
+func (_u *DocumentUpdate) SetCreateAt(v time.Time) *DocumentUpdate {
+	_u.mutation.SetCreateAt(v)
+	return _u
 }
 
 // SetNillableCreateAt sets the "create_at" field if the given value is not nil.
-func (du *DocumentUpdate) SetNillableCreateAt(t *time.Time) *DocumentUpdate {
-	if t != nil {
-		du.SetCreateAt(*t)
+func (_u *DocumentUpdate) SetNillableCreateAt(v *time.Time) *DocumentUpdate {
+	if v != nil {
+		_u.SetCreateAt(*v)
 	}
-	return du
+	return _u
 }
 
 // Mutation returns the DocumentMutation object of the builder.
-func (du *DocumentUpdate) Mutation() *DocumentMutation {
-	return du.mutation
+func (_u *DocumentUpdate) Mutation() *DocumentMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (du *DocumentUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, du.sqlSave, du.mutation, du.hooks)
+func (_u *DocumentUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (du *DocumentUpdate) SaveX(ctx context.Context) int {
-	affected, err := du.Save(ctx)
+func (_u *DocumentUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -180,26 +180,26 @@ func (du *DocumentUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (du *DocumentUpdate) Exec(ctx context.Context) error {
-	_, err := du.Save(ctx)
+func (_u *DocumentUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (du *DocumentUpdate) ExecX(ctx context.Context) {
-	if err := du.Exec(ctx); err != nil {
+func (_u *DocumentUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (du *DocumentUpdate) check() error {
-	if v, ok := du.mutation.Status(); ok {
+func (_u *DocumentUpdate) check() error {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := document.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Document.status": %w`, err)}
 		}
 	}
-	if v, ok := du.mutation.IDCardNumber(); ok {
+	if v, ok := _u.mutation.IDCardNumber(); ok {
 		if err := document.IDCardNumberValidator(v); err != nil {
 			return &ValidationError{Name: "id_card_number", err: fmt.Errorf(`ent: validator failed for field "Document.id_card_number": %w`, err)}
 		}
@@ -208,58 +208,58 @@ func (du *DocumentUpdate) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (du *DocumentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DocumentUpdate {
-	du.modifiers = append(du.modifiers, modifiers...)
-	return du
+func (_u *DocumentUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DocumentUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (du *DocumentUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := du.check(); err != nil {
-		return n, err
+func (_u *DocumentUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(document.Table, document.Columns, sqlgraph.NewFieldSpec(document.FieldID, field.TypeString))
-	if ps := du.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := du.mutation.Hash(); ok {
+	if value, ok := _u.mutation.Hash(); ok {
 		_spec.SetField(document.FieldHash, field.TypeString, value)
 	}
-	if value, ok := du.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(document.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := du.mutation.TemplateID(); ok {
+	if value, ok := _u.mutation.TemplateID(); ok {
 		_spec.SetField(document.FieldTemplateID, field.TypeString, value)
 	}
-	if value, ok := du.mutation.IDCardNumber(); ok {
+	if value, ok := _u.mutation.IDCardNumber(); ok {
 		_spec.SetField(document.FieldIDCardNumber, field.TypeString, value)
 	}
-	if value, ok := du.mutation.ExpiresAt(); ok {
+	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(document.FieldExpiresAt, field.TypeTime, value)
 	}
-	if value, ok := du.mutation.SignedURL(); ok {
+	if value, ok := _u.mutation.SignedURL(); ok {
 		_spec.SetField(document.FieldSignedURL, field.TypeString, value)
 	}
-	if du.mutation.SignedURLCleared() {
+	if _u.mutation.SignedURLCleared() {
 		_spec.ClearField(document.FieldSignedURL, field.TypeString)
 	}
-	if value, ok := du.mutation.UnsignedURL(); ok {
+	if value, ok := _u.mutation.UnsignedURL(); ok {
 		_spec.SetField(document.FieldUnsignedURL, field.TypeString, value)
 	}
-	if du.mutation.UnsignedURLCleared() {
+	if _u.mutation.UnsignedURLCleared() {
 		_spec.ClearField(document.FieldUnsignedURL, field.TypeString)
 	}
-	if value, ok := du.mutation.Paths(); ok {
+	if value, ok := _u.mutation.Paths(); ok {
 		_spec.SetField(document.FieldPaths, field.TypeJSON, value)
 	}
-	if value, ok := du.mutation.CreateAt(); ok {
+	if value, ok := _u.mutation.CreateAt(); ok {
 		_spec.SetField(document.FieldCreateAt, field.TypeTime, value)
 	}
-	_spec.AddModifiers(du.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, du.driver, _spec); err != nil {
+	_spec.AddModifiers(_u.modifiers...)
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{document.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -267,8 +267,8 @@ func (du *DocumentUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	du.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // DocumentUpdateOne is the builder for updating a single Document entity.
@@ -281,161 +281,161 @@ type DocumentUpdateOne struct {
 }
 
 // SetHash sets the "hash" field.
-func (duo *DocumentUpdateOne) SetHash(s string) *DocumentUpdateOne {
-	duo.mutation.SetHash(s)
-	return duo
+func (_u *DocumentUpdateOne) SetHash(v string) *DocumentUpdateOne {
+	_u.mutation.SetHash(v)
+	return _u
 }
 
 // SetNillableHash sets the "hash" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableHash(s *string) *DocumentUpdateOne {
-	if s != nil {
-		duo.SetHash(*s)
+func (_u *DocumentUpdateOne) SetNillableHash(v *string) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetHash(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetStatus sets the "status" field.
-func (duo *DocumentUpdateOne) SetStatus(d document.Status) *DocumentUpdateOne {
-	duo.mutation.SetStatus(d)
-	return duo
+func (_u *DocumentUpdateOne) SetStatus(v document.Status) *DocumentUpdateOne {
+	_u.mutation.SetStatus(v)
+	return _u
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableStatus(d *document.Status) *DocumentUpdateOne {
-	if d != nil {
-		duo.SetStatus(*d)
+func (_u *DocumentUpdateOne) SetNillableStatus(v *document.Status) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetStatus(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetTemplateID sets the "template_id" field.
-func (duo *DocumentUpdateOne) SetTemplateID(s string) *DocumentUpdateOne {
-	duo.mutation.SetTemplateID(s)
-	return duo
+func (_u *DocumentUpdateOne) SetTemplateID(v string) *DocumentUpdateOne {
+	_u.mutation.SetTemplateID(v)
+	return _u
 }
 
 // SetNillableTemplateID sets the "template_id" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableTemplateID(s *string) *DocumentUpdateOne {
-	if s != nil {
-		duo.SetTemplateID(*s)
+func (_u *DocumentUpdateOne) SetNillableTemplateID(v *string) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetTemplateID(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetIDCardNumber sets the "id_card_number" field.
-func (duo *DocumentUpdateOne) SetIDCardNumber(s string) *DocumentUpdateOne {
-	duo.mutation.SetIDCardNumber(s)
-	return duo
+func (_u *DocumentUpdateOne) SetIDCardNumber(v string) *DocumentUpdateOne {
+	_u.mutation.SetIDCardNumber(v)
+	return _u
 }
 
 // SetNillableIDCardNumber sets the "id_card_number" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableIDCardNumber(s *string) *DocumentUpdateOne {
-	if s != nil {
-		duo.SetIDCardNumber(*s)
+func (_u *DocumentUpdateOne) SetNillableIDCardNumber(v *string) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetIDCardNumber(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (duo *DocumentUpdateOne) SetExpiresAt(t time.Time) *DocumentUpdateOne {
-	duo.mutation.SetExpiresAt(t)
-	return duo
+func (_u *DocumentUpdateOne) SetExpiresAt(v time.Time) *DocumentUpdateOne {
+	_u.mutation.SetExpiresAt(v)
+	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableExpiresAt(t *time.Time) *DocumentUpdateOne {
-	if t != nil {
-		duo.SetExpiresAt(*t)
+func (_u *DocumentUpdateOne) SetNillableExpiresAt(v *time.Time) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
-	return duo
+	return _u
 }
 
 // SetSignedURL sets the "signed_url" field.
-func (duo *DocumentUpdateOne) SetSignedURL(s string) *DocumentUpdateOne {
-	duo.mutation.SetSignedURL(s)
-	return duo
+func (_u *DocumentUpdateOne) SetSignedURL(v string) *DocumentUpdateOne {
+	_u.mutation.SetSignedURL(v)
+	return _u
 }
 
 // SetNillableSignedURL sets the "signed_url" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableSignedURL(s *string) *DocumentUpdateOne {
-	if s != nil {
-		duo.SetSignedURL(*s)
+func (_u *DocumentUpdateOne) SetNillableSignedURL(v *string) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetSignedURL(*v)
 	}
-	return duo
+	return _u
 }
 
 // ClearSignedURL clears the value of the "signed_url" field.
-func (duo *DocumentUpdateOne) ClearSignedURL() *DocumentUpdateOne {
-	duo.mutation.ClearSignedURL()
-	return duo
+func (_u *DocumentUpdateOne) ClearSignedURL() *DocumentUpdateOne {
+	_u.mutation.ClearSignedURL()
+	return _u
 }
 
 // SetUnsignedURL sets the "unsigned_url" field.
-func (duo *DocumentUpdateOne) SetUnsignedURL(s string) *DocumentUpdateOne {
-	duo.mutation.SetUnsignedURL(s)
-	return duo
+func (_u *DocumentUpdateOne) SetUnsignedURL(v string) *DocumentUpdateOne {
+	_u.mutation.SetUnsignedURL(v)
+	return _u
 }
 
 // SetNillableUnsignedURL sets the "unsigned_url" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableUnsignedURL(s *string) *DocumentUpdateOne {
-	if s != nil {
-		duo.SetUnsignedURL(*s)
+func (_u *DocumentUpdateOne) SetNillableUnsignedURL(v *string) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetUnsignedURL(*v)
 	}
-	return duo
+	return _u
 }
 
 // ClearUnsignedURL clears the value of the "unsigned_url" field.
-func (duo *DocumentUpdateOne) ClearUnsignedURL() *DocumentUpdateOne {
-	duo.mutation.ClearUnsignedURL()
-	return duo
+func (_u *DocumentUpdateOne) ClearUnsignedURL() *DocumentUpdateOne {
+	_u.mutation.ClearUnsignedURL()
+	return _u
 }
 
 // SetPaths sets the "paths" field.
-func (duo *DocumentUpdateOne) SetPaths(m *model.Paths) *DocumentUpdateOne {
-	duo.mutation.SetPaths(m)
-	return duo
+func (_u *DocumentUpdateOne) SetPaths(v *model.Paths) *DocumentUpdateOne {
+	_u.mutation.SetPaths(v)
+	return _u
 }
 
 // SetCreateAt sets the "create_at" field.
-func (duo *DocumentUpdateOne) SetCreateAt(t time.Time) *DocumentUpdateOne {
-	duo.mutation.SetCreateAt(t)
-	return duo
+func (_u *DocumentUpdateOne) SetCreateAt(v time.Time) *DocumentUpdateOne {
+	_u.mutation.SetCreateAt(v)
+	return _u
 }
 
 // SetNillableCreateAt sets the "create_at" field if the given value is not nil.
-func (duo *DocumentUpdateOne) SetNillableCreateAt(t *time.Time) *DocumentUpdateOne {
-	if t != nil {
-		duo.SetCreateAt(*t)
+func (_u *DocumentUpdateOne) SetNillableCreateAt(v *time.Time) *DocumentUpdateOne {
+	if v != nil {
+		_u.SetCreateAt(*v)
 	}
-	return duo
+	return _u
 }
 
 // Mutation returns the DocumentMutation object of the builder.
-func (duo *DocumentUpdateOne) Mutation() *DocumentMutation {
-	return duo.mutation
+func (_u *DocumentUpdateOne) Mutation() *DocumentMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the DocumentUpdate builder.
-func (duo *DocumentUpdateOne) Where(ps ...predicate.Document) *DocumentUpdateOne {
-	duo.mutation.Where(ps...)
-	return duo
+func (_u *DocumentUpdateOne) Where(ps ...predicate.Document) *DocumentUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (duo *DocumentUpdateOne) Select(field string, fields ...string) *DocumentUpdateOne {
-	duo.fields = append([]string{field}, fields...)
-	return duo
+func (_u *DocumentUpdateOne) Select(field string, fields ...string) *DocumentUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Document entity.
-func (duo *DocumentUpdateOne) Save(ctx context.Context) (*Document, error) {
-	return withHooks(ctx, duo.sqlSave, duo.mutation, duo.hooks)
+func (_u *DocumentUpdateOne) Save(ctx context.Context) (*Document, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (duo *DocumentUpdateOne) SaveX(ctx context.Context) *Document {
-	node, err := duo.Save(ctx)
+func (_u *DocumentUpdateOne) SaveX(ctx context.Context) *Document {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -443,26 +443,26 @@ func (duo *DocumentUpdateOne) SaveX(ctx context.Context) *Document {
 }
 
 // Exec executes the query on the entity.
-func (duo *DocumentUpdateOne) Exec(ctx context.Context) error {
-	_, err := duo.Save(ctx)
+func (_u *DocumentUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (duo *DocumentUpdateOne) ExecX(ctx context.Context) {
-	if err := duo.Exec(ctx); err != nil {
+func (_u *DocumentUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (duo *DocumentUpdateOne) check() error {
-	if v, ok := duo.mutation.Status(); ok {
+func (_u *DocumentUpdateOne) check() error {
+	if v, ok := _u.mutation.Status(); ok {
 		if err := document.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Document.status": %w`, err)}
 		}
 	}
-	if v, ok := duo.mutation.IDCardNumber(); ok {
+	if v, ok := _u.mutation.IDCardNumber(); ok {
 		if err := document.IDCardNumberValidator(v); err != nil {
 			return &ValidationError{Name: "id_card_number", err: fmt.Errorf(`ent: validator failed for field "Document.id_card_number": %w`, err)}
 		}
@@ -471,22 +471,22 @@ func (duo *DocumentUpdateOne) check() error {
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (duo *DocumentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DocumentUpdateOne {
-	duo.modifiers = append(duo.modifiers, modifiers...)
-	return duo
+func (_u *DocumentUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *DocumentUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (duo *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err error) {
-	if err := duo.check(); err != nil {
+func (_u *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(document.Table, document.Columns, sqlgraph.NewFieldSpec(document.FieldID, field.TypeString))
-	id, ok := duo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Document.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := duo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, document.FieldID)
 		for _, f := range fields {
@@ -498,51 +498,51 @@ func (duo *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err
 			}
 		}
 	}
-	if ps := duo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := duo.mutation.Hash(); ok {
+	if value, ok := _u.mutation.Hash(); ok {
 		_spec.SetField(document.FieldHash, field.TypeString, value)
 	}
-	if value, ok := duo.mutation.Status(); ok {
+	if value, ok := _u.mutation.Status(); ok {
 		_spec.SetField(document.FieldStatus, field.TypeEnum, value)
 	}
-	if value, ok := duo.mutation.TemplateID(); ok {
+	if value, ok := _u.mutation.TemplateID(); ok {
 		_spec.SetField(document.FieldTemplateID, field.TypeString, value)
 	}
-	if value, ok := duo.mutation.IDCardNumber(); ok {
+	if value, ok := _u.mutation.IDCardNumber(); ok {
 		_spec.SetField(document.FieldIDCardNumber, field.TypeString, value)
 	}
-	if value, ok := duo.mutation.ExpiresAt(); ok {
+	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(document.FieldExpiresAt, field.TypeTime, value)
 	}
-	if value, ok := duo.mutation.SignedURL(); ok {
+	if value, ok := _u.mutation.SignedURL(); ok {
 		_spec.SetField(document.FieldSignedURL, field.TypeString, value)
 	}
-	if duo.mutation.SignedURLCleared() {
+	if _u.mutation.SignedURLCleared() {
 		_spec.ClearField(document.FieldSignedURL, field.TypeString)
 	}
-	if value, ok := duo.mutation.UnsignedURL(); ok {
+	if value, ok := _u.mutation.UnsignedURL(); ok {
 		_spec.SetField(document.FieldUnsignedURL, field.TypeString, value)
 	}
-	if duo.mutation.UnsignedURLCleared() {
+	if _u.mutation.UnsignedURLCleared() {
 		_spec.ClearField(document.FieldUnsignedURL, field.TypeString)
 	}
-	if value, ok := duo.mutation.Paths(); ok {
+	if value, ok := _u.mutation.Paths(); ok {
 		_spec.SetField(document.FieldPaths, field.TypeJSON, value)
 	}
-	if value, ok := duo.mutation.CreateAt(); ok {
+	if value, ok := _u.mutation.CreateAt(); ok {
 		_spec.SetField(document.FieldCreateAt, field.TypeTime, value)
 	}
-	_spec.AddModifiers(duo.modifiers...)
-	_node = &Document{config: duo.config}
+	_spec.AddModifiers(_u.modifiers...)
+	_node = &Document{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, duo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{document.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -550,6 +550,6 @@ func (duo *DocumentUpdateOne) sqlSave(ctx context.Context) (_node *Document, err
 		}
 		return nil, err
 	}
-	duo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }

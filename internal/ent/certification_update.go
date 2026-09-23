@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"time"
 
+	"auroraride.com/edocseal/internal/ent/certification"
+	"auroraride.com/edocseal/internal/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"auroraride.com/edocseal/internal/ent/certification"
-	"auroraride.com/edocseal/internal/ent/predicate"
 )
 
 // CertificationUpdate is the builder for updating Certification entities.
@@ -24,80 +24,94 @@ type CertificationUpdate struct {
 }
 
 // Where appends a list predicates to the CertificationUpdate builder.
-func (cu *CertificationUpdate) Where(ps ...predicate.Certification) *CertificationUpdate {
-	cu.mutation.Where(ps...)
-	return cu
+func (_u *CertificationUpdate) Where(ps ...predicate.Certification) *CertificationUpdate {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // SetIDCardNumber sets the "id_card_number" field.
-func (cu *CertificationUpdate) SetIDCardNumber(s string) *CertificationUpdate {
-	cu.mutation.SetIDCardNumber(s)
-	return cu
+func (_u *CertificationUpdate) SetIDCardNumber(v string) *CertificationUpdate {
+	_u.mutation.SetIDCardNumber(v)
+	return _u
 }
 
 // SetNillableIDCardNumber sets the "id_card_number" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableIDCardNumber(s *string) *CertificationUpdate {
-	if s != nil {
-		cu.SetIDCardNumber(*s)
+func (_u *CertificationUpdate) SetNillableIDCardNumber(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetIDCardNumber(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetPrivatePath sets the "private_path" field.
-func (cu *CertificationUpdate) SetPrivatePath(s string) *CertificationUpdate {
-	cu.mutation.SetPrivatePath(s)
-	return cu
+func (_u *CertificationUpdate) SetPrivatePath(v string) *CertificationUpdate {
+	_u.mutation.SetPrivatePath(v)
+	return _u
 }
 
 // SetNillablePrivatePath sets the "private_path" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillablePrivatePath(s *string) *CertificationUpdate {
-	if s != nil {
-		cu.SetPrivatePath(*s)
+func (_u *CertificationUpdate) SetNillablePrivatePath(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetPrivatePath(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetCertPath sets the "cert_path" field.
-func (cu *CertificationUpdate) SetCertPath(s string) *CertificationUpdate {
-	cu.mutation.SetCertPath(s)
-	return cu
+func (_u *CertificationUpdate) SetCertPath(v string) *CertificationUpdate {
+	_u.mutation.SetCertPath(v)
+	return _u
 }
 
 // SetNillableCertPath sets the "cert_path" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableCertPath(s *string) *CertificationUpdate {
-	if s != nil {
-		cu.SetCertPath(*s)
+func (_u *CertificationUpdate) SetNillableCertPath(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetCertPath(*v)
 	}
-	return cu
+	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (cu *CertificationUpdate) SetExpiresAt(t time.Time) *CertificationUpdate {
-	cu.mutation.SetExpiresAt(t)
-	return cu
+func (_u *CertificationUpdate) SetExpiresAt(v time.Time) *CertificationUpdate {
+	_u.mutation.SetExpiresAt(v)
+	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (cu *CertificationUpdate) SetNillableExpiresAt(t *time.Time) *CertificationUpdate {
-	if t != nil {
-		cu.SetExpiresAt(*t)
+func (_u *CertificationUpdate) SetNillableExpiresAt(v *time.Time) *CertificationUpdate {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
-	return cu
+	return _u
+}
+
+// SetIssuer sets the "issuer" field.
+func (_u *CertificationUpdate) SetIssuer(v string) *CertificationUpdate {
+	_u.mutation.SetIssuer(v)
+	return _u
+}
+
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (_u *CertificationUpdate) SetNillableIssuer(v *string) *CertificationUpdate {
+	if v != nil {
+		_u.SetIssuer(*v)
+	}
+	return _u
 }
 
 // Mutation returns the CertificationMutation object of the builder.
-func (cu *CertificationUpdate) Mutation() *CertificationMutation {
-	return cu.mutation
+func (_u *CertificationUpdate) Mutation() *CertificationMutation {
+	return _u.mutation
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *CertificationUpdate) Save(ctx context.Context) (int, error) {
-	return withHooks(ctx, cu.sqlSave, cu.mutation, cu.hooks)
+func (_u *CertificationUpdate) Save(ctx context.Context) (int, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *CertificationUpdate) SaveX(ctx context.Context) int {
-	affected, err := cu.Save(ctx)
+func (_u *CertificationUpdate) SaveX(ctx context.Context) int {
+	affected, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -105,70 +119,78 @@ func (cu *CertificationUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *CertificationUpdate) Exec(ctx context.Context) error {
-	_, err := cu.Save(ctx)
+func (_u *CertificationUpdate) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *CertificationUpdate) ExecX(ctx context.Context) {
-	if err := cu.Exec(ctx); err != nil {
+func (_u *CertificationUpdate) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cu *CertificationUpdate) check() error {
-	if v, ok := cu.mutation.IDCardNumber(); ok {
+func (_u *CertificationUpdate) check() error {
+	if v, ok := _u.mutation.IDCardNumber(); ok {
 		if err := certification.IDCardNumberValidator(v); err != nil {
 			return &ValidationError{Name: "id_card_number", err: fmt.Errorf(`ent: validator failed for field "Certification.id_card_number": %w`, err)}
 		}
 	}
-	if v, ok := cu.mutation.PrivatePath(); ok {
+	if v, ok := _u.mutation.PrivatePath(); ok {
 		if err := certification.PrivatePathValidator(v); err != nil {
 			return &ValidationError{Name: "private_path", err: fmt.Errorf(`ent: validator failed for field "Certification.private_path": %w`, err)}
 		}
 	}
-	if v, ok := cu.mutation.CertPath(); ok {
+	if v, ok := _u.mutation.CertPath(); ok {
 		if err := certification.CertPathValidator(v); err != nil {
 			return &ValidationError{Name: "cert_path", err: fmt.Errorf(`ent: validator failed for field "Certification.cert_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Issuer(); ok {
+		if err := certification.IssuerValidator(v); err != nil {
+			return &ValidationError{Name: "issuer", err: fmt.Errorf(`ent: validator failed for field "Certification.issuer": %w`, err)}
 		}
 	}
 	return nil
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (cu *CertificationUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CertificationUpdate {
-	cu.modifiers = append(cu.modifiers, modifiers...)
-	return cu
+func (_u *CertificationUpdate) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CertificationUpdate {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
-	if err := cu.check(); err != nil {
-		return n, err
+func (_u *CertificationUpdate) sqlSave(ctx context.Context) (_node int, err error) {
+	if err := _u.check(); err != nil {
+		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
-	if ps := cu.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cu.mutation.IDCardNumber(); ok {
+	if value, ok := _u.mutation.IDCardNumber(); ok {
 		_spec.SetField(certification.FieldIDCardNumber, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.PrivatePath(); ok {
+	if value, ok := _u.mutation.PrivatePath(); ok {
 		_spec.SetField(certification.FieldPrivatePath, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.CertPath(); ok {
+	if value, ok := _u.mutation.CertPath(); ok {
 		_spec.SetField(certification.FieldCertPath, field.TypeString, value)
 	}
-	if value, ok := cu.mutation.ExpiresAt(); ok {
+	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(certification.FieldExpiresAt, field.TypeTime, value)
 	}
-	_spec.AddModifiers(cu.modifiers...)
-	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
+	if value, ok := _u.mutation.Issuer(); ok {
+		_spec.SetField(certification.FieldIssuer, field.TypeString, value)
+	}
+	_spec.AddModifiers(_u.modifiers...)
+	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certification.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -176,8 +198,8 @@ func (cu *CertificationUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		return 0, err
 	}
-	cu.mutation.done = true
-	return n, nil
+	_u.mutation.done = true
+	return _node, nil
 }
 
 // CertificationUpdateOne is the builder for updating a single Certification entity.
@@ -190,87 +212,101 @@ type CertificationUpdateOne struct {
 }
 
 // SetIDCardNumber sets the "id_card_number" field.
-func (cuo *CertificationUpdateOne) SetIDCardNumber(s string) *CertificationUpdateOne {
-	cuo.mutation.SetIDCardNumber(s)
-	return cuo
+func (_u *CertificationUpdateOne) SetIDCardNumber(v string) *CertificationUpdateOne {
+	_u.mutation.SetIDCardNumber(v)
+	return _u
 }
 
 // SetNillableIDCardNumber sets the "id_card_number" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableIDCardNumber(s *string) *CertificationUpdateOne {
-	if s != nil {
-		cuo.SetIDCardNumber(*s)
+func (_u *CertificationUpdateOne) SetNillableIDCardNumber(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetIDCardNumber(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetPrivatePath sets the "private_path" field.
-func (cuo *CertificationUpdateOne) SetPrivatePath(s string) *CertificationUpdateOne {
-	cuo.mutation.SetPrivatePath(s)
-	return cuo
+func (_u *CertificationUpdateOne) SetPrivatePath(v string) *CertificationUpdateOne {
+	_u.mutation.SetPrivatePath(v)
+	return _u
 }
 
 // SetNillablePrivatePath sets the "private_path" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillablePrivatePath(s *string) *CertificationUpdateOne {
-	if s != nil {
-		cuo.SetPrivatePath(*s)
+func (_u *CertificationUpdateOne) SetNillablePrivatePath(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetPrivatePath(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetCertPath sets the "cert_path" field.
-func (cuo *CertificationUpdateOne) SetCertPath(s string) *CertificationUpdateOne {
-	cuo.mutation.SetCertPath(s)
-	return cuo
+func (_u *CertificationUpdateOne) SetCertPath(v string) *CertificationUpdateOne {
+	_u.mutation.SetCertPath(v)
+	return _u
 }
 
 // SetNillableCertPath sets the "cert_path" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableCertPath(s *string) *CertificationUpdateOne {
-	if s != nil {
-		cuo.SetCertPath(*s)
+func (_u *CertificationUpdateOne) SetNillableCertPath(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetCertPath(*v)
 	}
-	return cuo
+	return _u
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (cuo *CertificationUpdateOne) SetExpiresAt(t time.Time) *CertificationUpdateOne {
-	cuo.mutation.SetExpiresAt(t)
-	return cuo
+func (_u *CertificationUpdateOne) SetExpiresAt(v time.Time) *CertificationUpdateOne {
+	_u.mutation.SetExpiresAt(v)
+	return _u
 }
 
 // SetNillableExpiresAt sets the "expires_at" field if the given value is not nil.
-func (cuo *CertificationUpdateOne) SetNillableExpiresAt(t *time.Time) *CertificationUpdateOne {
-	if t != nil {
-		cuo.SetExpiresAt(*t)
+func (_u *CertificationUpdateOne) SetNillableExpiresAt(v *time.Time) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetExpiresAt(*v)
 	}
-	return cuo
+	return _u
+}
+
+// SetIssuer sets the "issuer" field.
+func (_u *CertificationUpdateOne) SetIssuer(v string) *CertificationUpdateOne {
+	_u.mutation.SetIssuer(v)
+	return _u
+}
+
+// SetNillableIssuer sets the "issuer" field if the given value is not nil.
+func (_u *CertificationUpdateOne) SetNillableIssuer(v *string) *CertificationUpdateOne {
+	if v != nil {
+		_u.SetIssuer(*v)
+	}
+	return _u
 }
 
 // Mutation returns the CertificationMutation object of the builder.
-func (cuo *CertificationUpdateOne) Mutation() *CertificationMutation {
-	return cuo.mutation
+func (_u *CertificationUpdateOne) Mutation() *CertificationMutation {
+	return _u.mutation
 }
 
 // Where appends a list predicates to the CertificationUpdate builder.
-func (cuo *CertificationUpdateOne) Where(ps ...predicate.Certification) *CertificationUpdateOne {
-	cuo.mutation.Where(ps...)
-	return cuo
+func (_u *CertificationUpdateOne) Where(ps ...predicate.Certification) *CertificationUpdateOne {
+	_u.mutation.Where(ps...)
+	return _u
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *CertificationUpdateOne) Select(field string, fields ...string) *CertificationUpdateOne {
-	cuo.fields = append([]string{field}, fields...)
-	return cuo
+func (_u *CertificationUpdateOne) Select(field string, fields ...string) *CertificationUpdateOne {
+	_u.fields = append([]string{field}, fields...)
+	return _u
 }
 
 // Save executes the query and returns the updated Certification entity.
-func (cuo *CertificationUpdateOne) Save(ctx context.Context) (*Certification, error) {
-	return withHooks(ctx, cuo.sqlSave, cuo.mutation, cuo.hooks)
+func (_u *CertificationUpdateOne) Save(ctx context.Context) (*Certification, error) {
+	return withHooks(ctx, _u.sqlSave, _u.mutation, _u.hooks)
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *CertificationUpdateOne) SaveX(ctx context.Context) *Certification {
-	node, err := cuo.Save(ctx)
+func (_u *CertificationUpdateOne) SaveX(ctx context.Context) *Certification {
+	node, err := _u.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -278,55 +314,60 @@ func (cuo *CertificationUpdateOne) SaveX(ctx context.Context) *Certification {
 }
 
 // Exec executes the query on the entity.
-func (cuo *CertificationUpdateOne) Exec(ctx context.Context) error {
-	_, err := cuo.Save(ctx)
+func (_u *CertificationUpdateOne) Exec(ctx context.Context) error {
+	_, err := _u.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *CertificationUpdateOne) ExecX(ctx context.Context) {
-	if err := cuo.Exec(ctx); err != nil {
+func (_u *CertificationUpdateOne) ExecX(ctx context.Context) {
+	if err := _u.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cuo *CertificationUpdateOne) check() error {
-	if v, ok := cuo.mutation.IDCardNumber(); ok {
+func (_u *CertificationUpdateOne) check() error {
+	if v, ok := _u.mutation.IDCardNumber(); ok {
 		if err := certification.IDCardNumberValidator(v); err != nil {
 			return &ValidationError{Name: "id_card_number", err: fmt.Errorf(`ent: validator failed for field "Certification.id_card_number": %w`, err)}
 		}
 	}
-	if v, ok := cuo.mutation.PrivatePath(); ok {
+	if v, ok := _u.mutation.PrivatePath(); ok {
 		if err := certification.PrivatePathValidator(v); err != nil {
 			return &ValidationError{Name: "private_path", err: fmt.Errorf(`ent: validator failed for field "Certification.private_path": %w`, err)}
 		}
 	}
-	if v, ok := cuo.mutation.CertPath(); ok {
+	if v, ok := _u.mutation.CertPath(); ok {
 		if err := certification.CertPathValidator(v); err != nil {
 			return &ValidationError{Name: "cert_path", err: fmt.Errorf(`ent: validator failed for field "Certification.cert_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.Issuer(); ok {
+		if err := certification.IssuerValidator(v); err != nil {
+			return &ValidationError{Name: "issuer", err: fmt.Errorf(`ent: validator failed for field "Certification.issuer": %w`, err)}
 		}
 	}
 	return nil
 }
 
 // Modify adds a statement modifier for attaching custom logic to the UPDATE statement.
-func (cuo *CertificationUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CertificationUpdateOne {
-	cuo.modifiers = append(cuo.modifiers, modifiers...)
-	return cuo
+func (_u *CertificationUpdateOne) Modify(modifiers ...func(u *sql.UpdateBuilder)) *CertificationUpdateOne {
+	_u.modifiers = append(_u.modifiers, modifiers...)
+	return _u
 }
 
-func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certification, err error) {
-	if err := cuo.check(); err != nil {
+func (_u *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certification, err error) {
+	if err := _u.check(); err != nil {
 		return _node, err
 	}
 	_spec := sqlgraph.NewUpdateSpec(certification.Table, certification.Columns, sqlgraph.NewFieldSpec(certification.FieldID, field.TypeInt))
-	id, ok := cuo.mutation.ID()
+	id, ok := _u.mutation.ID()
 	if !ok {
 		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Certification.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
-	if fields := cuo.fields; len(fields) > 0 {
+	if fields := _u.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
 		_spec.Node.Columns = append(_spec.Node.Columns, certification.FieldID)
 		for _, f := range fields {
@@ -338,30 +379,33 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 			}
 		}
 	}
-	if ps := cuo.mutation.predicates; len(ps) > 0 {
+	if ps := _u.mutation.predicates; len(ps) > 0 {
 		_spec.Predicate = func(selector *sql.Selector) {
 			for i := range ps {
 				ps[i](selector)
 			}
 		}
 	}
-	if value, ok := cuo.mutation.IDCardNumber(); ok {
+	if value, ok := _u.mutation.IDCardNumber(); ok {
 		_spec.SetField(certification.FieldIDCardNumber, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.PrivatePath(); ok {
+	if value, ok := _u.mutation.PrivatePath(); ok {
 		_spec.SetField(certification.FieldPrivatePath, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.CertPath(); ok {
+	if value, ok := _u.mutation.CertPath(); ok {
 		_spec.SetField(certification.FieldCertPath, field.TypeString, value)
 	}
-	if value, ok := cuo.mutation.ExpiresAt(); ok {
+	if value, ok := _u.mutation.ExpiresAt(); ok {
 		_spec.SetField(certification.FieldExpiresAt, field.TypeTime, value)
 	}
-	_spec.AddModifiers(cuo.modifiers...)
-	_node = &Certification{config: cuo.config}
+	if value, ok := _u.mutation.Issuer(); ok {
+		_spec.SetField(certification.FieldIssuer, field.TypeString, value)
+	}
+	_spec.AddModifiers(_u.modifiers...)
+	_node = &Certification{config: _u.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
-	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
+	if err = sqlgraph.UpdateNode(ctx, _u.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{certification.Label}
 		} else if sqlgraph.IsConstraintError(err) {
@@ -369,6 +413,6 @@ func (cuo *CertificationUpdateOne) sqlSave(ctx context.Context) (_node *Certific
 		}
 		return nil, err
 	}
-	cuo.mutation.done = true
+	_u.mutation.done = true
 	return _node, nil
 }
