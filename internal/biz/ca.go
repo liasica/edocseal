@@ -52,8 +52,8 @@ func RequestCertificae(
 		}
 	}
 
-	// 生成方式切换后不复用其他方式签发的证书
-	cert = queryCertification(idcard, issuer)
+	// 未过期的证书直接复用，不区分签发方式
+	cert = queryCertification(idcard)
 	if cert != nil {
 		return
 	}
@@ -121,13 +121,9 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 }
 
 // 查询证书
-func queryCertification(idcard, issuer string) *ent.Certification {
+func queryCertification(idcard string) *ent.Certification {
 	cert, _ := ent.NewDatabase().Certification.Query().
-		Where(
-			certification.IDCardNumber(idcard),
-			certification.Issuer(issuer),
-			certification.ExpiresAtGT(time.Now()),
-		).
+		Where(certification.IDCardNumber(idcard), certification.ExpiresAtGT(time.Now())).
 		First(context.Background())
 
 	return cert
