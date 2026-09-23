@@ -1,3 +1,7 @@
+### 文档
+
+- [签约企业与证书](docs/签约企业与证书.md)：证书生成方式、个人与企业证书的签发和复用规则、签约企业管理、根证书与配置项
+
 ### 待办
 
 - [ ] 使用队列处理签名任务，例如 [asynq](https://github.com/hibiken/asynq) 或 [nsq](https://github.com/nsqio/nsq)
