@@ -23,7 +23,7 @@ const (
 	EnterpriseService_Save_FullMethodName                      = "/pb.EnterpriseService/Save"
 	EnterpriseService_Delete_FullMethodName                    = "/pb.EnterpriseService/Delete"
 	EnterpriseService_SetDefault_FullMethodName                = "/pb.EnterpriseService/SetDefault"
-	EnterpriseService_RevokeCertificates_FullMethodName        = "/pb.EnterpriseService/RevokeCertificates"
+	EnterpriseService_GenerateCertificates_FullMethodName      = "/pb.EnterpriseService/GenerateCertificates"
 	EnterpriseService_RegenerateRootCertificate_FullMethodName = "/pb.EnterpriseService/RegenerateRootCertificate"
 )
 
@@ -39,9 +39,9 @@ type EnterpriseServiceClient interface {
 	Delete(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error)
 	// 设为签约企业
 	SetDefault(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error)
-	// 作废企业证书，下次签约时重新签发
-	RevokeCertificates(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error)
-	// 重新生成企业自签根证书，该企业的自签证书随之作废
+	// 按证书生成方式为缺少证书或证书已过期的企业生成企业证书，未过期的证书跳过
+	GenerateCertificates(ctx context.Context, in *EnterpriseGenerateRequest, opts ...grpc.CallOption) (*EnterpriseGenerateResponse, error)
+	// 重新生成企业自签根证书，该企业的自签证书随之作废；根证书未过期时拒绝
 	RegenerateRootCertificate(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error)
 }
 
@@ -93,10 +93,10 @@ func (c *enterpriseServiceClient) SetDefault(ctx context.Context, in *Enterprise
 	return out, nil
 }
 
-func (c *enterpriseServiceClient) RevokeCertificates(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error) {
+func (c *enterpriseServiceClient) GenerateCertificates(ctx context.Context, in *EnterpriseGenerateRequest, opts ...grpc.CallOption) (*EnterpriseGenerateResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(EnterpriseEmptyResponse)
-	err := c.cc.Invoke(ctx, EnterpriseService_RevokeCertificates_FullMethodName, in, out, cOpts...)
+	out := new(EnterpriseGenerateResponse)
+	err := c.cc.Invoke(ctx, EnterpriseService_GenerateCertificates_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -125,9 +125,9 @@ type EnterpriseServiceServer interface {
 	Delete(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error)
 	// 设为签约企业
 	SetDefault(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error)
-	// 作废企业证书，下次签约时重新签发
-	RevokeCertificates(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error)
-	// 重新生成企业自签根证书，该企业的自签证书随之作废
+	// 按证书生成方式为缺少证书或证书已过期的企业生成企业证书，未过期的证书跳过
+	GenerateCertificates(context.Context, *EnterpriseGenerateRequest) (*EnterpriseGenerateResponse, error)
+	// 重新生成企业自签根证书，该企业的自签证书随之作废；根证书未过期时拒绝
 	RegenerateRootCertificate(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error)
 	mustEmbedUnimplementedEnterpriseServiceServer()
 }
@@ -151,8 +151,8 @@ func (UnimplementedEnterpriseServiceServer) Delete(context.Context, *EnterpriseC
 func (UnimplementedEnterpriseServiceServer) SetDefault(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SetDefault not implemented")
 }
-func (UnimplementedEnterpriseServiceServer) RevokeCertificates(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RevokeCertificates not implemented")
+func (UnimplementedEnterpriseServiceServer) GenerateCertificates(context.Context, *EnterpriseGenerateRequest) (*EnterpriseGenerateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateCertificates not implemented")
 }
 func (UnimplementedEnterpriseServiceServer) RegenerateRootCertificate(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegenerateRootCertificate not implemented")
@@ -250,20 +250,20 @@ func _EnterpriseService_SetDefault_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EnterpriseService_RevokeCertificates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EnterpriseCodeRequest)
+func _EnterpriseService_GenerateCertificates_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EnterpriseGenerateRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(EnterpriseServiceServer).RevokeCertificates(ctx, in)
+		return srv.(EnterpriseServiceServer).GenerateCertificates(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: EnterpriseService_RevokeCertificates_FullMethodName,
+		FullMethod: EnterpriseService_GenerateCertificates_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EnterpriseServiceServer).RevokeCertificates(ctx, req.(*EnterpriseCodeRequest))
+		return srv.(EnterpriseServiceServer).GenerateCertificates(ctx, req.(*EnterpriseGenerateRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -310,8 +310,8 @@ var EnterpriseService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _EnterpriseService_SetDefault_Handler,
 		},
 		{
-			MethodName: "RevokeCertificates",
-			Handler:    _EnterpriseService_RevokeCertificates_Handler,
+			MethodName: "GenerateCertificates",
+			Handler:    _EnterpriseService_GenerateCertificates_Handler,
 		},
 		{
 			MethodName: "RegenerateRootCertificate",

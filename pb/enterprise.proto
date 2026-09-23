@@ -17,10 +17,10 @@ service EnterpriseService {
   // 设为签约企业
   rpc SetDefault(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
 
-  // 作废企业证书，下次签约时重新签发
-  rpc RevokeCertificates(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
+  // 按证书生成方式为缺少证书或证书已过期的企业生成企业证书，未过期的证书跳过
+  rpc GenerateCertificates(EnterpriseGenerateRequest) returns (EnterpriseGenerateResponse) {}
 
-  // 重新生成企业自签根证书，该企业的自签证书随之作废
+  // 重新生成企业自签根证书，该企业的自签证书随之作废；根证书未过期时拒绝
   rpc RegenerateRootCertificate(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
 }
 
@@ -83,3 +83,19 @@ message EnterpriseCodeRequest {
 }
 
 message EnterpriseEmptyResponse {}
+
+message EnterpriseGenerateRequest {
+  string issuer = 1; // 证书生成方式：SELF 自签、SNCA 陕西CA
+}
+
+// 企业证书生成结果
+message EnterpriseGenerateResult {
+  string credit_code = 1; // 统一社会信用代码
+  string name = 2; // 企业名称
+  string status = 3; // 结果：GENERATED 已生成、EXISTS 证书未过期无需生成、FAILED 生成失败
+  string message = 4; // 失败原因
+}
+
+message EnterpriseGenerateResponse {
+  repeated EnterpriseGenerateResult items = 1;
+}

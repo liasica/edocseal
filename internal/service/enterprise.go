@@ -52,10 +52,11 @@ func (*EnterpriseService) SetDefault(_ context.Context, req *pb.EnterpriseCodeRe
 	return &pb.EnterpriseEmptyResponse{}, enterpriseError("设置签约企业", biz.SetDefaultEnterprise(req.CreditCode))
 }
 
-// RevokeCertificates 作废企业证书
-func (*EnterpriseService) RevokeCertificates(_ context.Context, req *pb.EnterpriseCodeRequest) (*pb.EnterpriseEmptyResponse, error) {
-	zap.L().Info("作废企业证书", zap.String("creditCode", req.CreditCode))
-	return &pb.EnterpriseEmptyResponse{}, enterpriseError("作废企业证书", biz.RevokeEnterpriseCertificates(req.CreditCode))
+// GenerateCertificates 按证书生成方式为缺少证书或证书已过期的企业生成企业证书
+func (*EnterpriseService) GenerateCertificates(_ context.Context, req *pb.EnterpriseGenerateRequest) (*pb.EnterpriseGenerateResponse, error) {
+	zap.L().Info("生成企业证书", zap.String("issuer", req.Issuer))
+	items, err := biz.GenerateCertificates(req.Issuer)
+	return &pb.EnterpriseGenerateResponse{Items: items}, enterpriseError("生成企业证书", err)
 }
 
 // RegenerateRootCertificate 重新生成企业自签根证书

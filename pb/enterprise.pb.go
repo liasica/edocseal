@@ -592,6 +592,163 @@ func (*EnterpriseEmptyResponse) Descriptor() ([]byte, []int) {
 	return file_enterprise_proto_rawDescGZIP(), []int{7}
 }
 
+type EnterpriseGenerateRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"` // 证书生成方式：SELF 自签、SNCA 陕西CA
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnterpriseGenerateRequest) Reset() {
+	*x = EnterpriseGenerateRequest{}
+	mi := &file_enterprise_proto_msgTypes[8]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnterpriseGenerateRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnterpriseGenerateRequest) ProtoMessage() {}
+
+func (x *EnterpriseGenerateRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_enterprise_proto_msgTypes[8]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnterpriseGenerateRequest.ProtoReflect.Descriptor instead.
+func (*EnterpriseGenerateRequest) Descriptor() ([]byte, []int) {
+	return file_enterprise_proto_rawDescGZIP(), []int{8}
+}
+
+func (x *EnterpriseGenerateRequest) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+// 企业证书生成结果
+type EnterpriseGenerateResult struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	CreditCode    string                 `protobuf:"bytes,1,opt,name=credit_code,json=creditCode,proto3" json:"credit_code,omitempty"` // 统一社会信用代码
+	Name          string                 `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                               // 企业名称
+	Status        string                 `protobuf:"bytes,3,opt,name=status,proto3" json:"status,omitempty"`                           // 结果：GENERATED 已生成、EXISTS 证书未过期无需生成、FAILED 生成失败
+	Message       string                 `protobuf:"bytes,4,opt,name=message,proto3" json:"message,omitempty"`                         // 失败原因
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnterpriseGenerateResult) Reset() {
+	*x = EnterpriseGenerateResult{}
+	mi := &file_enterprise_proto_msgTypes[9]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnterpriseGenerateResult) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnterpriseGenerateResult) ProtoMessage() {}
+
+func (x *EnterpriseGenerateResult) ProtoReflect() protoreflect.Message {
+	mi := &file_enterprise_proto_msgTypes[9]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnterpriseGenerateResult.ProtoReflect.Descriptor instead.
+func (*EnterpriseGenerateResult) Descriptor() ([]byte, []int) {
+	return file_enterprise_proto_rawDescGZIP(), []int{9}
+}
+
+func (x *EnterpriseGenerateResult) GetCreditCode() string {
+	if x != nil {
+		return x.CreditCode
+	}
+	return ""
+}
+
+func (x *EnterpriseGenerateResult) GetName() string {
+	if x != nil {
+		return x.Name
+	}
+	return ""
+}
+
+func (x *EnterpriseGenerateResult) GetStatus() string {
+	if x != nil {
+		return x.Status
+	}
+	return ""
+}
+
+func (x *EnterpriseGenerateResult) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
+type EnterpriseGenerateResponse struct {
+	state         protoimpl.MessageState      `protogen:"open.v1"`
+	Items         []*EnterpriseGenerateResult `protobuf:"bytes,1,rep,name=items,proto3" json:"items,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *EnterpriseGenerateResponse) Reset() {
+	*x = EnterpriseGenerateResponse{}
+	mi := &file_enterprise_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnterpriseGenerateResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnterpriseGenerateResponse) ProtoMessage() {}
+
+func (x *EnterpriseGenerateResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_enterprise_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnterpriseGenerateResponse.ProtoReflect.Descriptor instead.
+func (*EnterpriseGenerateResponse) Descriptor() ([]byte, []int) {
+	return file_enterprise_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *EnterpriseGenerateResponse) GetItems() []*EnterpriseGenerateResult {
+	if x != nil {
+		return x.Items
+	}
+	return nil
+}
+
 var File_enterprise_proto protoreflect.FileDescriptor
 
 const file_enterprise_proto_rawDesc = "" +
@@ -650,14 +807,24 @@ const file_enterprise_proto_rawDesc = "" +
 	"\x15EnterpriseCodeRequest\x12\x1f\n" +
 	"\vcredit_code\x18\x01 \x01(\tR\n" +
 	"creditCode\"\x19\n" +
-	"\x17EnterpriseEmptyResponse2\xc9\x03\n" +
+	"\x17EnterpriseEmptyResponse\"3\n" +
+	"\x19EnterpriseGenerateRequest\x12\x16\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\"\x81\x01\n" +
+	"\x18EnterpriseGenerateResult\x12\x1f\n" +
+	"\vcredit_code\x18\x01 \x01(\tR\n" +
+	"creditCode\x12\x12\n" +
+	"\x04name\x18\x02 \x01(\tR\x04name\x12\x16\n" +
+	"\x06status\x18\x03 \x01(\tR\x06status\x12\x18\n" +
+	"\amessage\x18\x04 \x01(\tR\amessage\"P\n" +
+	"\x1aEnterpriseGenerateResponse\x122\n" +
+	"\x05items\x18\x01 \x03(\v2\x1c.pb.EnterpriseGenerateResultR\x05items2\xd2\x03\n" +
 	"\x11EnterpriseService\x12?\n" +
 	"\x04List\x12\x19.pb.EnterpriseListRequest\x1a\x1a.pb.EnterpriseListResponse\"\x00\x12@\n" +
 	"\x04Save\x12\x19.pb.EnterpriseSaveRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12B\n" +
 	"\x06Delete\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12F\n" +
 	"\n" +
-	"SetDefault\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12N\n" +
-	"\x12RevokeCertificates\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12U\n" +
+	"SetDefault\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12W\n" +
+	"\x14GenerateCertificates\x12\x1d.pb.EnterpriseGenerateRequest\x1a\x1e.pb.EnterpriseGenerateResponse\"\x00\x12U\n" +
 	"\x19RegenerateRootCertificate\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00B\x1fZ\x1dauroraride.com/edocseal/pb;pbb\x06proto3"
 
 var (
@@ -672,39 +839,43 @@ func file_enterprise_proto_rawDescGZIP() []byte {
 	return file_enterprise_proto_rawDescData
 }
 
-var file_enterprise_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
+var file_enterprise_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_enterprise_proto_goTypes = []any{
-	(*CertificateDetail)(nil),       // 0: pb.CertificateDetail
-	(*EnterpriseCertificate)(nil),   // 1: pb.EnterpriseCertificate
-	(*Enterprise)(nil),              // 2: pb.Enterprise
-	(*EnterpriseListRequest)(nil),   // 3: pb.EnterpriseListRequest
-	(*EnterpriseListResponse)(nil),  // 4: pb.EnterpriseListResponse
-	(*EnterpriseSaveRequest)(nil),   // 5: pb.EnterpriseSaveRequest
-	(*EnterpriseCodeRequest)(nil),   // 6: pb.EnterpriseCodeRequest
-	(*EnterpriseEmptyResponse)(nil), // 7: pb.EnterpriseEmptyResponse
+	(*CertificateDetail)(nil),          // 0: pb.CertificateDetail
+	(*EnterpriseCertificate)(nil),      // 1: pb.EnterpriseCertificate
+	(*Enterprise)(nil),                 // 2: pb.Enterprise
+	(*EnterpriseListRequest)(nil),      // 3: pb.EnterpriseListRequest
+	(*EnterpriseListResponse)(nil),     // 4: pb.EnterpriseListResponse
+	(*EnterpriseSaveRequest)(nil),      // 5: pb.EnterpriseSaveRequest
+	(*EnterpriseCodeRequest)(nil),      // 6: pb.EnterpriseCodeRequest
+	(*EnterpriseEmptyResponse)(nil),    // 7: pb.EnterpriseEmptyResponse
+	(*EnterpriseGenerateRequest)(nil),  // 8: pb.EnterpriseGenerateRequest
+	(*EnterpriseGenerateResult)(nil),   // 9: pb.EnterpriseGenerateResult
+	(*EnterpriseGenerateResponse)(nil), // 10: pb.EnterpriseGenerateResponse
 }
 var file_enterprise_proto_depIdxs = []int32{
 	0,  // 0: pb.EnterpriseCertificate.detail:type_name -> pb.CertificateDetail
 	0,  // 1: pb.Enterprise.root_certificate:type_name -> pb.CertificateDetail
 	1,  // 2: pb.Enterprise.certificates:type_name -> pb.EnterpriseCertificate
 	2,  // 3: pb.EnterpriseListResponse.items:type_name -> pb.Enterprise
-	3,  // 4: pb.EnterpriseService.List:input_type -> pb.EnterpriseListRequest
-	5,  // 5: pb.EnterpriseService.Save:input_type -> pb.EnterpriseSaveRequest
-	6,  // 6: pb.EnterpriseService.Delete:input_type -> pb.EnterpriseCodeRequest
-	6,  // 7: pb.EnterpriseService.SetDefault:input_type -> pb.EnterpriseCodeRequest
-	6,  // 8: pb.EnterpriseService.RevokeCertificates:input_type -> pb.EnterpriseCodeRequest
-	6,  // 9: pb.EnterpriseService.RegenerateRootCertificate:input_type -> pb.EnterpriseCodeRequest
-	4,  // 10: pb.EnterpriseService.List:output_type -> pb.EnterpriseListResponse
-	7,  // 11: pb.EnterpriseService.Save:output_type -> pb.EnterpriseEmptyResponse
-	7,  // 12: pb.EnterpriseService.Delete:output_type -> pb.EnterpriseEmptyResponse
-	7,  // 13: pb.EnterpriseService.SetDefault:output_type -> pb.EnterpriseEmptyResponse
-	7,  // 14: pb.EnterpriseService.RevokeCertificates:output_type -> pb.EnterpriseEmptyResponse
-	7,  // 15: pb.EnterpriseService.RegenerateRootCertificate:output_type -> pb.EnterpriseEmptyResponse
-	10, // [10:16] is the sub-list for method output_type
-	4,  // [4:10] is the sub-list for method input_type
-	4,  // [4:4] is the sub-list for extension type_name
-	4,  // [4:4] is the sub-list for extension extendee
-	0,  // [0:4] is the sub-list for field type_name
+	9,  // 4: pb.EnterpriseGenerateResponse.items:type_name -> pb.EnterpriseGenerateResult
+	3,  // 5: pb.EnterpriseService.List:input_type -> pb.EnterpriseListRequest
+	5,  // 6: pb.EnterpriseService.Save:input_type -> pb.EnterpriseSaveRequest
+	6,  // 7: pb.EnterpriseService.Delete:input_type -> pb.EnterpriseCodeRequest
+	6,  // 8: pb.EnterpriseService.SetDefault:input_type -> pb.EnterpriseCodeRequest
+	8,  // 9: pb.EnterpriseService.GenerateCertificates:input_type -> pb.EnterpriseGenerateRequest
+	6,  // 10: pb.EnterpriseService.RegenerateRootCertificate:input_type -> pb.EnterpriseCodeRequest
+	4,  // 11: pb.EnterpriseService.List:output_type -> pb.EnterpriseListResponse
+	7,  // 12: pb.EnterpriseService.Save:output_type -> pb.EnterpriseEmptyResponse
+	7,  // 13: pb.EnterpriseService.Delete:output_type -> pb.EnterpriseEmptyResponse
+	7,  // 14: pb.EnterpriseService.SetDefault:output_type -> pb.EnterpriseEmptyResponse
+	10, // 15: pb.EnterpriseService.GenerateCertificates:output_type -> pb.EnterpriseGenerateResponse
+	7,  // 16: pb.EnterpriseService.RegenerateRootCertificate:output_type -> pb.EnterpriseEmptyResponse
+	11, // [11:17] is the sub-list for method output_type
+	5,  // [5:11] is the sub-list for method input_type
+	5,  // [5:5] is the sub-list for extension type_name
+	5,  // [5:5] is the sub-list for extension extendee
+	0,  // [0:5] is the sub-list for field type_name
 }
 
 func init() { file_enterprise_proto_init() }
@@ -718,7 +889,7 @@ func file_enterprise_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_enterprise_proto_rawDesc), len(file_enterprise_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   8,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

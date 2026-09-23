@@ -307,16 +307,6 @@ func SaveEnterprise(req *pb.EnterpriseSaveRequest) (err error) {
 		return
 	}
 
-	// 名称或地区变化后证书主题已不准确，作废后下次签约重新签发
-	if old != nil && (old.Name != req.Name || old.Province != req.Province || old.City != req.City) {
-		_, err = ent.NewDatabase().EnterpriseCertification.Delete().
-			Where(enterprisecertification.CreditCode(req.CreditCode)).
-			Exec(ctx)
-		if err != nil {
-			return
-		}
-	}
-
 	return LoadEnterprises()
 }
 
@@ -387,27 +377,61 @@ func SetDefaultEnterprise(creditCode string) (err error) {
 	return LoadEnterprises()
 }
 
-// RevokeEnterpriseCertificates 作废企业的全部证书记录，下次签约时重新签发
-func RevokeEnterpriseCertificates(creditCode string) (err error) {
+// 企业证书生成结果
+const (
+	generateStatusGenerated = "GENERATED" // 已生成
+	generateStatusExists    = "EXISTS"    // 证书未过期无需生成
+	generateStatusFailed    = "FAILED"    // 生成失败
+)
+
+// GenerateCertificates 按证书生成方式为缺少证书或证书已过期的企业生成企业证书，未过期的证书跳过
+func GenerateCertificates(issuer string) (results []*pb.EnterpriseGenerateResult, err error) {
+	if issuer != model.CertificateIssuerSelf && issuer != model.CertificateIssuerSnca {
+		err = fmt.Errorf("不支持的证书生成方式: %s", issuer)
+		return
+	}
+
 	enterpriseWriteMutex.Lock()
 	defer enterpriseWriteMutex.Unlock()
 
-	_, err = queryEnterpriseByCode(creditCode)
-	if err != nil {
-		return
+	enterprises.RLock()
+	items := make([]*ent.Enterprise, 0, len(enterprises.items))
+	for _, e := range enterprises.items {
+		items = append(items, e)
 	}
+	enterprises.RUnlock()
 
-	_, err = ent.NewDatabase().EnterpriseCertification.Delete().
-		Where(enterprisecertification.CreditCode(creditCode)).
-		Exec(context.Background())
-	if err != nil {
-		return
+	sort.Slice(items, func(i, j int) bool {
+		return items[i].CreditCode < items[j].CreditCode
+	})
+
+	for _, e := range items {
+		result := &pb.EnterpriseGenerateResult{CreditCode: e.CreditCode, Name: e.Name}
+		results = append(results, result)
+
+		if cert := cachedEnterpriseCertificate(e.CreditCode, issuer); cert != nil && cert.ExpiresAt.After(time.Now()) {
+			result.Status = generateStatusExists
+			continue
+		}
+
+		issued, issueErr := issueEnterpriseCertificate(e, issuer)
+		if issueErr != nil {
+			zap.L().Error("企业证书生成失败", zap.Error(issueErr), zap.String("creditCode", e.CreditCode), zap.String("issuer", issuer))
+			result.Status = generateStatusFailed
+			result.Message = issueErr.Error()
+			continue
+		}
+
+		enterprises.Lock()
+		enterprises.certs[enterpriseCertKey(e.CreditCode, issuer)] = issued
+		enterprises.Unlock()
+
+		result.Status = generateStatusGenerated
 	}
-
-	return LoadEnterprises()
+	return
 }
 
-// RegenerateRootCertificate 重新生成企业自签根证书，该企业的自签证书随之作废
+// RegenerateRootCertificate 重新生成企业自签根证书，该企业的自签证书随之作废；根证书未过期时不能重新生成
 func RegenerateRootCertificate(creditCode string) (err error) {
 	enterpriseWriteMutex.Lock()
 	defer enterpriseWriteMutex.Unlock()
@@ -416,6 +440,10 @@ func RegenerateRootCertificate(creditCode string) (err error) {
 	e, err = queryEnterpriseByCode(creditCode)
 	if err != nil {
 		return
+	}
+
+	if e.RootExpiresAt != nil && e.RootExpiresAt.After(time.Now()) {
+		return errors.New("根证书未过期，不能重新生成")
 	}
 
 	_, _, err = generateEnterpriseRootLocked(e)
