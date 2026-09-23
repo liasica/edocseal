@@ -5,13 +5,10 @@
 package task
 
 import (
-	"time"
-
 	"github.com/robfig/cron/v3"
 	"go.uber.org/zap"
 
 	"auroraride.com/edocseal/internal/biz"
-	"auroraride.com/edocseal/internal/g"
 )
 
 type EnterpriseTask struct{}
@@ -35,17 +32,11 @@ func (e *EnterpriseTask) Run() {
 }
 
 func (e *EnterpriseTask) do() {
-	cfg := g.GetEnterpriseConfig()
-
-	// 加载证书
-	cert := cfg.GetCertificate()
-	zap.L().Info("证书加载成功", zap.String("subject", cert.Subject.String()), zap.Time("notBefore", cert.NotBefore), zap.Time("notAfter", cert.NotAfter))
-
-	// 证书过期检查（7天内过期）
-	if cert.NotAfter.Before(time.Now().AddDate(0, 0, 7)) {
-		err := biz.RequestEnterpriseCertAndUpdateConfig()
-		if err != nil {
-			zap.L().Error("更新证书失败", zap.Error(err))
-		}
+	renewed, err := biz.RenewEnterpriseCertificate()
+	if err != nil {
+		zap.L().Error("更新证书失败", zap.Error(err))
+		return
 	}
+
+	zap.L().Info("企业证书检查过期任务完成", zap.Bool("renewed", renewed))
 }

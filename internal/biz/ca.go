@@ -6,13 +6,14 @@ package biz
 
 import (
 	"context"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/pem"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
-	"strings"
+	"sync"
 	"time"
 
 	"go.uber.org/zap"
@@ -25,6 +26,9 @@ import (
 	"auroraride.com/edocseal/internal/g"
 	"auroraride.com/edocseal/third/snca"
 )
+
+// enterpriseRenewMutex 防止定时任务与手动触发同时续期企业证书
+var enterpriseRenewMutex sync.Mutex
 
 func CertificatePaths(idcard string) (keypath string, capath string) {
 	return filepath.Join(g.GetCertificateDir(), idcard+"_key.pem"), filepath.Join(g.GetCertificateDir(), idcard+"_cert.pem")
@@ -173,17 +177,24 @@ func requestFromSnca() (keyBytes []byte, crtBytes []byte, err error) {
 	return
 }
 
-// requestFromUrl 从指定URL获取证书和私钥
+// requestFromUrl 从企业证书地址获取证书和私钥，返回 DER 编码内容，证书与本机一致时均返回 nil
 func requestFromUrl(url string, name, serial string) (keyBytes []byte, crtBytes []byte, err error) {
 	// 若URL为空，则直接返回未找到企业证书错误
 	if url == "" {
 		return nil, nil, edocseal.ErrEnterpriseCertificateNotFound
 	}
 
+	client := resty.New().SetTimeout(30 * time.Second)
+	defer func() {
+		_ = client.Close()
+	}()
+
 	// 发送HTTP请求获取证书和私钥
-	var result edocseal.EnterpriseCertificate
-	var resp *resty.Response
-	resp, err = resty.New().R().
+	var (
+		result edocseal.EnterpriseCertificate
+		resp   *resty.Response
+	)
+	resp, err = client.R().
 		SetResult(&result).
 		SetQueryParam("name", name).
 		SetQueryParam("serial", serial).
@@ -192,18 +203,67 @@ func requestFromUrl(url string, name, serial string) (keyBytes []byte, crtBytes 
 		return
 	}
 
-	if resp.IsSuccess() && (result.Key == "" || result.Cert == "") {
+	if !resp.IsSuccess() {
+		err = fmt.Errorf("企业证书地址响应异常: %s", resp.Status())
 		return
 	}
 
-	// 解析返回的证书和私钥
-	keyBytes = []byte(result.Key)
-	crtBytes = []byte(result.Cert)
+	// 名称和序列号与本机一致时响应体为空
+	if result.Key == "" && result.Cert == "" {
+		return
+	}
+
+	keyBytes, err = decodePEM(result.Key)
+	if err != nil {
+		err = fmt.Errorf("企业私钥解析失败: %w", err)
+		return
+	}
+
+	crtBytes, err = decodePEM(result.Cert)
+	if err != nil {
+		err = fmt.Errorf("企业证书解析失败: %w", err)
+	}
+
 	return
 }
 
-// RequestEnterpriseCertAndUpdateConfig 申请企业证书并更新配置
-func RequestEnterpriseCertAndUpdateConfig() (err error) {
+// decodePEM 返回 PEM 文本中第一个块的 DER 内容
+func decodePEM(content string) (b []byte, err error) {
+	block, _ := pem.Decode([]byte(content))
+	if block == nil {
+		err = errors.New("不是有效的 PEM 内容")
+		return
+	}
+
+	b = block.Bytes
+	return
+}
+
+// RenewEnterpriseCertificate 企业证书 7 天内到期时申请新证书并更新配置，返回是否已更换证书
+func RenewEnterpriseCertificate() (renewed bool, err error) {
+	if !enterpriseRenewMutex.TryLock() {
+		err = errors.New("企业证书续期正在执行")
+		return
+	}
+	defer enterpriseRenewMutex.Unlock()
+
+	cert := g.GetEnterpriseConfig().GetCertificate()
+	zap.L().Info("检查企业证书有效期",
+		zap.String("subject", cert.Subject.String()),
+		zap.String("serialNumber", cert.SerialNumber.String()),
+		zap.Time("notBefore", cert.NotBefore),
+		zap.Time("notAfter", cert.NotAfter),
+	)
+
+	if !cert.NotAfter.Before(time.Now().AddDate(0, 0, 7)) {
+		return
+	}
+
+	return RequestEnterpriseCertAndUpdateConfig()
+}
+
+// RequestEnterpriseCertAndUpdateConfig 申请企业证书并更新配置，返回是否已更换证书
+func RequestEnterpriseCertAndUpdateConfig() (renewed bool, err error) {
 	cfg := g.GetEnterpriseConfig()
 
 	var (
@@ -212,13 +272,10 @@ func RequestEnterpriseCertAndUpdateConfig() (err error) {
 		crt      *x509.Certificate
 	)
 
-	// 尝试从url中获取证书和私钥
+	// 从企业证书地址获取证书和私钥，未配置地址时向 SNCA 申请
 	keyBytes, crtBytes, err = requestFromUrl(cfg.Url, cfg.Name, cfg.GetCertificate().SerialNumber.String())
-	if err != nil {
-		// 如果返回错误是企业证书未找到，则尝试从SNCA申请
-		if !errors.Is(err, edocseal.ErrEnterpriseCertificateNotFound) {
-			keyBytes, crtBytes, err = requestFromSnca()
-		}
+	if errors.Is(err, edocseal.ErrEnterpriseCertificateNotFound) {
+		keyBytes, crtBytes, err = requestFromSnca()
 	}
 
 	// 如果申请证书失败，则返回错误
@@ -238,7 +295,19 @@ func RequestEnterpriseCertAndUpdateConfig() (err error) {
 		return
 	}
 
-	zap.L().Info("申请企业证书成功", zap.String("name", cfg.Name), zap.Int64("serialNumber", crt.SerialNumber.Int64()), zap.Time("notBefore", crt.NotBefore), zap.Time("notAfter", crt.NotAfter))
+	// 校验私钥与证书是否匹配
+	_, err = tls.X509KeyPair(ca.PEMEncoding(crtBytes, ca.BlocTypeCertificate), ca.PEMEncoding(keyBytes, ca.BlocTypePrivateKey))
+	if err != nil {
+		err = fmt.Errorf("企业证书与私钥不匹配: %w", err)
+		return
+	}
+
+	zap.L().Info("申请企业证书成功",
+		zap.String("name", cfg.Name),
+		zap.String("serialNumber", crt.SerialNumber.String()),
+		zap.Time("notBefore", crt.NotBefore),
+		zap.Time("notAfter", crt.NotAfter),
+	)
 
 	dir := filepath.Dir(g.GetConfigFile())
 
@@ -256,14 +325,14 @@ func RequestEnterpriseCertAndUpdateConfig() (err error) {
 		return
 	}
 
-	c, _ := os.ReadFile(g.GetConfigFile())
-	str := string(c)
-	str = strings.ReplaceAll(str, cfg.PrivateKey, kf)
-	str = strings.ReplaceAll(str, cfg.Certificate, cf)
+	// 改写配置文件并替换内存中的企业证书
+	err = g.ReplaceEnterpriseCertificate(kf, cf)
+	if err != nil {
+		return
+	}
 
-	priKey, _ := ca.ParsePrivateKey(keyBytes)
+	zap.L().Info("企业证书已更新", zap.String("certificate", cf), zap.String("privateKey", kf))
 
-	g.UpdateEnterpriseConfig(kf, cf, crt, crtBytes, priKey, keyBytes)
-
-	return os.WriteFile(g.GetConfigFile(), []byte(str), os.ModePerm)
+	renewed = true
+	return
 }

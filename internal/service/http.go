@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 	jsoniter "github.com/json-iterator/go"
@@ -20,10 +21,14 @@ import (
 	"auroraride.com/edocseal/internal/task"
 )
 
+// maintainToken 维护接口路径中的令牌
+const maintainToken = "9geUbBHvX3caRWl1"
+
 func StartHttpServer() {
 	r := mux.NewRouter()
 	r.HandleFunc("/s/{id}", shortUrl)
-	r.HandleFunc("/maintain/stop/9geUbBHvX3caRWl1", stopTasks)
+	r.HandleFunc("/maintain/stop/"+maintainToken, stopTasks)
+	r.HandleFunc("/maintain/enterprise/renew/"+maintainToken, renewEnterpriseCert).Methods(http.MethodPost)
 	r.HandleFunc("/enterprise/cert/{token}", getEnterpriseCert).Methods("GET")
 	zap.L().Info("API启动", zap.String("bind", g.GetHttpBind()))
 	err := http.ListenAndServe(g.GetHttpBind(), r)
@@ -43,6 +48,29 @@ func stopTasks(w http.ResponseWriter, _ *http.Request) {
 
 	wg.Wait()
 	_, _ = w.Write([]byte("ok\n"))
+}
+
+// 手动执行企业证书续期，规则与定时任务一致，返回续期后的证书信息
+func renewEnterpriseCert(w http.ResponseWriter, _ *http.Request) {
+	renewed, err := biz.RenewEnterpriseCertificate()
+	if err != nil {
+		zap.L().Error("手动续期企业证书失败", zap.Error(err))
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	cfg := g.GetEnterpriseConfig()
+	cert := cfg.GetCertificate()
+
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	_, _ = fmt.Fprintf(w, "renewed: %t\nserial: %s\nnotBefore: %s\nnotAfter: %s\ncertificate: %s\nprivateKey: %s\n",
+		renewed,
+		cert.SerialNumber,
+		cert.NotBefore.Local().Format(time.DateTime),
+		cert.NotAfter.Local().Format(time.DateTime),
+		cfg.Certificate,
+		cfg.PrivateKey,
+	)
 }
 
 func shortUrl(w http.ResponseWriter, r *http.Request) {

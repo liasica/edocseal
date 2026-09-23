@@ -25,8 +25,9 @@ func TestAgencyIssueCertificate(t *testing.T) {
 func TestRequestEnterpriseCertAndUpdateConfig(t *testing.T) {
 	g.LoadConfig("config/config.yaml")
 
-	err := RequestEnterpriseCertAndUpdateConfig()
+	renewed, err := RequestEnterpriseCertAndUpdateConfig()
 	require.NoError(t, err)
+	t.Logf("renewed: %t", renewed)
 
 	t.Logf("%#v", g.GetEnterpriseConfig())
 }

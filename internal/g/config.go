@@ -10,6 +10,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/viper"
 
@@ -246,14 +247,47 @@ func GetEnterpriseConfig() *Enterprise {
 	return cfg.Enterprise
 }
 
-// UpdateEnterpriseConfig 更新企业配置
-func UpdateEnterpriseConfig(key, cert string, crt *x509.Certificate, certBytes []byte, privateKey *rsa.PrivateKey, keyBytes []byte) {
-	cfg.Enterprise.PrivateKey = key
-	cfg.Enterprise.Certificate = cert
-	cfg.Enterprise.certificate = crt
-	cfg.Enterprise.certBytes = certBytes
-	cfg.Enterprise.privateKey = privateKey
-	cfg.Enterprise.keyBytes = keyBytes
+// ReplaceEnterpriseCertificate 载入新的企业证书与私钥，改写配置文件中的路径后替换内存配置
+func ReplaceEnterpriseCertificate(keyPath, certPath string) (err error) {
+	current := cfg.Enterprise
+
+	next := *current
+	next.PrivateKey = keyPath
+	next.Certificate = certPath
+	err = next.Load()
+	if err != nil {
+		return
+	}
+
+	var content []byte
+	content, err = os.ReadFile(configFile)
+	if err != nil {
+		return
+	}
+
+	str := string(content)
+	if !strings.Contains(str, current.PrivateKey) || !strings.Contains(str, current.Certificate) {
+		err = errors.New("配置文件中未找到当前企业证书路径")
+		return
+	}
+
+	str = strings.ReplaceAll(str, current.PrivateKey, keyPath)
+	str = strings.ReplaceAll(str, current.Certificate, certPath)
+
+	// 先写临时文件再重命名，避免写入中断导致配置文件损坏
+	tmp := configFile + ".tmp"
+	err = os.WriteFile(tmp, []byte(str), 0o644)
+	if err != nil {
+		return
+	}
+
+	err = os.Rename(tmp, configFile)
+	if err != nil {
+		return
+	}
+
+	cfg.Enterprise = &next
+	return
 }
 
 // GetShortUrlPrefix 获取短链接前缀
