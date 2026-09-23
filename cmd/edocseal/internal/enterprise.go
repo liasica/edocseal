@@ -22,8 +22,13 @@ func enterpriseCommand() *cobra.Command {
 		Run: func(_ *cobra.Command, _ []string) {
 			for _, item := range biz.ListEnterprises() {
 				fmt.Printf("%s %s 签约企业=%t 签章=%t\n", item.CreditCode, item.Name, item.IsDefault, len(item.Seal) > 0)
+				if root := item.RootCertificate; root != nil {
+					fmt.Printf("  ROOT %s %s 到期 %s %s\n", root.Serial, root.Subject, time.Unix(root.NotAfter, 0).Format(time.DateTime), root.Status)
+				}
 				for _, cert := range item.Certificates {
-					fmt.Printf("  %s %s 颁发者 %s 到期 %s\n", cert.Issuer, cert.Serial, cert.IssuerName, time.Unix(cert.NotAfter, 0).Format(time.DateTime))
+					if d := cert.Detail; d != nil {
+						fmt.Printf("  %s %s 颁发者 %s 到期 %s %s\n", cert.Issuer, d.Serial, d.Issuer, time.Unix(d.NotAfter, 0).Format(time.DateTime), d.Status)
+					}
 				}
 			}
 		},

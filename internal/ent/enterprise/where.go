@@ -3,6 +3,8 @@
 package enterprise
 
 import (
+	"time"
+
 	"auroraride.com/edocseal/internal/ent/predicate"
 	"entgo.io/ent/dialect/sql"
 )
@@ -90,6 +92,21 @@ func Idcard(v string) predicate.Enterprise {
 // IsDefault applies equality check predicate on the "is_default" field. It's identical to IsDefaultEQ.
 func IsDefault(v bool) predicate.Enterprise {
 	return predicate.Enterprise(sql.FieldEQ(FieldIsDefault, v))
+}
+
+// RootCertPath applies equality check predicate on the "root_cert_path" field. It's identical to RootCertPathEQ.
+func RootCertPath(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEQ(FieldRootCertPath, v))
+}
+
+// RootPrivatePath applies equality check predicate on the "root_private_path" field. It's identical to RootPrivatePathEQ.
+func RootPrivatePath(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEQ(FieldRootPrivatePath, v))
+}
+
+// RootExpiresAt applies equality check predicate on the "root_expires_at" field. It's identical to RootExpiresAtEQ.
+func RootExpiresAt(v time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEQ(FieldRootExpiresAt, v))
 }
 
 // CreditCodeEQ applies the EQ predicate on the "credit_code" field.
@@ -585,6 +602,206 @@ func IsDefaultEQ(v bool) predicate.Enterprise {
 // IsDefaultNEQ applies the NEQ predicate on the "is_default" field.
 func IsDefaultNEQ(v bool) predicate.Enterprise {
 	return predicate.Enterprise(sql.FieldNEQ(FieldIsDefault, v))
+}
+
+// RootCertPathEQ applies the EQ predicate on the "root_cert_path" field.
+func RootCertPathEQ(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEQ(FieldRootCertPath, v))
+}
+
+// RootCertPathNEQ applies the NEQ predicate on the "root_cert_path" field.
+func RootCertPathNEQ(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNEQ(FieldRootCertPath, v))
+}
+
+// RootCertPathIn applies the In predicate on the "root_cert_path" field.
+func RootCertPathIn(vs ...string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldIn(FieldRootCertPath, vs...))
+}
+
+// RootCertPathNotIn applies the NotIn predicate on the "root_cert_path" field.
+func RootCertPathNotIn(vs ...string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNotIn(FieldRootCertPath, vs...))
+}
+
+// RootCertPathGT applies the GT predicate on the "root_cert_path" field.
+func RootCertPathGT(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldGT(FieldRootCertPath, v))
+}
+
+// RootCertPathGTE applies the GTE predicate on the "root_cert_path" field.
+func RootCertPathGTE(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldGTE(FieldRootCertPath, v))
+}
+
+// RootCertPathLT applies the LT predicate on the "root_cert_path" field.
+func RootCertPathLT(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldLT(FieldRootCertPath, v))
+}
+
+// RootCertPathLTE applies the LTE predicate on the "root_cert_path" field.
+func RootCertPathLTE(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldLTE(FieldRootCertPath, v))
+}
+
+// RootCertPathContains applies the Contains predicate on the "root_cert_path" field.
+func RootCertPathContains(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldContains(FieldRootCertPath, v))
+}
+
+// RootCertPathHasPrefix applies the HasPrefix predicate on the "root_cert_path" field.
+func RootCertPathHasPrefix(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldHasPrefix(FieldRootCertPath, v))
+}
+
+// RootCertPathHasSuffix applies the HasSuffix predicate on the "root_cert_path" field.
+func RootCertPathHasSuffix(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldHasSuffix(FieldRootCertPath, v))
+}
+
+// RootCertPathIsNil applies the IsNil predicate on the "root_cert_path" field.
+func RootCertPathIsNil() predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldIsNull(FieldRootCertPath))
+}
+
+// RootCertPathNotNil applies the NotNil predicate on the "root_cert_path" field.
+func RootCertPathNotNil() predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNotNull(FieldRootCertPath))
+}
+
+// RootCertPathEqualFold applies the EqualFold predicate on the "root_cert_path" field.
+func RootCertPathEqualFold(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEqualFold(FieldRootCertPath, v))
+}
+
+// RootCertPathContainsFold applies the ContainsFold predicate on the "root_cert_path" field.
+func RootCertPathContainsFold(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldContainsFold(FieldRootCertPath, v))
+}
+
+// RootPrivatePathEQ applies the EQ predicate on the "root_private_path" field.
+func RootPrivatePathEQ(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEQ(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathNEQ applies the NEQ predicate on the "root_private_path" field.
+func RootPrivatePathNEQ(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNEQ(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathIn applies the In predicate on the "root_private_path" field.
+func RootPrivatePathIn(vs ...string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldIn(FieldRootPrivatePath, vs...))
+}
+
+// RootPrivatePathNotIn applies the NotIn predicate on the "root_private_path" field.
+func RootPrivatePathNotIn(vs ...string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNotIn(FieldRootPrivatePath, vs...))
+}
+
+// RootPrivatePathGT applies the GT predicate on the "root_private_path" field.
+func RootPrivatePathGT(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldGT(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathGTE applies the GTE predicate on the "root_private_path" field.
+func RootPrivatePathGTE(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldGTE(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathLT applies the LT predicate on the "root_private_path" field.
+func RootPrivatePathLT(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldLT(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathLTE applies the LTE predicate on the "root_private_path" field.
+func RootPrivatePathLTE(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldLTE(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathContains applies the Contains predicate on the "root_private_path" field.
+func RootPrivatePathContains(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldContains(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathHasPrefix applies the HasPrefix predicate on the "root_private_path" field.
+func RootPrivatePathHasPrefix(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldHasPrefix(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathHasSuffix applies the HasSuffix predicate on the "root_private_path" field.
+func RootPrivatePathHasSuffix(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldHasSuffix(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathIsNil applies the IsNil predicate on the "root_private_path" field.
+func RootPrivatePathIsNil() predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldIsNull(FieldRootPrivatePath))
+}
+
+// RootPrivatePathNotNil applies the NotNil predicate on the "root_private_path" field.
+func RootPrivatePathNotNil() predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNotNull(FieldRootPrivatePath))
+}
+
+// RootPrivatePathEqualFold applies the EqualFold predicate on the "root_private_path" field.
+func RootPrivatePathEqualFold(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEqualFold(FieldRootPrivatePath, v))
+}
+
+// RootPrivatePathContainsFold applies the ContainsFold predicate on the "root_private_path" field.
+func RootPrivatePathContainsFold(v string) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldContainsFold(FieldRootPrivatePath, v))
+}
+
+// RootExpiresAtEQ applies the EQ predicate on the "root_expires_at" field.
+func RootExpiresAtEQ(v time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldEQ(FieldRootExpiresAt, v))
+}
+
+// RootExpiresAtNEQ applies the NEQ predicate on the "root_expires_at" field.
+func RootExpiresAtNEQ(v time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNEQ(FieldRootExpiresAt, v))
+}
+
+// RootExpiresAtIn applies the In predicate on the "root_expires_at" field.
+func RootExpiresAtIn(vs ...time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldIn(FieldRootExpiresAt, vs...))
+}
+
+// RootExpiresAtNotIn applies the NotIn predicate on the "root_expires_at" field.
+func RootExpiresAtNotIn(vs ...time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNotIn(FieldRootExpiresAt, vs...))
+}
+
+// RootExpiresAtGT applies the GT predicate on the "root_expires_at" field.
+func RootExpiresAtGT(v time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldGT(FieldRootExpiresAt, v))
+}
+
+// RootExpiresAtGTE applies the GTE predicate on the "root_expires_at" field.
+func RootExpiresAtGTE(v time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldGTE(FieldRootExpiresAt, v))
+}
+
+// RootExpiresAtLT applies the LT predicate on the "root_expires_at" field.
+func RootExpiresAtLT(v time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldLT(FieldRootExpiresAt, v))
+}
+
+// RootExpiresAtLTE applies the LTE predicate on the "root_expires_at" field.
+func RootExpiresAtLTE(v time.Time) predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldLTE(FieldRootExpiresAt, v))
+}
+
+// RootExpiresAtIsNil applies the IsNil predicate on the "root_expires_at" field.
+func RootExpiresAtIsNil() predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldIsNull(FieldRootExpiresAt))
+}
+
+// RootExpiresAtNotNil applies the NotNil predicate on the "root_expires_at" field.
+func RootExpiresAtNotNil() predicate.Enterprise {
+	return predicate.Enterprise(sql.FieldNotNull(FieldRootExpiresAt))
 }
 
 // And groups predicates with the AND operator between them.

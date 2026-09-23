@@ -24,7 +24,6 @@ const (
 	EnterpriseService_Delete_FullMethodName                    = "/pb.EnterpriseService/Delete"
 	EnterpriseService_SetDefault_FullMethodName                = "/pb.EnterpriseService/SetDefault"
 	EnterpriseService_RevokeCertificates_FullMethodName        = "/pb.EnterpriseService/RevokeCertificates"
-	EnterpriseService_RootCertificate_FullMethodName           = "/pb.EnterpriseService/RootCertificate"
 	EnterpriseService_RegenerateRootCertificate_FullMethodName = "/pb.EnterpriseService/RegenerateRootCertificate"
 )
 
@@ -42,10 +41,8 @@ type EnterpriseServiceClient interface {
 	SetDefault(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error)
 	// 作废企业证书，下次签约时重新签发
 	RevokeCertificates(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error)
-	// 根证书信息
-	RootCertificate(ctx context.Context, in *EnterpriseEmptyRequest, opts ...grpc.CallOption) (*RootCertificateResponse, error)
-	// 重新生成根证书
-	RegenerateRootCertificate(ctx context.Context, in *EnterpriseEmptyRequest, opts ...grpc.CallOption) (*RootCertificateResponse, error)
+	// 重新生成企业自签根证书，该企业的自签证书随之作废
+	RegenerateRootCertificate(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error)
 }
 
 type enterpriseServiceClient struct {
@@ -106,19 +103,9 @@ func (c *enterpriseServiceClient) RevokeCertificates(ctx context.Context, in *En
 	return out, nil
 }
 
-func (c *enterpriseServiceClient) RootCertificate(ctx context.Context, in *EnterpriseEmptyRequest, opts ...grpc.CallOption) (*RootCertificateResponse, error) {
+func (c *enterpriseServiceClient) RegenerateRootCertificate(ctx context.Context, in *EnterpriseCodeRequest, opts ...grpc.CallOption) (*EnterpriseEmptyResponse, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RootCertificateResponse)
-	err := c.cc.Invoke(ctx, EnterpriseService_RootCertificate_FullMethodName, in, out, cOpts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *enterpriseServiceClient) RegenerateRootCertificate(ctx context.Context, in *EnterpriseEmptyRequest, opts ...grpc.CallOption) (*RootCertificateResponse, error) {
-	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(RootCertificateResponse)
+	out := new(EnterpriseEmptyResponse)
 	err := c.cc.Invoke(ctx, EnterpriseService_RegenerateRootCertificate_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
@@ -140,10 +127,8 @@ type EnterpriseServiceServer interface {
 	SetDefault(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error)
 	// 作废企业证书，下次签约时重新签发
 	RevokeCertificates(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error)
-	// 根证书信息
-	RootCertificate(context.Context, *EnterpriseEmptyRequest) (*RootCertificateResponse, error)
-	// 重新生成根证书
-	RegenerateRootCertificate(context.Context, *EnterpriseEmptyRequest) (*RootCertificateResponse, error)
+	// 重新生成企业自签根证书，该企业的自签证书随之作废
+	RegenerateRootCertificate(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error)
 	mustEmbedUnimplementedEnterpriseServiceServer()
 }
 
@@ -169,10 +154,7 @@ func (UnimplementedEnterpriseServiceServer) SetDefault(context.Context, *Enterpr
 func (UnimplementedEnterpriseServiceServer) RevokeCertificates(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RevokeCertificates not implemented")
 }
-func (UnimplementedEnterpriseServiceServer) RootCertificate(context.Context, *EnterpriseEmptyRequest) (*RootCertificateResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RootCertificate not implemented")
-}
-func (UnimplementedEnterpriseServiceServer) RegenerateRootCertificate(context.Context, *EnterpriseEmptyRequest) (*RootCertificateResponse, error) {
+func (UnimplementedEnterpriseServiceServer) RegenerateRootCertificate(context.Context, *EnterpriseCodeRequest) (*EnterpriseEmptyResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RegenerateRootCertificate not implemented")
 }
 func (UnimplementedEnterpriseServiceServer) mustEmbedUnimplementedEnterpriseServiceServer() {}
@@ -286,26 +268,8 @@ func _EnterpriseService_RevokeCertificates_Handler(srv interface{}, ctx context.
 	return interceptor(ctx, in, info, handler)
 }
 
-func _EnterpriseService_RootCertificate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EnterpriseEmptyRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(EnterpriseServiceServer).RootCertificate(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: EnterpriseService_RootCertificate_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EnterpriseServiceServer).RootCertificate(ctx, req.(*EnterpriseEmptyRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _EnterpriseService_RegenerateRootCertificate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(EnterpriseEmptyRequest)
+	in := new(EnterpriseCodeRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -317,7 +281,7 @@ func _EnterpriseService_RegenerateRootCertificate_Handler(srv interface{}, ctx c
 		FullMethod: EnterpriseService_RegenerateRootCertificate_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(EnterpriseServiceServer).RegenerateRootCertificate(ctx, req.(*EnterpriseEmptyRequest))
+		return srv.(EnterpriseServiceServer).RegenerateRootCertificate(ctx, req.(*EnterpriseCodeRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -348,10 +312,6 @@ var EnterpriseService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RevokeCertificates",
 			Handler:    _EnterpriseService_RevokeCertificates_Handler,
-		},
-		{
-			MethodName: "RootCertificate",
-			Handler:    _EnterpriseService_RootCertificate_Handler,
 		},
 		{
 			MethodName: "RegenerateRootCertificate",

@@ -413,7 +413,7 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 
 	// 获取个人证书
 	var cert *ent.Certification
-	cert, err = RequestCertificae(issuer, req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
+	cert, err = RequestCertificae(issuer, ep, req.Name, req.Province, req.City, req.Address, req.Phone, req.Idcard)
 	if err != nil {
 		return
 	}

@@ -74,6 +74,14 @@ func init() {
 	enterpriseDescIsDefault := enterpriseFields[7].Descriptor()
 	// enterprise.DefaultIsDefault holds the default value on creation for the is_default field.
 	enterprise.DefaultIsDefault = enterpriseDescIsDefault.Default.(bool)
+	// enterpriseDescRootCertPath is the schema descriptor for root_cert_path field.
+	enterpriseDescRootCertPath := enterpriseFields[8].Descriptor()
+	// enterprise.RootCertPathValidator is a validator for the "root_cert_path" field. It is called by the builders before save.
+	enterprise.RootCertPathValidator = enterpriseDescRootCertPath.Validators[0].(func(string) error)
+	// enterpriseDescRootPrivatePath is the schema descriptor for root_private_path field.
+	enterpriseDescRootPrivatePath := enterpriseFields[9].Descriptor()
+	// enterprise.RootPrivatePathValidator is a validator for the "root_private_path" field. It is called by the builders before save.
+	enterprise.RootPrivatePathValidator = enterpriseDescRootPrivatePath.Validators[0].(func(string) error)
 	enterprisecertificationFields := schema.EnterpriseCertification{}.Fields()
 	_ = enterprisecertificationFields
 	// enterprisecertificationDescCreditCode is the schema descriptor for credit_code field.

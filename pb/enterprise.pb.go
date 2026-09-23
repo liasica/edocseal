@@ -21,32 +21,39 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-// 企业证书
-type EnterpriseCertificateInfo struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"`                           // 证书生成方式：SELF 自签、SNCA 陕西CA
-	Serial        string                 `protobuf:"bytes,2,opt,name=serial,proto3" json:"serial,omitempty"`                           // 序列号（十六进制）
-	NotBefore     int64                  `protobuf:"varint,3,opt,name=not_before,json=notBefore,proto3" json:"not_before,omitempty"`   // 生效时间（秒级时间戳）
-	NotAfter      int64                  `protobuf:"varint,4,opt,name=not_after,json=notAfter,proto3" json:"not_after,omitempty"`      // 到期时间（秒级时间戳）
-	IssuerName    string                 `protobuf:"bytes,5,opt,name=issuer_name,json=issuerName,proto3" json:"issuer_name,omitempty"` // 颁发者通用名
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+// 证书详情
+type CertificateDetail struct {
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Subject            string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                                 // 主题
+	Issuer             string                 `protobuf:"bytes,2,opt,name=issuer,proto3" json:"issuer,omitempty"`                                                   // 颁发者
+	Serial             string                 `protobuf:"bytes,3,opt,name=serial,proto3" json:"serial,omitempty"`                                                   // 序列号（十六进制）
+	NotBefore          int64                  `protobuf:"varint,4,opt,name=not_before,json=notBefore,proto3" json:"not_before,omitempty"`                           // 生效时间（秒级时间戳）
+	NotAfter           int64                  `protobuf:"varint,5,opt,name=not_after,json=notAfter,proto3" json:"not_after,omitempty"`                              // 到期时间（秒级时间戳）
+	Status             string                 `protobuf:"bytes,6,opt,name=status,proto3" json:"status,omitempty"`                                                   // 状态：VALID 有效、RENEWING 待续签、EXPIRED 已过期
+	PublicKey          string                 `protobuf:"bytes,7,opt,name=public_key,json=publicKey,proto3" json:"public_key,omitempty"`                            // 公钥算法与长度
+	SignatureAlgorithm string                 `protobuf:"bytes,8,opt,name=signature_algorithm,json=signatureAlgorithm,proto3" json:"signature_algorithm,omitempty"` // 签名算法
+	KeyUsage           []string               `protobuf:"bytes,9,rep,name=key_usage,json=keyUsage,proto3" json:"key_usage,omitempty"`                               // 密钥用法
+	IsCa               bool                   `protobuf:"varint,10,opt,name=is_ca,json=isCa,proto3" json:"is_ca,omitempty"`                                         // 是否为 CA 证书
+	Fingerprint        string                 `protobuf:"bytes,11,opt,name=fingerprint,proto3" json:"fingerprint,omitempty"`                                        // SHA-256 指纹
+	Pem                string                 `protobuf:"bytes,12,opt,name=pem,proto3" json:"pem,omitempty"`                                                        // 证书 PEM 内容
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
-func (x *EnterpriseCertificateInfo) Reset() {
-	*x = EnterpriseCertificateInfo{}
+func (x *CertificateDetail) Reset() {
+	*x = CertificateDetail{}
 	mi := &file_enterprise_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *EnterpriseCertificateInfo) String() string {
+func (x *CertificateDetail) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*EnterpriseCertificateInfo) ProtoMessage() {}
+func (*CertificateDetail) ProtoMessage() {}
 
-func (x *EnterpriseCertificateInfo) ProtoReflect() protoreflect.Message {
+func (x *CertificateDetail) ProtoReflect() protoreflect.Message {
 	mi := &file_enterprise_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -58,66 +65,169 @@ func (x *EnterpriseCertificateInfo) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use EnterpriseCertificateInfo.ProtoReflect.Descriptor instead.
-func (*EnterpriseCertificateInfo) Descriptor() ([]byte, []int) {
+// Deprecated: Use CertificateDetail.ProtoReflect.Descriptor instead.
+func (*CertificateDetail) Descriptor() ([]byte, []int) {
 	return file_enterprise_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *EnterpriseCertificateInfo) GetIssuer() string {
+func (x *CertificateDetail) GetSubject() string {
+	if x != nil {
+		return x.Subject
+	}
+	return ""
+}
+
+func (x *CertificateDetail) GetIssuer() string {
 	if x != nil {
 		return x.Issuer
 	}
 	return ""
 }
 
-func (x *EnterpriseCertificateInfo) GetSerial() string {
+func (x *CertificateDetail) GetSerial() string {
 	if x != nil {
 		return x.Serial
 	}
 	return ""
 }
 
-func (x *EnterpriseCertificateInfo) GetNotBefore() int64 {
+func (x *CertificateDetail) GetNotBefore() int64 {
 	if x != nil {
 		return x.NotBefore
 	}
 	return 0
 }
 
-func (x *EnterpriseCertificateInfo) GetNotAfter() int64 {
+func (x *CertificateDetail) GetNotAfter() int64 {
 	if x != nil {
 		return x.NotAfter
 	}
 	return 0
 }
 
-func (x *EnterpriseCertificateInfo) GetIssuerName() string {
+func (x *CertificateDetail) GetStatus() string {
 	if x != nil {
-		return x.IssuerName
+		return x.Status
 	}
 	return ""
 }
 
-// 签约企业
-type Enterprise struct {
-	state         protoimpl.MessageState       `protogen:"open.v1"`
-	CreditCode    string                       `protobuf:"bytes,1,opt,name=credit_code,json=creditCode,proto3" json:"credit_code,omitempty"` // 统一社会信用代码
-	Name          string                       `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                               // 企业名称
-	Province      string                       `protobuf:"bytes,3,opt,name=province,proto3" json:"province,omitempty"`                       // 省份
-	City          string                       `protobuf:"bytes,4,opt,name=city,proto3" json:"city,omitempty"`                               // 城市
-	PersonName    string                       `protobuf:"bytes,5,opt,name=person_name,json=personName,proto3" json:"person_name,omitempty"` // 代办人姓名，向陕西CA 申请证书时使用
-	Phone         string                       `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`                             // 代办人手机号，向陕西CA 申请证书时使用
-	Idcard        string                       `protobuf:"bytes,7,opt,name=idcard,proto3" json:"idcard,omitempty"`                           // 代办人身份证号，向陕西CA 申请证书时使用
-	IsDefault     bool                         `protobuf:"varint,8,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`   // 是否为当前签约企业
-	Seal          []byte                       `protobuf:"bytes,9,opt,name=seal,proto3" json:"seal,omitempty"`                               // 签章图片（PNG）
-	Certificates  []*EnterpriseCertificateInfo `protobuf:"bytes,10,rep,name=certificates,proto3" json:"certificates,omitempty"`              // 企业证书
+func (x *CertificateDetail) GetPublicKey() string {
+	if x != nil {
+		return x.PublicKey
+	}
+	return ""
+}
+
+func (x *CertificateDetail) GetSignatureAlgorithm() string {
+	if x != nil {
+		return x.SignatureAlgorithm
+	}
+	return ""
+}
+
+func (x *CertificateDetail) GetKeyUsage() []string {
+	if x != nil {
+		return x.KeyUsage
+	}
+	return nil
+}
+
+func (x *CertificateDetail) GetIsCa() bool {
+	if x != nil {
+		return x.IsCa
+	}
+	return false
+}
+
+func (x *CertificateDetail) GetFingerprint() string {
+	if x != nil {
+		return x.Fingerprint
+	}
+	return ""
+}
+
+func (x *CertificateDetail) GetPem() string {
+	if x != nil {
+		return x.Pem
+	}
+	return ""
+}
+
+// 企业证书
+type EnterpriseCertificate struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Issuer        string                 `protobuf:"bytes,1,opt,name=issuer,proto3" json:"issuer,omitempty"` // 证书生成方式：SELF 自签、SNCA 陕西CA
+	Detail        *CertificateDetail     `protobuf:"bytes,2,opt,name=detail,proto3" json:"detail,omitempty"` // 证书详情
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
+func (x *EnterpriseCertificate) Reset() {
+	*x = EnterpriseCertificate{}
+	mi := &file_enterprise_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *EnterpriseCertificate) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*EnterpriseCertificate) ProtoMessage() {}
+
+func (x *EnterpriseCertificate) ProtoReflect() protoreflect.Message {
+	mi := &file_enterprise_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use EnterpriseCertificate.ProtoReflect.Descriptor instead.
+func (*EnterpriseCertificate) Descriptor() ([]byte, []int) {
+	return file_enterprise_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *EnterpriseCertificate) GetIssuer() string {
+	if x != nil {
+		return x.Issuer
+	}
+	return ""
+}
+
+func (x *EnterpriseCertificate) GetDetail() *CertificateDetail {
+	if x != nil {
+		return x.Detail
+	}
+	return nil
+}
+
+// 签约企业
+type Enterprise struct {
+	state           protoimpl.MessageState   `protogen:"open.v1"`
+	CreditCode      string                   `protobuf:"bytes,1,opt,name=credit_code,json=creditCode,proto3" json:"credit_code,omitempty"`                 // 统一社会信用代码
+	Name            string                   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`                                               // 企业名称
+	Province        string                   `protobuf:"bytes,3,opt,name=province,proto3" json:"province,omitempty"`                                       // 省份
+	City            string                   `protobuf:"bytes,4,opt,name=city,proto3" json:"city,omitempty"`                                               // 城市
+	PersonName      string                   `protobuf:"bytes,5,opt,name=person_name,json=personName,proto3" json:"person_name,omitempty"`                 // 代办人姓名，向陕西CA 申请证书时使用
+	Phone           string                   `protobuf:"bytes,6,opt,name=phone,proto3" json:"phone,omitempty"`                                             // 代办人手机号，向陕西CA 申请证书时使用
+	Idcard          string                   `protobuf:"bytes,7,opt,name=idcard,proto3" json:"idcard,omitempty"`                                           // 代办人身份证号，向陕西CA 申请证书时使用
+	IsDefault       bool                     `protobuf:"varint,8,opt,name=is_default,json=isDefault,proto3" json:"is_default,omitempty"`                   // 是否为当前签约企业
+	Seal            []byte                   `protobuf:"bytes,9,opt,name=seal,proto3" json:"seal,omitempty"`                                               // 签章图片（PNG）
+	RootCertificate *CertificateDetail       `protobuf:"bytes,10,opt,name=root_certificate,json=rootCertificate,proto3" json:"root_certificate,omitempty"` // 自签根证书
+	Certificates    []*EnterpriseCertificate `protobuf:"bytes,11,rep,name=certificates,proto3" json:"certificates,omitempty"`                              // 企业证书
+	unknownFields   protoimpl.UnknownFields
+	sizeCache       protoimpl.SizeCache
+}
+
 func (x *Enterprise) Reset() {
 	*x = Enterprise{}
-	mi := &file_enterprise_proto_msgTypes[1]
+	mi := &file_enterprise_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -129,7 +239,7 @@ func (x *Enterprise) String() string {
 func (*Enterprise) ProtoMessage() {}
 
 func (x *Enterprise) ProtoReflect() protoreflect.Message {
-	mi := &file_enterprise_proto_msgTypes[1]
+	mi := &file_enterprise_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -142,7 +252,7 @@ func (x *Enterprise) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Enterprise.ProtoReflect.Descriptor instead.
 func (*Enterprise) Descriptor() ([]byte, []int) {
-	return file_enterprise_proto_rawDescGZIP(), []int{1}
+	return file_enterprise_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *Enterprise) GetCreditCode() string {
@@ -208,7 +318,14 @@ func (x *Enterprise) GetSeal() []byte {
 	return nil
 }
 
-func (x *Enterprise) GetCertificates() []*EnterpriseCertificateInfo {
+func (x *Enterprise) GetRootCertificate() *CertificateDetail {
+	if x != nil {
+		return x.RootCertificate
+	}
+	return nil
+}
+
+func (x *Enterprise) GetCertificates() []*EnterpriseCertificate {
 	if x != nil {
 		return x.Certificates
 	}
@@ -223,7 +340,7 @@ type EnterpriseListRequest struct {
 
 func (x *EnterpriseListRequest) Reset() {
 	*x = EnterpriseListRequest{}
-	mi := &file_enterprise_proto_msgTypes[2]
+	mi := &file_enterprise_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -235,7 +352,7 @@ func (x *EnterpriseListRequest) String() string {
 func (*EnterpriseListRequest) ProtoMessage() {}
 
 func (x *EnterpriseListRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_enterprise_proto_msgTypes[2]
+	mi := &file_enterprise_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -248,7 +365,7 @@ func (x *EnterpriseListRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnterpriseListRequest.ProtoReflect.Descriptor instead.
 func (*EnterpriseListRequest) Descriptor() ([]byte, []int) {
-	return file_enterprise_proto_rawDescGZIP(), []int{2}
+	return file_enterprise_proto_rawDescGZIP(), []int{3}
 }
 
 type EnterpriseListResponse struct {
@@ -260,7 +377,7 @@ type EnterpriseListResponse struct {
 
 func (x *EnterpriseListResponse) Reset() {
 	*x = EnterpriseListResponse{}
-	mi := &file_enterprise_proto_msgTypes[3]
+	mi := &file_enterprise_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -272,7 +389,7 @@ func (x *EnterpriseListResponse) String() string {
 func (*EnterpriseListResponse) ProtoMessage() {}
 
 func (x *EnterpriseListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_enterprise_proto_msgTypes[3]
+	mi := &file_enterprise_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -285,7 +402,7 @@ func (x *EnterpriseListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnterpriseListResponse.ProtoReflect.Descriptor instead.
 func (*EnterpriseListResponse) Descriptor() ([]byte, []int) {
-	return file_enterprise_proto_rawDescGZIP(), []int{3}
+	return file_enterprise_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *EnterpriseListResponse) GetItems() []*Enterprise {
@@ -311,7 +428,7 @@ type EnterpriseSaveRequest struct {
 
 func (x *EnterpriseSaveRequest) Reset() {
 	*x = EnterpriseSaveRequest{}
-	mi := &file_enterprise_proto_msgTypes[4]
+	mi := &file_enterprise_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -323,7 +440,7 @@ func (x *EnterpriseSaveRequest) String() string {
 func (*EnterpriseSaveRequest) ProtoMessage() {}
 
 func (x *EnterpriseSaveRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_enterprise_proto_msgTypes[4]
+	mi := &file_enterprise_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -336,7 +453,7 @@ func (x *EnterpriseSaveRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnterpriseSaveRequest.ProtoReflect.Descriptor instead.
 func (*EnterpriseSaveRequest) Descriptor() ([]byte, []int) {
-	return file_enterprise_proto_rawDescGZIP(), []int{4}
+	return file_enterprise_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *EnterpriseSaveRequest) GetCreditCode() string {
@@ -404,7 +521,7 @@ type EnterpriseCodeRequest struct {
 
 func (x *EnterpriseCodeRequest) Reset() {
 	*x = EnterpriseCodeRequest{}
-	mi := &file_enterprise_proto_msgTypes[5]
+	mi := &file_enterprise_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -416,7 +533,7 @@ func (x *EnterpriseCodeRequest) String() string {
 func (*EnterpriseCodeRequest) ProtoMessage() {}
 
 func (x *EnterpriseCodeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_enterprise_proto_msgTypes[5]
+	mi := &file_enterprise_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -429,7 +546,7 @@ func (x *EnterpriseCodeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EnterpriseCodeRequest.ProtoReflect.Descriptor instead.
 func (*EnterpriseCodeRequest) Descriptor() ([]byte, []int) {
-	return file_enterprise_proto_rawDescGZIP(), []int{5}
+	return file_enterprise_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *EnterpriseCodeRequest) GetCreditCode() string {
@@ -437,42 +554,6 @@ func (x *EnterpriseCodeRequest) GetCreditCode() string {
 		return x.CreditCode
 	}
 	return ""
-}
-
-type EnterpriseEmptyRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *EnterpriseEmptyRequest) Reset() {
-	*x = EnterpriseEmptyRequest{}
-	mi := &file_enterprise_proto_msgTypes[6]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *EnterpriseEmptyRequest) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*EnterpriseEmptyRequest) ProtoMessage() {}
-
-func (x *EnterpriseEmptyRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_enterprise_proto_msgTypes[6]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use EnterpriseEmptyRequest.ProtoReflect.Descriptor instead.
-func (*EnterpriseEmptyRequest) Descriptor() ([]byte, []int) {
-	return file_enterprise_proto_rawDescGZIP(), []int{6}
 }
 
 type EnterpriseEmptyResponse struct {
@@ -511,88 +592,30 @@ func (*EnterpriseEmptyResponse) Descriptor() ([]byte, []int) {
 	return file_enterprise_proto_rawDescGZIP(), []int{7}
 }
 
-// 根证书信息
-type RootCertificateResponse struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Subject       string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                       // 主题
-	Serial        string                 `protobuf:"bytes,2,opt,name=serial,proto3" json:"serial,omitempty"`                         // 序列号（十六进制）
-	NotBefore     int64                  `protobuf:"varint,3,opt,name=not_before,json=notBefore,proto3" json:"not_before,omitempty"` // 生效时间（秒级时间戳）
-	NotAfter      int64                  `protobuf:"varint,4,opt,name=not_after,json=notAfter,proto3" json:"not_after,omitempty"`    // 到期时间（秒级时间戳）
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
-}
-
-func (x *RootCertificateResponse) Reset() {
-	*x = RootCertificateResponse{}
-	mi := &file_enterprise_proto_msgTypes[8]
-	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-	ms.StoreMessageInfo(mi)
-}
-
-func (x *RootCertificateResponse) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*RootCertificateResponse) ProtoMessage() {}
-
-func (x *RootCertificateResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_enterprise_proto_msgTypes[8]
-	if x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use RootCertificateResponse.ProtoReflect.Descriptor instead.
-func (*RootCertificateResponse) Descriptor() ([]byte, []int) {
-	return file_enterprise_proto_rawDescGZIP(), []int{8}
-}
-
-func (x *RootCertificateResponse) GetSubject() string {
-	if x != nil {
-		return x.Subject
-	}
-	return ""
-}
-
-func (x *RootCertificateResponse) GetSerial() string {
-	if x != nil {
-		return x.Serial
-	}
-	return ""
-}
-
-func (x *RootCertificateResponse) GetNotBefore() int64 {
-	if x != nil {
-		return x.NotBefore
-	}
-	return 0
-}
-
-func (x *RootCertificateResponse) GetNotAfter() int64 {
-	if x != nil {
-		return x.NotAfter
-	}
-	return 0
-}
-
 var File_enterprise_proto protoreflect.FileDescriptor
 
 const file_enterprise_proto_rawDesc = "" +
 	"\n" +
-	"\x10enterprise.proto\x12\x02pb\"\xa8\x01\n" +
-	"\x19EnterpriseCertificateInfo\x12\x16\n" +
-	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12\x16\n" +
-	"\x06serial\x18\x02 \x01(\tR\x06serial\x12\x1d\n" +
+	"\x10enterprise.proto\x12\x02pb\"\xe7\x02\n" +
+	"\x11CertificateDetail\x12\x18\n" +
+	"\asubject\x18\x01 \x01(\tR\asubject\x12\x16\n" +
+	"\x06issuer\x18\x02 \x01(\tR\x06issuer\x12\x16\n" +
+	"\x06serial\x18\x03 \x01(\tR\x06serial\x12\x1d\n" +
 	"\n" +
-	"not_before\x18\x03 \x01(\x03R\tnotBefore\x12\x1b\n" +
-	"\tnot_after\x18\x04 \x01(\x03R\bnotAfter\x12\x1f\n" +
-	"\vissuer_name\x18\x05 \x01(\tR\n" +
-	"issuerName\"\xb6\x02\n" +
+	"not_before\x18\x04 \x01(\x03R\tnotBefore\x12\x1b\n" +
+	"\tnot_after\x18\x05 \x01(\x03R\bnotAfter\x12\x16\n" +
+	"\x06status\x18\x06 \x01(\tR\x06status\x12\x1d\n" +
+	"\n" +
+	"public_key\x18\a \x01(\tR\tpublicKey\x12/\n" +
+	"\x13signature_algorithm\x18\b \x01(\tR\x12signatureAlgorithm\x12\x1b\n" +
+	"\tkey_usage\x18\t \x03(\tR\bkeyUsage\x12\x13\n" +
+	"\x05is_ca\x18\n" +
+	" \x01(\bR\x04isCa\x12 \n" +
+	"\vfingerprint\x18\v \x01(\tR\vfingerprint\x12\x10\n" +
+	"\x03pem\x18\f \x01(\tR\x03pem\"^\n" +
+	"\x15EnterpriseCertificate\x12\x16\n" +
+	"\x06issuer\x18\x01 \x01(\tR\x06issuer\x12-\n" +
+	"\x06detail\x18\x02 \x01(\v2\x15.pb.CertificateDetailR\x06detail\"\xf4\x02\n" +
 	"\n" +
 	"Enterprise\x12\x1f\n" +
 	"\vcredit_code\x18\x01 \x01(\tR\n" +
@@ -606,9 +629,10 @@ const file_enterprise_proto_rawDesc = "" +
 	"\x06idcard\x18\a \x01(\tR\x06idcard\x12\x1d\n" +
 	"\n" +
 	"is_default\x18\b \x01(\bR\tisDefault\x12\x12\n" +
-	"\x04seal\x18\t \x01(\fR\x04seal\x12A\n" +
-	"\fcertificates\x18\n" +
-	" \x03(\v2\x1d.pb.EnterpriseCertificateInfoR\fcertificates\"\x17\n" +
+	"\x04seal\x18\t \x01(\fR\x04seal\x12@\n" +
+	"\x10root_certificate\x18\n" +
+	" \x01(\v2\x15.pb.CertificateDetailR\x0frootCertificate\x12=\n" +
+	"\fcertificates\x18\v \x03(\v2\x19.pb.EnterpriseCertificateR\fcertificates\"\x17\n" +
 	"\x15EnterpriseListRequest\">\n" +
 	"\x16EnterpriseListResponse\x12$\n" +
 	"\x05items\x18\x01 \x03(\v2\x0e.pb.EnterpriseR\x05items\"\xdf\x01\n" +
@@ -625,24 +649,16 @@ const file_enterprise_proto_rawDesc = "" +
 	"\x04seal\x18\b \x01(\fR\x04seal\"8\n" +
 	"\x15EnterpriseCodeRequest\x12\x1f\n" +
 	"\vcredit_code\x18\x01 \x01(\tR\n" +
-	"creditCode\"\x18\n" +
-	"\x16EnterpriseEmptyRequest\"\x19\n" +
-	"\x17EnterpriseEmptyResponse\"\x87\x01\n" +
-	"\x17RootCertificateResponse\x12\x18\n" +
-	"\asubject\x18\x01 \x01(\tR\asubject\x12\x16\n" +
-	"\x06serial\x18\x02 \x01(\tR\x06serial\x12\x1d\n" +
-	"\n" +
-	"not_before\x18\x03 \x01(\x03R\tnotBefore\x12\x1b\n" +
-	"\tnot_after\x18\x04 \x01(\x03R\bnotAfter2\x98\x04\n" +
+	"creditCode\"\x19\n" +
+	"\x17EnterpriseEmptyResponse2\xc9\x03\n" +
 	"\x11EnterpriseService\x12?\n" +
 	"\x04List\x12\x19.pb.EnterpriseListRequest\x1a\x1a.pb.EnterpriseListResponse\"\x00\x12@\n" +
 	"\x04Save\x12\x19.pb.EnterpriseSaveRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12B\n" +
 	"\x06Delete\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12F\n" +
 	"\n" +
 	"SetDefault\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12N\n" +
-	"\x12RevokeCertificates\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12L\n" +
-	"\x0fRootCertificate\x12\x1a.pb.EnterpriseEmptyRequest\x1a\x1b.pb.RootCertificateResponse\"\x00\x12V\n" +
-	"\x19RegenerateRootCertificate\x12\x1a.pb.EnterpriseEmptyRequest\x1a\x1b.pb.RootCertificateResponse\"\x00B\x1fZ\x1dauroraride.com/edocseal/pb;pbb\x06proto3"
+	"\x12RevokeCertificates\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00\x12U\n" +
+	"\x19RegenerateRootCertificate\x12\x19.pb.EnterpriseCodeRequest\x1a\x1b.pb.EnterpriseEmptyResponse\"\x00B\x1fZ\x1dauroraride.com/edocseal/pb;pbb\x06proto3"
 
 var (
 	file_enterprise_proto_rawDescOnce sync.Once
@@ -656,40 +672,39 @@ func file_enterprise_proto_rawDescGZIP() []byte {
 	return file_enterprise_proto_rawDescData
 }
 
-var file_enterprise_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_enterprise_proto_msgTypes = make([]protoimpl.MessageInfo, 8)
 var file_enterprise_proto_goTypes = []any{
-	(*EnterpriseCertificateInfo)(nil), // 0: pb.EnterpriseCertificateInfo
-	(*Enterprise)(nil),                // 1: pb.Enterprise
-	(*EnterpriseListRequest)(nil),     // 2: pb.EnterpriseListRequest
-	(*EnterpriseListResponse)(nil),    // 3: pb.EnterpriseListResponse
-	(*EnterpriseSaveRequest)(nil),     // 4: pb.EnterpriseSaveRequest
-	(*EnterpriseCodeRequest)(nil),     // 5: pb.EnterpriseCodeRequest
-	(*EnterpriseEmptyRequest)(nil),    // 6: pb.EnterpriseEmptyRequest
-	(*EnterpriseEmptyResponse)(nil),   // 7: pb.EnterpriseEmptyResponse
-	(*RootCertificateResponse)(nil),   // 8: pb.RootCertificateResponse
+	(*CertificateDetail)(nil),       // 0: pb.CertificateDetail
+	(*EnterpriseCertificate)(nil),   // 1: pb.EnterpriseCertificate
+	(*Enterprise)(nil),              // 2: pb.Enterprise
+	(*EnterpriseListRequest)(nil),   // 3: pb.EnterpriseListRequest
+	(*EnterpriseListResponse)(nil),  // 4: pb.EnterpriseListResponse
+	(*EnterpriseSaveRequest)(nil),   // 5: pb.EnterpriseSaveRequest
+	(*EnterpriseCodeRequest)(nil),   // 6: pb.EnterpriseCodeRequest
+	(*EnterpriseEmptyResponse)(nil), // 7: pb.EnterpriseEmptyResponse
 }
 var file_enterprise_proto_depIdxs = []int32{
-	0, // 0: pb.Enterprise.certificates:type_name -> pb.EnterpriseCertificateInfo
-	1, // 1: pb.EnterpriseListResponse.items:type_name -> pb.Enterprise
-	2, // 2: pb.EnterpriseService.List:input_type -> pb.EnterpriseListRequest
-	4, // 3: pb.EnterpriseService.Save:input_type -> pb.EnterpriseSaveRequest
-	5, // 4: pb.EnterpriseService.Delete:input_type -> pb.EnterpriseCodeRequest
-	5, // 5: pb.EnterpriseService.SetDefault:input_type -> pb.EnterpriseCodeRequest
-	5, // 6: pb.EnterpriseService.RevokeCertificates:input_type -> pb.EnterpriseCodeRequest
-	6, // 7: pb.EnterpriseService.RootCertificate:input_type -> pb.EnterpriseEmptyRequest
-	6, // 8: pb.EnterpriseService.RegenerateRootCertificate:input_type -> pb.EnterpriseEmptyRequest
-	3, // 9: pb.EnterpriseService.List:output_type -> pb.EnterpriseListResponse
-	7, // 10: pb.EnterpriseService.Save:output_type -> pb.EnterpriseEmptyResponse
-	7, // 11: pb.EnterpriseService.Delete:output_type -> pb.EnterpriseEmptyResponse
-	7, // 12: pb.EnterpriseService.SetDefault:output_type -> pb.EnterpriseEmptyResponse
-	7, // 13: pb.EnterpriseService.RevokeCertificates:output_type -> pb.EnterpriseEmptyResponse
-	8, // 14: pb.EnterpriseService.RootCertificate:output_type -> pb.RootCertificateResponse
-	8, // 15: pb.EnterpriseService.RegenerateRootCertificate:output_type -> pb.RootCertificateResponse
-	9, // [9:16] is the sub-list for method output_type
-	2, // [2:9] is the sub-list for method input_type
-	2, // [2:2] is the sub-list for extension type_name
-	2, // [2:2] is the sub-list for extension extendee
-	0, // [0:2] is the sub-list for field type_name
+	0,  // 0: pb.EnterpriseCertificate.detail:type_name -> pb.CertificateDetail
+	0,  // 1: pb.Enterprise.root_certificate:type_name -> pb.CertificateDetail
+	1,  // 2: pb.Enterprise.certificates:type_name -> pb.EnterpriseCertificate
+	2,  // 3: pb.EnterpriseListResponse.items:type_name -> pb.Enterprise
+	3,  // 4: pb.EnterpriseService.List:input_type -> pb.EnterpriseListRequest
+	5,  // 5: pb.EnterpriseService.Save:input_type -> pb.EnterpriseSaveRequest
+	6,  // 6: pb.EnterpriseService.Delete:input_type -> pb.EnterpriseCodeRequest
+	6,  // 7: pb.EnterpriseService.SetDefault:input_type -> pb.EnterpriseCodeRequest
+	6,  // 8: pb.EnterpriseService.RevokeCertificates:input_type -> pb.EnterpriseCodeRequest
+	6,  // 9: pb.EnterpriseService.RegenerateRootCertificate:input_type -> pb.EnterpriseCodeRequest
+	4,  // 10: pb.EnterpriseService.List:output_type -> pb.EnterpriseListResponse
+	7,  // 11: pb.EnterpriseService.Save:output_type -> pb.EnterpriseEmptyResponse
+	7,  // 12: pb.EnterpriseService.Delete:output_type -> pb.EnterpriseEmptyResponse
+	7,  // 13: pb.EnterpriseService.SetDefault:output_type -> pb.EnterpriseEmptyResponse
+	7,  // 14: pb.EnterpriseService.RevokeCertificates:output_type -> pb.EnterpriseEmptyResponse
+	7,  // 15: pb.EnterpriseService.RegenerateRootCertificate:output_type -> pb.EnterpriseEmptyResponse
+	10, // [10:16] is the sub-list for method output_type
+	4,  // [4:10] is the sub-list for method input_type
+	4,  // [4:4] is the sub-list for extension type_name
+	4,  // [4:4] is the sub-list for extension extendee
+	0,  // [0:4] is the sub-list for field type_name
 }
 
 func init() { file_enterprise_proto_init() }
@@ -703,7 +718,7 @@ func file_enterprise_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_enterprise_proto_rawDesc), len(file_enterprise_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   8,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

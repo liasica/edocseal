@@ -58,15 +58,8 @@ func (*EnterpriseService) RevokeCertificates(_ context.Context, req *pb.Enterpri
 	return &pb.EnterpriseEmptyResponse{}, enterpriseError("作废企业证书", biz.RevokeEnterpriseCertificates(req.CreditCode))
 }
 
-// RootCertificate 根证书信息
-func (*EnterpriseService) RootCertificate(_ context.Context, _ *pb.EnterpriseEmptyRequest) (*pb.RootCertificateResponse, error) {
-	info, err := biz.RootCertificateInfo()
-	return info, enterpriseError("读取根证书", err)
-}
-
-// RegenerateRootCertificate 重新生成根证书
-func (*EnterpriseService) RegenerateRootCertificate(_ context.Context, _ *pb.EnterpriseEmptyRequest) (*pb.RootCertificateResponse, error) {
-	zap.L().Info("重新生成根证书")
-	info, err := biz.RegenerateRootCertificate()
-	return info, enterpriseError("重新生成根证书", err)
+// RegenerateRootCertificate 重新生成企业自签根证书
+func (*EnterpriseService) RegenerateRootCertificate(_ context.Context, req *pb.EnterpriseCodeRequest) (*pb.EnterpriseEmptyResponse, error) {
+	zap.L().Info("重新生成企业根证书", zap.String("creditCode", req.CreditCode))
+	return &pb.EnterpriseEmptyResponse{}, enterpriseError("重新生成企业根证书", biz.RegenerateRootCertificate(req.CreditCode))
 }

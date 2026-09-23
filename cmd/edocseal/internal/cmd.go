@@ -46,7 +46,6 @@ func RunCommand() {
 	cmd.AddGroup(tmpl.Group())
 
 	cmd.AddCommand(
-		certificateCommand(),
 		serverCommand(),
 		tmpl.Command(),
 		shorturlCommand(),

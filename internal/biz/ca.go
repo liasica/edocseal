@@ -6,9 +6,9 @@ package biz
 
 import (
 	"context"
+	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"errors"
 	"fmt"
 	"path/filepath"
 	"time"
@@ -37,9 +37,10 @@ func ResolveCertificateIssuer(issuer string) string {
 	return model.CertificateIssuerSnca
 }
 
-// RequestCertificae 按证书生成方式申请个人证书
+// RequestCertificae 按证书生成方式申请个人证书，自签时由签约企业的根证书签发
 func RequestCertificae(
 	issuer string,
+	ep *ent.Enterprise,
 	name string,
 	province string,
 	city string,
@@ -56,7 +57,7 @@ func RequestCertificae(
 	var crt, key []byte
 	switch issuer {
 	case model.CertificateIssuerSelf:
-		crt, key, err = selfIssueCertificate(name, province, city, address, phone, idcard)
+		crt, key, err = selfIssueCertificate(ep, name, province, city, idcard)
 	case model.CertificateIssuerSnca:
 		crt, key, err = agencyIssueCertificate(name, province, city, address, phone, idcard)
 	default:
@@ -92,16 +93,25 @@ func RequestCertificae(
 		Save(context.Background())
 }
 
-// 自签发证书
-func selfIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
-	// 获取根证书
-	rootCrt := g.LoadRootCertificate()
-	if !rootCrt.IsValid() {
-		return nil, nil, errors.New("根证书不存在")
+// 使用签约企业的根证书签发个人证书
+func selfIssueCertificate(
+	ep *ent.Enterprise,
+	name string,
+	province string,
+	city string,
+	idcard string,
+) (crt, key []byte, err error) {
+	var (
+		rootCrt *x509.Certificate
+		rootKey *rsa.PrivateKey
+	)
+
+	rootCrt, rootKey, err = EnterpriseRoot(ep)
+	if err != nil {
+		return
 	}
 
-	// 签发证书
-	crt, key, _, err = ca.CreateInterCertificate(rootCrt.GetPrivateKey(), rootCrt.GetCertificate(), pkix.Name{
+	crt, key, _, err = ca.CreateInterCertificate(rootKey, rootCrt, pkix.Name{
 		Country:            []string{"CN"},
 		Province:           []string{province},
 		Locality:           []string{city},
@@ -109,9 +119,6 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 		OrganizationalUnit: []string{idcard},
 		CommonName:         idcard,
 	})
-	if err != nil {
-		return
-	}
 	return
 }
 

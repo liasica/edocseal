@@ -7,6 +7,8 @@ package biz
 import (
 	"bytes"
 	"context"
+	"crypto/rsa"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -18,6 +20,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"sync"
 	"time"
 
@@ -37,8 +40,16 @@ import (
 )
 
 const (
-	enterpriseRenewBefore   = 7 * 24 * time.Hour // 企业证书剩余有效期不足该时长时重新签发
-	enterpriseSelfSignYears = 10                 // 自签企业证书有效期（年）
+	enterpriseRenewBefore     = 7 * 24 * time.Hour  // 企业证书剩余有效期不足该时长时重新签发
+	enterpriseRootRenewBefore = 30 * 24 * time.Hour // 企业根证书剩余有效期不足该时长时重新生成
+	enterpriseSelfSignYears   = 10                  // 自签企业证书有效期（年）
+)
+
+// 证书状态
+const (
+	certificateStatusValid    = "VALID"    // 有效
+	certificateStatusRenewing = "RENEWING" // 待续签
+	certificateStatusExpired  = "EXPIRED"  // 已过期
 )
 
 // enterpriseCache 签约企业与企业证书的内存缓存，启动时从数据库加载，变更时先写数据库再更新缓存
@@ -221,23 +232,19 @@ func ListEnterprises() (items []*pb.Enterprise) {
 			item.Seal, _ = os.ReadFile(path)
 		}
 
+		if e.RootCertPath != "" {
+			item.RootCertificate = certificateDetail(e.RootCertPath, enterpriseRootRenewBefore)
+		}
+
 		for _, issuer := range []string{model.CertificateIssuerSelf, model.CertificateIssuerSnca} {
 			cert := enterprises.certs[enterpriseCertKey(e.CreditCode, issuer)]
 			if cert == nil {
 				continue
 			}
 
-			crt, err := ca.LoadCertificateFromFile(cert.CertPath)
-			if err != nil {
-				continue
-			}
-
-			item.Certificates = append(item.Certificates, &pb.EnterpriseCertificateInfo{
-				Issuer:     issuer,
-				Serial:     fmt.Sprintf("%X", crt.SerialNumber),
-				NotBefore:  crt.NotBefore.Unix(),
-				NotAfter:   crt.NotAfter.Unix(),
-				IssuerName: crt.Issuer.CommonName,
+			item.Certificates = append(item.Certificates, &pb.EnterpriseCertificate{
+				Issuer: issuer,
+				Detail: certificateDetail(cert.CertPath, enterpriseRenewBefore),
 			})
 		}
 
@@ -400,93 +407,265 @@ func RevokeEnterpriseCertificates(creditCode string) (err error) {
 	return LoadEnterprises()
 }
 
-// RootCertificateInfo 返回当前根证书信息
-func RootCertificateInfo() (info *pb.RootCertificateResponse, err error) {
-	root := g.LoadRootCertificate()
-	if !root.IsValid() {
-		err = errors.New("根证书不存在")
-		return
-	}
-
-	crt := root.GetCertificate()
-	info = &pb.RootCertificateResponse{
-		Subject:   crt.Subject.String(),
-		Serial:    fmt.Sprintf("%X", crt.SerialNumber),
-		NotBefore: crt.NotBefore.Unix(),
-		NotAfter:  crt.NotAfter.Unix(),
-	}
-	return
-}
-
-// RegenerateRootCertificate 重新生成根证书，原文件加时间后缀备份，并作废全部自签证书使其按新根证书重新签发
-func RegenerateRootCertificate() (info *pb.RootCertificateResponse, err error) {
+// RegenerateRootCertificate 重新生成企业自签根证书，该企业的自签证书随之作废
+func RegenerateRootCertificate(creditCode string) (err error) {
 	enterpriseWriteMutex.Lock()
 	defer enterpriseWriteMutex.Unlock()
 
-	path := g.GetRootCertificatePath()
-	if path.Certificate == "" || path.PrivateKey == "" {
-		err = errors.New("未配置根证书路径")
-		return
-	}
-
-	priKey := ca.GenerateRsaPrivateKey()
-	keyBytes, _ := x509.MarshalPKCS8PrivateKey(priKey)
-
-	var crtBytes []byte
-	crtBytes, err = ca.GenerateRootCertificate(priKey, model.RootCertificateSubject)
+	var e *ent.Enterprise
+	e, err = queryEnterpriseByCode(creditCode)
 	if err != nil {
 		return
 	}
 
-	// 先写临时文件，再备份原文件并替换
-	err = ca.SaveToFile(path.PrivateKey+".tmp", keyBytes, ca.BlocTypePrivateKey)
-	if err != nil {
+	_, _, err = generateEnterpriseRootLocked(e)
+	return
+}
+
+// EnterpriseRoot 返回企业自签根证书，没有或即将过期时生成
+func EnterpriseRoot(e *ent.Enterprise) (crt *x509.Certificate, key *rsa.PrivateKey, err error) {
+	crt, key, err = loadEnterpriseRoot(e)
+	if err == nil {
 		return
 	}
 
-	err = ca.SaveToFile(path.Certificate+".tmp", crtBytes, ca.BlocTypeCertificate)
-	if err != nil {
-		return
-	}
+	enterpriseWriteMutex.Lock()
+	defer enterpriseWriteMutex.Unlock()
 
-	suffix := "." + time.Now().Format("20060102150405") + ".bak"
-	for _, p := range []string{path.PrivateKey, path.Certificate} {
-		if edocseal.FileExists(p) {
-			err = os.Rename(p, p+suffix)
-			if err != nil {
-				return
-			}
+	return ensureEnterpriseRootLocked(e)
+}
+
+// RenewCertificates 续签即将到期的企业根证书与企业证书，供定时任务调用
+func RenewCertificates() {
+	enterpriseWriteMutex.Lock()
+	defer enterpriseWriteMutex.Unlock()
+
+	enterprises.RLock()
+	items := make([]*ent.Enterprise, 0, len(enterprises.items))
+	for _, e := range enterprises.items {
+		items = append(items, e)
+	}
+	certs := make([]*ent.EnterpriseCertification, 0, len(enterprises.certs))
+	for _, cert := range enterprises.certs {
+		certs = append(certs, cert)
+	}
+	enterprises.RUnlock()
+
+	for _, e := range items {
+		if e.RootExpiresAt == nil || e.RootExpiresAt.After(time.Now().Add(enterpriseRootRenewBefore)) {
+			continue
 		}
 
-		err = os.Rename(p+".tmp", p)
+		if _, _, err := generateEnterpriseRootLocked(e); err != nil {
+			zap.L().Error("企业根证书续签失败", zap.Error(err), zap.String("creditCode", e.CreditCode))
+		}
+	}
+
+	for _, cert := range certs {
+		if enterpriseCertificateUsable(cert) {
+			continue
+		}
+
+		e, err := QueryEnterprise(cert.CreditCode)
+		if err != nil {
+			continue
+		}
+
+		var issued *ent.EnterpriseCertification
+		issued, err = issueEnterpriseCertificate(e, cert.Issuer)
+		if err != nil {
+			zap.L().Error("企业证书续签失败", zap.Error(err), zap.String("creditCode", cert.CreditCode), zap.String("issuer", cert.Issuer))
+			continue
+		}
+
+		enterprises.Lock()
+		enterprises.certs[enterpriseCertKey(cert.CreditCode, cert.Issuer)] = issued
+		enterprises.Unlock()
+	}
+
+	zap.L().Info("企业证书自动续签检查完成", zap.Int("enterprises", len(items)), zap.Int("certificates", len(certs)))
+}
+
+// 读取企业根证书，不存在或即将过期时返回错误
+func loadEnterpriseRoot(e *ent.Enterprise) (crt *x509.Certificate, key *rsa.PrivateKey, err error) {
+	if e.RootCertPath == "" || e.RootExpiresAt == nil || !e.RootExpiresAt.After(time.Now().Add(enterpriseRootRenewBefore)) {
+		err = fmt.Errorf("企业根证书不可用: %s", e.CreditCode)
+		return
+	}
+
+	crt, err = ca.LoadCertificateFromFile(e.RootCertPath)
+	if err != nil {
+		return
+	}
+
+	key, err = ca.LoadPrivateKeyFromFile(e.RootPrivatePath)
+	return
+}
+
+// 返回可用的企业根证书，没有时生成，调用方需持有 enterpriseWriteMutex
+func ensureEnterpriseRootLocked(e *ent.Enterprise) (crt *x509.Certificate, key *rsa.PrivateKey, err error) {
+	// 以缓存中的最新记录为准，等待锁期间可能已生成
+	if latest, queryErr := QueryEnterprise(e.CreditCode); queryErr == nil {
+		e = latest
+	}
+
+	crt, key, err = loadEnterpriseRoot(e)
+	if err == nil {
+		return
+	}
+
+	return generateEnterpriseRootLocked(e)
+}
+
+// 生成企业根证书并写入企业记录，作废该企业的自签企业证书；为签约企业时一并作废自签个人证书。调用方需持有 enterpriseWriteMutex
+func generateEnterpriseRootLocked(e *ent.Enterprise) (crt *x509.Certificate, key *rsa.PrivateKey, err error) {
+	key = ca.GenerateRsaPrivateKey()
+
+	var der []byte
+	der, err = ca.GenerateRootCertificate(key, pkix.Name{
+		Country:            []string{"CN"},
+		Province:           []string{e.Province},
+		Locality:           []string{e.City},
+		Organization:       []string{e.Name},
+		OrganizationalUnit: []string{e.CreditCode},
+		CommonName:         e.Name + " Root CA",
+	})
+	if err != nil {
+		return
+	}
+
+	crt, err = x509.ParseCertificate(der)
+	if err != nil {
+		return
+	}
+
+	dir := filepath.Join(g.GetCertificateDir(), "root")
+	err = edocseal.CreateDirectory(dir)
+	if err != nil {
+		return
+	}
+
+	keyBytes, _ := x509.MarshalPKCS8PrivateKey(key)
+	base := filepath.Join(dir, fmt.Sprintf("%s_%s", e.CreditCode, crt.SerialNumber))
+	kp, cp := base+"_key.pem", base+"_cert.pem"
+
+	err = ca.SaveToFile(kp, keyBytes, ca.BlocTypePrivateKey)
+	if err != nil {
+		return
+	}
+
+	err = ca.SaveToFile(cp, der, ca.BlocTypeCertificate)
+	if err != nil {
+		return
+	}
+
+	ctx := context.Background()
+	err = ent.NewDatabase().Enterprise.Update().
+		Where(enterprise.CreditCode(e.CreditCode)).
+		SetRootCertPath(cp).
+		SetRootPrivatePath(kp).
+		SetRootExpiresAt(crt.NotAfter).
+		Exec(ctx)
+	if err != nil {
+		return
+	}
+
+	_, err = ent.NewDatabase().EnterpriseCertification.Delete().
+		Where(
+			enterprisecertification.CreditCode(e.CreditCode),
+			enterprisecertification.Issuer(model.CertificateIssuerSelf),
+		).
+		Exec(ctx)
+	if err != nil {
+		return
+	}
+
+	if e.IsDefault {
+		_, err = ent.NewDatabase().Certification.Delete().
+			Where(certification.Issuer(model.CertificateIssuerSelf)).
+			Exec(ctx)
 		if err != nil {
 			return
 		}
 	}
 
-	ctx := context.Background()
-	_, err = ent.NewDatabase().EnterpriseCertification.Delete().
-		Where(enterprisecertification.Issuer(model.CertificateIssuerSelf)).
-		Exec(ctx)
-	if err != nil {
-		return
-	}
-
-	_, err = ent.NewDatabase().Certification.Delete().
-		Where(certification.Issuer(model.CertificateIssuerSelf)).
-		Exec(ctx)
-	if err != nil {
-		return
-	}
+	zap.L().Info("企业根证书已生成",
+		zap.String("creditCode", e.CreditCode),
+		zap.String("serialNumber", crt.SerialNumber.String()),
+		zap.Time("notAfter", crt.NotAfter),
+	)
 
 	err = LoadEnterprises()
+	return
+}
+
+// 解析证书文件为证书详情，文件无法解析时返回 nil
+func certificateDetail(path string, renewBefore time.Duration) *pb.CertificateDetail {
+	b, err := os.ReadFile(path)
 	if err != nil {
-		return
+		return nil
 	}
 
-	zap.L().Info("根证书已重新生成", zap.String("certificate", path.Certificate), zap.String("backupSuffix", suffix))
+	var crt *x509.Certificate
+	crt, err = ca.ParseCertificate(b)
+	if err != nil {
+		return nil
+	}
 
-	return RootCertificateInfo()
+	publicKey := crt.PublicKeyAlgorithm.String()
+	if rsaKey, ok := crt.PublicKey.(*rsa.PublicKey); ok {
+		publicKey = fmt.Sprintf("RSA %d 位", rsaKey.N.BitLen())
+	}
+
+	sum := sha256.Sum256(crt.Raw)
+	fingerprint := make([]string, len(sum))
+	for i, v := range sum {
+		fingerprint[i] = fmt.Sprintf("%02X", v)
+	}
+
+	status := certificateStatusValid
+	switch now := time.Now(); {
+	case !crt.NotAfter.After(now):
+		status = certificateStatusExpired
+	case crt.NotAfter.Before(now.Add(renewBefore)):
+		status = certificateStatusRenewing
+	}
+
+	return &pb.CertificateDetail{
+		Subject:            crt.Subject.String(),
+		Issuer:             crt.Issuer.String(),
+		Serial:             fmt.Sprintf("%X", crt.SerialNumber),
+		NotBefore:          crt.NotBefore.Unix(),
+		NotAfter:           crt.NotAfter.Unix(),
+		Status:             status,
+		PublicKey:          publicKey,
+		SignatureAlgorithm: crt.SignatureAlgorithm.String(),
+		KeyUsage:           keyUsageNames(crt.KeyUsage),
+		IsCa:               crt.IsCA,
+		Fingerprint:        strings.Join(fingerprint, ":"),
+		Pem:                string(b),
+	}
+}
+
+// 密钥用法名称
+func keyUsageNames(usage x509.KeyUsage) (names []string) {
+	for _, item := range []struct {
+		usage x509.KeyUsage
+		name  string
+	}{
+		{x509.KeyUsageDigitalSignature, "数字签名"},
+		{x509.KeyUsageContentCommitment, "不可否认"},
+		{x509.KeyUsageKeyEncipherment, "密钥加密"},
+		{x509.KeyUsageDataEncipherment, "数据加密"},
+		{x509.KeyUsageKeyAgreement, "密钥协商"},
+		{x509.KeyUsageCertSign, "证书签发"},
+		{x509.KeyUsageCRLSign, "CRL 签发"},
+	} {
+		if usage&item.usage != 0 {
+			names = append(names, item.name)
+		}
+	}
+	return
 }
 
 // 按非空的统一社会信用代码从缓存查询企业
@@ -594,15 +773,19 @@ func issueEnterpriseCertificate(e *ent.Enterprise, issuer string) (cert *ent.Ent
 		Save(context.Background())
 }
 
-// 使用根证书签发企业证书
+// 使用企业根证书签发企业证书，调用方需持有 enterpriseWriteMutex
 func selfIssueEnterpriseCertificate(e *ent.Enterprise) (crt, key []byte, err error) {
-	root := g.LoadRootCertificate()
-	if !root.IsValid() {
-		err = errors.New("根证书不存在")
+	var (
+		rootCrt *x509.Certificate
+		rootKey *rsa.PrivateKey
+	)
+
+	rootCrt, rootKey, err = ensureEnterpriseRootLocked(e)
+	if err != nil {
 		return
 	}
 
-	crt, key, _, err = ca.CreateSigningCertificate(root.GetPrivateKey(), root.GetCertificate(), pkix.Name{
+	crt, key, _, err = ca.CreateSigningCertificate(rootKey, rootCrt, pkix.Name{
 		Country:            []string{"CN"},
 		Province:           []string{e.Province},
 		Locality:           []string{e.City},

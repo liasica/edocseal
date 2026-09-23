@@ -17,11 +17,6 @@ var (
 	configFile string
 )
 
-type CertificatePath struct {
-	Certificate string
-	PrivateKey  string
-}
-
 type AliyunOss struct {
 	AccessKeyId     string
 	AccessKeySecret string
@@ -77,9 +72,6 @@ type Config struct {
 	Document struct {
 		BucketPath string // OSS存储路径
 	}
-
-	// 根证书和私钥，用于签发证书
-	RootCertificate CertificatePath
 
 	// 企业证书拉取配置
 	Enterprise Enterprise
@@ -220,11 +212,6 @@ func GetDocumentDir() string {
 // GetCertificateDir 获取根证书路径
 func GetCertificateDir() string {
 	return cfg.Dir.Certificate
-}
-
-// GetRootCertificatePath 获取根证书与私钥路径
-func GetRootCertificatePath() CertificatePath {
-	return cfg.RootCertificate
 }
 
 // GetSealDir 获取企业签章目录

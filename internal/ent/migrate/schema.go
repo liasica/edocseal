@@ -75,7 +75,10 @@ var (
 		{Name: "person_name", Type: field.TypeString, Nullable: true, Size: 50, Comment: "代办人姓名，向陕西CA 申请证书时使用"},
 		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 20, Comment: "代办人手机号，向陕西CA 申请证书时使用"},
 		{Name: "idcard", Type: field.TypeString, Nullable: true, Size: 18, Comment: "代办人身份证号，向陕西CA 申请证书时使用"},
-		{Name: "is_default", Type: field.TypeBool, Comment: "是否默认企业，签约请求未指定企业时使用", Default: false},
+		{Name: "is_default", Type: field.TypeBool, Comment: "是否为当前签约企业", Default: false},
+		{Name: "root_cert_path", Type: field.TypeString, Nullable: true, Size: 255, Comment: "自签根证书路径"},
+		{Name: "root_private_path", Type: field.TypeString, Nullable: true, Size: 255, Comment: "自签根证书私钥路径"},
+		{Name: "root_expires_at", Type: field.TypeTime, Nullable: true, Comment: "自签根证书过期时间"},
 	}
 	// EnterpriseTable holds the schema information for the "enterprise" table.
 	EnterpriseTable = &schema.Table{

@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"auroraride.com/edocseal/internal/ent/enterprise"
 	"auroraride.com/edocseal/internal/ent/predicate"
@@ -158,6 +159,66 @@ func (_u *EnterpriseUpdate) SetNillableIsDefault(v *bool) *EnterpriseUpdate {
 	return _u
 }
 
+// SetRootCertPath sets the "root_cert_path" field.
+func (_u *EnterpriseUpdate) SetRootCertPath(v string) *EnterpriseUpdate {
+	_u.mutation.SetRootCertPath(v)
+	return _u
+}
+
+// SetNillableRootCertPath sets the "root_cert_path" field if the given value is not nil.
+func (_u *EnterpriseUpdate) SetNillableRootCertPath(v *string) *EnterpriseUpdate {
+	if v != nil {
+		_u.SetRootCertPath(*v)
+	}
+	return _u
+}
+
+// ClearRootCertPath clears the value of the "root_cert_path" field.
+func (_u *EnterpriseUpdate) ClearRootCertPath() *EnterpriseUpdate {
+	_u.mutation.ClearRootCertPath()
+	return _u
+}
+
+// SetRootPrivatePath sets the "root_private_path" field.
+func (_u *EnterpriseUpdate) SetRootPrivatePath(v string) *EnterpriseUpdate {
+	_u.mutation.SetRootPrivatePath(v)
+	return _u
+}
+
+// SetNillableRootPrivatePath sets the "root_private_path" field if the given value is not nil.
+func (_u *EnterpriseUpdate) SetNillableRootPrivatePath(v *string) *EnterpriseUpdate {
+	if v != nil {
+		_u.SetRootPrivatePath(*v)
+	}
+	return _u
+}
+
+// ClearRootPrivatePath clears the value of the "root_private_path" field.
+func (_u *EnterpriseUpdate) ClearRootPrivatePath() *EnterpriseUpdate {
+	_u.mutation.ClearRootPrivatePath()
+	return _u
+}
+
+// SetRootExpiresAt sets the "root_expires_at" field.
+func (_u *EnterpriseUpdate) SetRootExpiresAt(v time.Time) *EnterpriseUpdate {
+	_u.mutation.SetRootExpiresAt(v)
+	return _u
+}
+
+// SetNillableRootExpiresAt sets the "root_expires_at" field if the given value is not nil.
+func (_u *EnterpriseUpdate) SetNillableRootExpiresAt(v *time.Time) *EnterpriseUpdate {
+	if v != nil {
+		_u.SetRootExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearRootExpiresAt clears the value of the "root_expires_at" field.
+func (_u *EnterpriseUpdate) ClearRootExpiresAt() *EnterpriseUpdate {
+	_u.mutation.ClearRootExpiresAt()
+	return _u
+}
+
 // Mutation returns the EnterpriseMutation object of the builder.
 func (_u *EnterpriseUpdate) Mutation() *EnterpriseMutation {
 	return _u.mutation
@@ -227,6 +288,16 @@ func (_u *EnterpriseUpdate) check() error {
 			return &ValidationError{Name: "idcard", err: fmt.Errorf(`ent: validator failed for field "Enterprise.idcard": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.RootCertPath(); ok {
+		if err := enterprise.RootCertPathValidator(v); err != nil {
+			return &ValidationError{Name: "root_cert_path", err: fmt.Errorf(`ent: validator failed for field "Enterprise.root_cert_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RootPrivatePath(); ok {
+		if err := enterprise.RootPrivatePathValidator(v); err != nil {
+			return &ValidationError{Name: "root_private_path", err: fmt.Errorf(`ent: validator failed for field "Enterprise.root_private_path": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -280,6 +351,24 @@ func (_u *EnterpriseUpdate) sqlSave(ctx context.Context) (_node int, err error) 
 	}
 	if value, ok := _u.mutation.IsDefault(); ok {
 		_spec.SetField(enterprise.FieldIsDefault, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.RootCertPath(); ok {
+		_spec.SetField(enterprise.FieldRootCertPath, field.TypeString, value)
+	}
+	if _u.mutation.RootCertPathCleared() {
+		_spec.ClearField(enterprise.FieldRootCertPath, field.TypeString)
+	}
+	if value, ok := _u.mutation.RootPrivatePath(); ok {
+		_spec.SetField(enterprise.FieldRootPrivatePath, field.TypeString, value)
+	}
+	if _u.mutation.RootPrivatePathCleared() {
+		_spec.ClearField(enterprise.FieldRootPrivatePath, field.TypeString)
+	}
+	if value, ok := _u.mutation.RootExpiresAt(); ok {
+		_spec.SetField(enterprise.FieldRootExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.RootExpiresAtCleared() {
+		_spec.ClearField(enterprise.FieldRootExpiresAt, field.TypeTime)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	if _node, err = sqlgraph.UpdateNodes(ctx, _u.driver, _spec); err != nil {
@@ -433,6 +522,66 @@ func (_u *EnterpriseUpdateOne) SetNillableIsDefault(v *bool) *EnterpriseUpdateOn
 	return _u
 }
 
+// SetRootCertPath sets the "root_cert_path" field.
+func (_u *EnterpriseUpdateOne) SetRootCertPath(v string) *EnterpriseUpdateOne {
+	_u.mutation.SetRootCertPath(v)
+	return _u
+}
+
+// SetNillableRootCertPath sets the "root_cert_path" field if the given value is not nil.
+func (_u *EnterpriseUpdateOne) SetNillableRootCertPath(v *string) *EnterpriseUpdateOne {
+	if v != nil {
+		_u.SetRootCertPath(*v)
+	}
+	return _u
+}
+
+// ClearRootCertPath clears the value of the "root_cert_path" field.
+func (_u *EnterpriseUpdateOne) ClearRootCertPath() *EnterpriseUpdateOne {
+	_u.mutation.ClearRootCertPath()
+	return _u
+}
+
+// SetRootPrivatePath sets the "root_private_path" field.
+func (_u *EnterpriseUpdateOne) SetRootPrivatePath(v string) *EnterpriseUpdateOne {
+	_u.mutation.SetRootPrivatePath(v)
+	return _u
+}
+
+// SetNillableRootPrivatePath sets the "root_private_path" field if the given value is not nil.
+func (_u *EnterpriseUpdateOne) SetNillableRootPrivatePath(v *string) *EnterpriseUpdateOne {
+	if v != nil {
+		_u.SetRootPrivatePath(*v)
+	}
+	return _u
+}
+
+// ClearRootPrivatePath clears the value of the "root_private_path" field.
+func (_u *EnterpriseUpdateOne) ClearRootPrivatePath() *EnterpriseUpdateOne {
+	_u.mutation.ClearRootPrivatePath()
+	return _u
+}
+
+// SetRootExpiresAt sets the "root_expires_at" field.
+func (_u *EnterpriseUpdateOne) SetRootExpiresAt(v time.Time) *EnterpriseUpdateOne {
+	_u.mutation.SetRootExpiresAt(v)
+	return _u
+}
+
+// SetNillableRootExpiresAt sets the "root_expires_at" field if the given value is not nil.
+func (_u *EnterpriseUpdateOne) SetNillableRootExpiresAt(v *time.Time) *EnterpriseUpdateOne {
+	if v != nil {
+		_u.SetRootExpiresAt(*v)
+	}
+	return _u
+}
+
+// ClearRootExpiresAt clears the value of the "root_expires_at" field.
+func (_u *EnterpriseUpdateOne) ClearRootExpiresAt() *EnterpriseUpdateOne {
+	_u.mutation.ClearRootExpiresAt()
+	return _u
+}
+
 // Mutation returns the EnterpriseMutation object of the builder.
 func (_u *EnterpriseUpdateOne) Mutation() *EnterpriseMutation {
 	return _u.mutation
@@ -515,6 +664,16 @@ func (_u *EnterpriseUpdateOne) check() error {
 			return &ValidationError{Name: "idcard", err: fmt.Errorf(`ent: validator failed for field "Enterprise.idcard": %w`, err)}
 		}
 	}
+	if v, ok := _u.mutation.RootCertPath(); ok {
+		if err := enterprise.RootCertPathValidator(v); err != nil {
+			return &ValidationError{Name: "root_cert_path", err: fmt.Errorf(`ent: validator failed for field "Enterprise.root_cert_path": %w`, err)}
+		}
+	}
+	if v, ok := _u.mutation.RootPrivatePath(); ok {
+		if err := enterprise.RootPrivatePathValidator(v); err != nil {
+			return &ValidationError{Name: "root_private_path", err: fmt.Errorf(`ent: validator failed for field "Enterprise.root_private_path": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -585,6 +744,24 @@ func (_u *EnterpriseUpdateOne) sqlSave(ctx context.Context) (_node *Enterprise, 
 	}
 	if value, ok := _u.mutation.IsDefault(); ok {
 		_spec.SetField(enterprise.FieldIsDefault, field.TypeBool, value)
+	}
+	if value, ok := _u.mutation.RootCertPath(); ok {
+		_spec.SetField(enterprise.FieldRootCertPath, field.TypeString, value)
+	}
+	if _u.mutation.RootCertPathCleared() {
+		_spec.ClearField(enterprise.FieldRootCertPath, field.TypeString)
+	}
+	if value, ok := _u.mutation.RootPrivatePath(); ok {
+		_spec.SetField(enterprise.FieldRootPrivatePath, field.TypeString, value)
+	}
+	if _u.mutation.RootPrivatePathCleared() {
+		_spec.ClearField(enterprise.FieldRootPrivatePath, field.TypeString)
+	}
+	if value, ok := _u.mutation.RootExpiresAt(); ok {
+		_spec.SetField(enterprise.FieldRootExpiresAt, field.TypeTime, value)
+	}
+	if _u.mutation.RootExpiresAtCleared() {
+		_spec.ClearField(enterprise.FieldRootExpiresAt, field.TypeTime)
 	}
 	_spec.AddModifiers(_u.modifiers...)
 	_node = &Enterprise{config: _u.config}

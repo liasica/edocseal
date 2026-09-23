@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	"auroraride.com/edocseal/internal/ent/enterprise"
 	"entgo.io/ent/dialect/sql"
@@ -97,6 +98,48 @@ func (_c *EnterpriseCreate) SetIsDefault(v bool) *EnterpriseCreate {
 func (_c *EnterpriseCreate) SetNillableIsDefault(v *bool) *EnterpriseCreate {
 	if v != nil {
 		_c.SetIsDefault(*v)
+	}
+	return _c
+}
+
+// SetRootCertPath sets the "root_cert_path" field.
+func (_c *EnterpriseCreate) SetRootCertPath(v string) *EnterpriseCreate {
+	_c.mutation.SetRootCertPath(v)
+	return _c
+}
+
+// SetNillableRootCertPath sets the "root_cert_path" field if the given value is not nil.
+func (_c *EnterpriseCreate) SetNillableRootCertPath(v *string) *EnterpriseCreate {
+	if v != nil {
+		_c.SetRootCertPath(*v)
+	}
+	return _c
+}
+
+// SetRootPrivatePath sets the "root_private_path" field.
+func (_c *EnterpriseCreate) SetRootPrivatePath(v string) *EnterpriseCreate {
+	_c.mutation.SetRootPrivatePath(v)
+	return _c
+}
+
+// SetNillableRootPrivatePath sets the "root_private_path" field if the given value is not nil.
+func (_c *EnterpriseCreate) SetNillableRootPrivatePath(v *string) *EnterpriseCreate {
+	if v != nil {
+		_c.SetRootPrivatePath(*v)
+	}
+	return _c
+}
+
+// SetRootExpiresAt sets the "root_expires_at" field.
+func (_c *EnterpriseCreate) SetRootExpiresAt(v time.Time) *EnterpriseCreate {
+	_c.mutation.SetRootExpiresAt(v)
+	return _c
+}
+
+// SetNillableRootExpiresAt sets the "root_expires_at" field if the given value is not nil.
+func (_c *EnterpriseCreate) SetNillableRootExpiresAt(v *time.Time) *EnterpriseCreate {
+	if v != nil {
+		_c.SetRootExpiresAt(*v)
 	}
 	return _c
 }
@@ -194,6 +237,16 @@ func (_c *EnterpriseCreate) check() error {
 	if _, ok := _c.mutation.IsDefault(); !ok {
 		return &ValidationError{Name: "is_default", err: errors.New(`ent: missing required field "Enterprise.is_default"`)}
 	}
+	if v, ok := _c.mutation.RootCertPath(); ok {
+		if err := enterprise.RootCertPathValidator(v); err != nil {
+			return &ValidationError{Name: "root_cert_path", err: fmt.Errorf(`ent: validator failed for field "Enterprise.root_cert_path": %w`, err)}
+		}
+	}
+	if v, ok := _c.mutation.RootPrivatePath(); ok {
+		if err := enterprise.RootPrivatePathValidator(v); err != nil {
+			return &ValidationError{Name: "root_private_path", err: fmt.Errorf(`ent: validator failed for field "Enterprise.root_private_path": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -252,6 +305,18 @@ func (_c *EnterpriseCreate) createSpec() (*Enterprise, *sqlgraph.CreateSpec) {
 	if value, ok := _c.mutation.IsDefault(); ok {
 		_spec.SetField(enterprise.FieldIsDefault, field.TypeBool, value)
 		_node.IsDefault = value
+	}
+	if value, ok := _c.mutation.RootCertPath(); ok {
+		_spec.SetField(enterprise.FieldRootCertPath, field.TypeString, value)
+		_node.RootCertPath = value
+	}
+	if value, ok := _c.mutation.RootPrivatePath(); ok {
+		_spec.SetField(enterprise.FieldRootPrivatePath, field.TypeString, value)
+		_node.RootPrivatePath = value
+	}
+	if value, ok := _c.mutation.RootExpiresAt(); ok {
+		_spec.SetField(enterprise.FieldRootExpiresAt, field.TypeTime, value)
+		_node.RootExpiresAt = &value
 	}
 	return _node, _spec
 }
@@ -416,6 +481,60 @@ func (u *EnterpriseUpsert) SetIsDefault(v bool) *EnterpriseUpsert {
 // UpdateIsDefault sets the "is_default" field to the value that was provided on create.
 func (u *EnterpriseUpsert) UpdateIsDefault() *EnterpriseUpsert {
 	u.SetExcluded(enterprise.FieldIsDefault)
+	return u
+}
+
+// SetRootCertPath sets the "root_cert_path" field.
+func (u *EnterpriseUpsert) SetRootCertPath(v string) *EnterpriseUpsert {
+	u.Set(enterprise.FieldRootCertPath, v)
+	return u
+}
+
+// UpdateRootCertPath sets the "root_cert_path" field to the value that was provided on create.
+func (u *EnterpriseUpsert) UpdateRootCertPath() *EnterpriseUpsert {
+	u.SetExcluded(enterprise.FieldRootCertPath)
+	return u
+}
+
+// ClearRootCertPath clears the value of the "root_cert_path" field.
+func (u *EnterpriseUpsert) ClearRootCertPath() *EnterpriseUpsert {
+	u.SetNull(enterprise.FieldRootCertPath)
+	return u
+}
+
+// SetRootPrivatePath sets the "root_private_path" field.
+func (u *EnterpriseUpsert) SetRootPrivatePath(v string) *EnterpriseUpsert {
+	u.Set(enterprise.FieldRootPrivatePath, v)
+	return u
+}
+
+// UpdateRootPrivatePath sets the "root_private_path" field to the value that was provided on create.
+func (u *EnterpriseUpsert) UpdateRootPrivatePath() *EnterpriseUpsert {
+	u.SetExcluded(enterprise.FieldRootPrivatePath)
+	return u
+}
+
+// ClearRootPrivatePath clears the value of the "root_private_path" field.
+func (u *EnterpriseUpsert) ClearRootPrivatePath() *EnterpriseUpsert {
+	u.SetNull(enterprise.FieldRootPrivatePath)
+	return u
+}
+
+// SetRootExpiresAt sets the "root_expires_at" field.
+func (u *EnterpriseUpsert) SetRootExpiresAt(v time.Time) *EnterpriseUpsert {
+	u.Set(enterprise.FieldRootExpiresAt, v)
+	return u
+}
+
+// UpdateRootExpiresAt sets the "root_expires_at" field to the value that was provided on create.
+func (u *EnterpriseUpsert) UpdateRootExpiresAt() *EnterpriseUpsert {
+	u.SetExcluded(enterprise.FieldRootExpiresAt)
+	return u
+}
+
+// ClearRootExpiresAt clears the value of the "root_expires_at" field.
+func (u *EnterpriseUpsert) ClearRootExpiresAt() *EnterpriseUpsert {
+	u.SetNull(enterprise.FieldRootExpiresAt)
 	return u
 }
 
@@ -589,6 +708,69 @@ func (u *EnterpriseUpsertOne) SetIsDefault(v bool) *EnterpriseUpsertOne {
 func (u *EnterpriseUpsertOne) UpdateIsDefault() *EnterpriseUpsertOne {
 	return u.Update(func(s *EnterpriseUpsert) {
 		s.UpdateIsDefault()
+	})
+}
+
+// SetRootCertPath sets the "root_cert_path" field.
+func (u *EnterpriseUpsertOne) SetRootCertPath(v string) *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.SetRootCertPath(v)
+	})
+}
+
+// UpdateRootCertPath sets the "root_cert_path" field to the value that was provided on create.
+func (u *EnterpriseUpsertOne) UpdateRootCertPath() *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.UpdateRootCertPath()
+	})
+}
+
+// ClearRootCertPath clears the value of the "root_cert_path" field.
+func (u *EnterpriseUpsertOne) ClearRootCertPath() *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.ClearRootCertPath()
+	})
+}
+
+// SetRootPrivatePath sets the "root_private_path" field.
+func (u *EnterpriseUpsertOne) SetRootPrivatePath(v string) *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.SetRootPrivatePath(v)
+	})
+}
+
+// UpdateRootPrivatePath sets the "root_private_path" field to the value that was provided on create.
+func (u *EnterpriseUpsertOne) UpdateRootPrivatePath() *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.UpdateRootPrivatePath()
+	})
+}
+
+// ClearRootPrivatePath clears the value of the "root_private_path" field.
+func (u *EnterpriseUpsertOne) ClearRootPrivatePath() *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.ClearRootPrivatePath()
+	})
+}
+
+// SetRootExpiresAt sets the "root_expires_at" field.
+func (u *EnterpriseUpsertOne) SetRootExpiresAt(v time.Time) *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.SetRootExpiresAt(v)
+	})
+}
+
+// UpdateRootExpiresAt sets the "root_expires_at" field to the value that was provided on create.
+func (u *EnterpriseUpsertOne) UpdateRootExpiresAt() *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.UpdateRootExpiresAt()
+	})
+}
+
+// ClearRootExpiresAt clears the value of the "root_expires_at" field.
+func (u *EnterpriseUpsertOne) ClearRootExpiresAt() *EnterpriseUpsertOne {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.ClearRootExpiresAt()
 	})
 }
 
@@ -934,6 +1116,69 @@ func (u *EnterpriseUpsertBulk) SetIsDefault(v bool) *EnterpriseUpsertBulk {
 func (u *EnterpriseUpsertBulk) UpdateIsDefault() *EnterpriseUpsertBulk {
 	return u.Update(func(s *EnterpriseUpsert) {
 		s.UpdateIsDefault()
+	})
+}
+
+// SetRootCertPath sets the "root_cert_path" field.
+func (u *EnterpriseUpsertBulk) SetRootCertPath(v string) *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.SetRootCertPath(v)
+	})
+}
+
+// UpdateRootCertPath sets the "root_cert_path" field to the value that was provided on create.
+func (u *EnterpriseUpsertBulk) UpdateRootCertPath() *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.UpdateRootCertPath()
+	})
+}
+
+// ClearRootCertPath clears the value of the "root_cert_path" field.
+func (u *EnterpriseUpsertBulk) ClearRootCertPath() *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.ClearRootCertPath()
+	})
+}
+
+// SetRootPrivatePath sets the "root_private_path" field.
+func (u *EnterpriseUpsertBulk) SetRootPrivatePath(v string) *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.SetRootPrivatePath(v)
+	})
+}
+
+// UpdateRootPrivatePath sets the "root_private_path" field to the value that was provided on create.
+func (u *EnterpriseUpsertBulk) UpdateRootPrivatePath() *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.UpdateRootPrivatePath()
+	})
+}
+
+// ClearRootPrivatePath clears the value of the "root_private_path" field.
+func (u *EnterpriseUpsertBulk) ClearRootPrivatePath() *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.ClearRootPrivatePath()
+	})
+}
+
+// SetRootExpiresAt sets the "root_expires_at" field.
+func (u *EnterpriseUpsertBulk) SetRootExpiresAt(v time.Time) *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.SetRootExpiresAt(v)
+	})
+}
+
+// UpdateRootExpiresAt sets the "root_expires_at" field to the value that was provided on create.
+func (u *EnterpriseUpsertBulk) UpdateRootExpiresAt() *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.UpdateRootExpiresAt()
+	})
+}
+
+// ClearRootExpiresAt clears the value of the "root_expires_at" field.
+func (u *EnterpriseUpsertBulk) ClearRootExpiresAt() *EnterpriseUpsertBulk {
+	return u.Update(func(s *EnterpriseUpsert) {
+		s.ClearRootExpiresAt()
 	})
 }
 

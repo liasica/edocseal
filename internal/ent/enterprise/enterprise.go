@@ -27,6 +27,12 @@ const (
 	FieldIdcard = "idcard"
 	// FieldIsDefault holds the string denoting the is_default field in the database.
 	FieldIsDefault = "is_default"
+	// FieldRootCertPath holds the string denoting the root_cert_path field in the database.
+	FieldRootCertPath = "root_cert_path"
+	// FieldRootPrivatePath holds the string denoting the root_private_path field in the database.
+	FieldRootPrivatePath = "root_private_path"
+	// FieldRootExpiresAt holds the string denoting the root_expires_at field in the database.
+	FieldRootExpiresAt = "root_expires_at"
 	// Table holds the table name of the enterprise in the database.
 	Table = "enterprise"
 )
@@ -42,6 +48,9 @@ var Columns = []string{
 	FieldPhone,
 	FieldIdcard,
 	FieldIsDefault,
+	FieldRootCertPath,
+	FieldRootPrivatePath,
+	FieldRootExpiresAt,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -71,6 +80,10 @@ var (
 	IdcardValidator func(string) error
 	// DefaultIsDefault holds the default value on creation for the "is_default" field.
 	DefaultIsDefault bool
+	// RootCertPathValidator is a validator for the "root_cert_path" field. It is called by the builders before save.
+	RootCertPathValidator func(string) error
+	// RootPrivatePathValidator is a validator for the "root_private_path" field. It is called by the builders before save.
+	RootPrivatePathValidator func(string) error
 )
 
 // OrderOption defines the ordering options for the Enterprise queries.
@@ -119,4 +132,19 @@ func ByIdcard(opts ...sql.OrderTermOption) OrderOption {
 // ByIsDefault orders the results by the is_default field.
 func ByIsDefault(opts ...sql.OrderTermOption) OrderOption {
 	return sql.OrderByField(FieldIsDefault, opts...).ToFunc()
+}
+
+// ByRootCertPath orders the results by the root_cert_path field.
+func ByRootCertPath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRootCertPath, opts...).ToFunc()
+}
+
+// ByRootPrivatePath orders the results by the root_private_path field.
+func ByRootPrivatePath(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRootPrivatePath, opts...).ToFunc()
+}
+
+// ByRootExpiresAt orders the results by the root_expires_at field.
+func ByRootExpiresAt(opts ...sql.OrderTermOption) OrderOption {
+	return sql.OrderByField(FieldRootExpiresAt, opts...).ToFunc()
 }

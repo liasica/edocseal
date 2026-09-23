@@ -32,6 +32,9 @@ func serverCommand() *cobra.Command {
 			// 启动文档删除定时任务
 			go task.NewFileTask().Run()
 
+			// 启动企业证书自动续签定时任务
+			go task.NewCertificateTask().Run()
+
 			// 启动http服务
 			go service.StartHttpServer()
 

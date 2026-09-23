@@ -5,6 +5,7 @@ package ent
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"auroraride.com/edocseal/internal/ent/enterprise"
 	"entgo.io/ent"
@@ -30,9 +31,15 @@ type Enterprise struct {
 	Phone string `json:"phone,omitempty"`
 	// 代办人身份证号，向陕西CA 申请证书时使用
 	Idcard string `json:"idcard,omitempty"`
-	// 是否默认企业，签约请求未指定企业时使用
-	IsDefault    bool `json:"is_default,omitempty"`
-	selectValues sql.SelectValues
+	// 是否为当前签约企业
+	IsDefault bool `json:"is_default,omitempty"`
+	// 自签根证书路径
+	RootCertPath string `json:"root_cert_path,omitempty"`
+	// 自签根证书私钥路径
+	RootPrivatePath string `json:"root_private_path,omitempty"`
+	// 自签根证书过期时间
+	RootExpiresAt *time.Time `json:"root_expires_at,omitempty"`
+	selectValues  sql.SelectValues
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -44,8 +51,10 @@ func (*Enterprise) scanValues(columns []string) ([]any, error) {
 			values[i] = new(sql.NullBool)
 		case enterprise.FieldID:
 			values[i] = new(sql.NullInt64)
-		case enterprise.FieldCreditCode, enterprise.FieldName, enterprise.FieldProvince, enterprise.FieldCity, enterprise.FieldPersonName, enterprise.FieldPhone, enterprise.FieldIdcard:
+		case enterprise.FieldCreditCode, enterprise.FieldName, enterprise.FieldProvince, enterprise.FieldCity, enterprise.FieldPersonName, enterprise.FieldPhone, enterprise.FieldIdcard, enterprise.FieldRootCertPath, enterprise.FieldRootPrivatePath:
 			values[i] = new(sql.NullString)
+		case enterprise.FieldRootExpiresAt:
+			values[i] = new(sql.NullTime)
 		default:
 			values[i] = new(sql.UnknownType)
 		}
@@ -115,6 +124,25 @@ func (_m *Enterprise) assignValues(columns []string, values []any) error {
 			} else if value.Valid {
 				_m.IsDefault = value.Bool
 			}
+		case enterprise.FieldRootCertPath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field root_cert_path", values[i])
+			} else if value.Valid {
+				_m.RootCertPath = value.String
+			}
+		case enterprise.FieldRootPrivatePath:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field root_private_path", values[i])
+			} else if value.Valid {
+				_m.RootPrivatePath = value.String
+			}
+		case enterprise.FieldRootExpiresAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field root_expires_at", values[i])
+			} else if value.Valid {
+				_m.RootExpiresAt = new(time.Time)
+				*_m.RootExpiresAt = value.Time
+			}
 		default:
 			_m.selectValues.Set(columns[i], values[i])
 		}
@@ -174,6 +202,17 @@ func (_m *Enterprise) String() string {
 	builder.WriteString(", ")
 	builder.WriteString("is_default=")
 	builder.WriteString(fmt.Sprintf("%v", _m.IsDefault))
+	builder.WriteString(", ")
+	builder.WriteString("root_cert_path=")
+	builder.WriteString(_m.RootCertPath)
+	builder.WriteString(", ")
+	builder.WriteString("root_private_path=")
+	builder.WriteString(_m.RootPrivatePath)
+	builder.WriteString(", ")
+	if v := _m.RootExpiresAt; v != nil {
+		builder.WriteString("root_expires_at=")
+		builder.WriteString(v.Format(time.ANSIC))
+	}
 	builder.WriteByte(')')
 	return builder.String()
 }

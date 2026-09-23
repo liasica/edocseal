@@ -20,20 +20,30 @@ service EnterpriseService {
   // 作废企业证书，下次签约时重新签发
   rpc RevokeCertificates(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
 
-  // 根证书信息
-  rpc RootCertificate(EnterpriseEmptyRequest) returns (RootCertificateResponse) {}
+  // 重新生成企业自签根证书，该企业的自签证书随之作废
+  rpc RegenerateRootCertificate(EnterpriseCodeRequest) returns (EnterpriseEmptyResponse) {}
+}
 
-  // 重新生成根证书
-  rpc RegenerateRootCertificate(EnterpriseEmptyRequest) returns (RootCertificateResponse) {}
+// 证书详情
+message CertificateDetail {
+  string subject = 1; // 主题
+  string issuer = 2; // 颁发者
+  string serial = 3; // 序列号（十六进制）
+  int64 not_before = 4; // 生效时间（秒级时间戳）
+  int64 not_after = 5; // 到期时间（秒级时间戳）
+  string status = 6; // 状态：VALID 有效、RENEWING 待续签、EXPIRED 已过期
+  string public_key = 7; // 公钥算法与长度
+  string signature_algorithm = 8; // 签名算法
+  repeated string key_usage = 9; // 密钥用法
+  bool is_ca = 10; // 是否为 CA 证书
+  string fingerprint = 11; // SHA-256 指纹
+  string pem = 12; // 证书 PEM 内容
 }
 
 // 企业证书
-message EnterpriseCertificateInfo {
+message EnterpriseCertificate {
   string issuer = 1; // 证书生成方式：SELF 自签、SNCA 陕西CA
-  string serial = 2; // 序列号（十六进制）
-  int64 not_before = 3; // 生效时间（秒级时间戳）
-  int64 not_after = 4; // 到期时间（秒级时间戳）
-  string issuer_name = 5; // 颁发者通用名
+  CertificateDetail detail = 2; // 证书详情
 }
 
 // 签约企业
@@ -47,7 +57,8 @@ message Enterprise {
   string idcard = 7; // 代办人身份证号，向陕西CA 申请证书时使用
   bool is_default = 8; // 是否为当前签约企业
   bytes seal = 9; // 签章图片（PNG）
-  repeated EnterpriseCertificateInfo certificates = 10; // 企业证书
+  CertificateDetail root_certificate = 10; // 自签根证书
+  repeated EnterpriseCertificate certificates = 11; // 企业证书
 }
 
 message EnterpriseListRequest {}
@@ -71,14 +82,4 @@ message EnterpriseCodeRequest {
   string credit_code = 1; // 统一社会信用代码
 }
 
-message EnterpriseEmptyRequest {}
-
 message EnterpriseEmptyResponse {}
-
-// 根证书信息
-message RootCertificateResponse {
-  string subject = 1; // 主题
-  string serial = 2; // 序列号（十六进制）
-  int64 not_before = 3; // 生效时间（秒级时间戳）
-  int64 not_after = 4; // 到期时间（秒级时间戳）
-}

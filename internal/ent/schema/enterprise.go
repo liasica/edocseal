@@ -30,7 +30,10 @@ func (Enterprise) Fields() []ent.Field {
 		field.String("person_name").Optional().MaxLen(50).Comment("代办人姓名，向陕西CA 申请证书时使用"),
 		field.String("phone").Optional().MaxLen(20).Comment("代办人手机号，向陕西CA 申请证书时使用"),
 		field.String("idcard").Optional().MaxLen(18).Comment("代办人身份证号，向陕西CA 申请证书时使用"),
-		field.Bool("is_default").Default(false).Comment("是否默认企业，签约请求未指定企业时使用"),
+		field.Bool("is_default").Default(false).Comment("是否为当前签约企业"),
+		field.String("root_cert_path").Optional().MaxLen(255).Comment("自签根证书路径"),
+		field.String("root_private_path").Optional().MaxLen(255).Comment("自签根证书私钥路径"),
+		field.Time("root_expires_at").Optional().Nillable().Comment("自签根证书过期时间"),
 	}
 }
 

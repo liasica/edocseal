@@ -1384,21 +1384,24 @@ func (m *DocumentMutation) ResetEdge(name string) error {
 // EnterpriseMutation represents an operation that mutates the Enterprise nodes in the graph.
 type EnterpriseMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	credit_code   *string
-	name          *string
-	province      *string
-	city          *string
-	person_name   *string
-	phone         *string
-	idcard        *string
-	is_default    *bool
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Enterprise, error)
-	predicates    []predicate.Enterprise
+	op                Op
+	typ               string
+	id                *int
+	credit_code       *string
+	name              *string
+	province          *string
+	city              *string
+	person_name       *string
+	phone             *string
+	idcard            *string
+	is_default        *bool
+	root_cert_path    *string
+	root_private_path *string
+	root_expires_at   *time.Time
+	clearedFields     map[string]struct{}
+	done              bool
+	oldValue          func(context.Context) (*Enterprise, error)
+	predicates        []predicate.Enterprise
 }
 
 var _ ent.Mutation = (*EnterpriseMutation)(nil)
@@ -1826,6 +1829,153 @@ func (m *EnterpriseMutation) ResetIsDefault() {
 	m.is_default = nil
 }
 
+// SetRootCertPath sets the "root_cert_path" field.
+func (m *EnterpriseMutation) SetRootCertPath(s string) {
+	m.root_cert_path = &s
+}
+
+// RootCertPath returns the value of the "root_cert_path" field in the mutation.
+func (m *EnterpriseMutation) RootCertPath() (r string, exists bool) {
+	v := m.root_cert_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRootCertPath returns the old "root_cert_path" field's value of the Enterprise entity.
+// If the Enterprise object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EnterpriseMutation) OldRootCertPath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRootCertPath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRootCertPath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRootCertPath: %w", err)
+	}
+	return oldValue.RootCertPath, nil
+}
+
+// ClearRootCertPath clears the value of the "root_cert_path" field.
+func (m *EnterpriseMutation) ClearRootCertPath() {
+	m.root_cert_path = nil
+	m.clearedFields[enterprise.FieldRootCertPath] = struct{}{}
+}
+
+// RootCertPathCleared returns if the "root_cert_path" field was cleared in this mutation.
+func (m *EnterpriseMutation) RootCertPathCleared() bool {
+	_, ok := m.clearedFields[enterprise.FieldRootCertPath]
+	return ok
+}
+
+// ResetRootCertPath resets all changes to the "root_cert_path" field.
+func (m *EnterpriseMutation) ResetRootCertPath() {
+	m.root_cert_path = nil
+	delete(m.clearedFields, enterprise.FieldRootCertPath)
+}
+
+// SetRootPrivatePath sets the "root_private_path" field.
+func (m *EnterpriseMutation) SetRootPrivatePath(s string) {
+	m.root_private_path = &s
+}
+
+// RootPrivatePath returns the value of the "root_private_path" field in the mutation.
+func (m *EnterpriseMutation) RootPrivatePath() (r string, exists bool) {
+	v := m.root_private_path
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRootPrivatePath returns the old "root_private_path" field's value of the Enterprise entity.
+// If the Enterprise object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EnterpriseMutation) OldRootPrivatePath(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRootPrivatePath is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRootPrivatePath requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRootPrivatePath: %w", err)
+	}
+	return oldValue.RootPrivatePath, nil
+}
+
+// ClearRootPrivatePath clears the value of the "root_private_path" field.
+func (m *EnterpriseMutation) ClearRootPrivatePath() {
+	m.root_private_path = nil
+	m.clearedFields[enterprise.FieldRootPrivatePath] = struct{}{}
+}
+
+// RootPrivatePathCleared returns if the "root_private_path" field was cleared in this mutation.
+func (m *EnterpriseMutation) RootPrivatePathCleared() bool {
+	_, ok := m.clearedFields[enterprise.FieldRootPrivatePath]
+	return ok
+}
+
+// ResetRootPrivatePath resets all changes to the "root_private_path" field.
+func (m *EnterpriseMutation) ResetRootPrivatePath() {
+	m.root_private_path = nil
+	delete(m.clearedFields, enterprise.FieldRootPrivatePath)
+}
+
+// SetRootExpiresAt sets the "root_expires_at" field.
+func (m *EnterpriseMutation) SetRootExpiresAt(t time.Time) {
+	m.root_expires_at = &t
+}
+
+// RootExpiresAt returns the value of the "root_expires_at" field in the mutation.
+func (m *EnterpriseMutation) RootExpiresAt() (r time.Time, exists bool) {
+	v := m.root_expires_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRootExpiresAt returns the old "root_expires_at" field's value of the Enterprise entity.
+// If the Enterprise object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *EnterpriseMutation) OldRootExpiresAt(ctx context.Context) (v *time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRootExpiresAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRootExpiresAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRootExpiresAt: %w", err)
+	}
+	return oldValue.RootExpiresAt, nil
+}
+
+// ClearRootExpiresAt clears the value of the "root_expires_at" field.
+func (m *EnterpriseMutation) ClearRootExpiresAt() {
+	m.root_expires_at = nil
+	m.clearedFields[enterprise.FieldRootExpiresAt] = struct{}{}
+}
+
+// RootExpiresAtCleared returns if the "root_expires_at" field was cleared in this mutation.
+func (m *EnterpriseMutation) RootExpiresAtCleared() bool {
+	_, ok := m.clearedFields[enterprise.FieldRootExpiresAt]
+	return ok
+}
+
+// ResetRootExpiresAt resets all changes to the "root_expires_at" field.
+func (m *EnterpriseMutation) ResetRootExpiresAt() {
+	m.root_expires_at = nil
+	delete(m.clearedFields, enterprise.FieldRootExpiresAt)
+}
+
 // Where appends a list predicates to the EnterpriseMutation builder.
 func (m *EnterpriseMutation) Where(ps ...predicate.Enterprise) {
 	m.predicates = append(m.predicates, ps...)
@@ -1860,7 +2010,7 @@ func (m *EnterpriseMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *EnterpriseMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 11)
 	if m.credit_code != nil {
 		fields = append(fields, enterprise.FieldCreditCode)
 	}
@@ -1884,6 +2034,15 @@ func (m *EnterpriseMutation) Fields() []string {
 	}
 	if m.is_default != nil {
 		fields = append(fields, enterprise.FieldIsDefault)
+	}
+	if m.root_cert_path != nil {
+		fields = append(fields, enterprise.FieldRootCertPath)
+	}
+	if m.root_private_path != nil {
+		fields = append(fields, enterprise.FieldRootPrivatePath)
+	}
+	if m.root_expires_at != nil {
+		fields = append(fields, enterprise.FieldRootExpiresAt)
 	}
 	return fields
 }
@@ -1909,6 +2068,12 @@ func (m *EnterpriseMutation) Field(name string) (ent.Value, bool) {
 		return m.Idcard()
 	case enterprise.FieldIsDefault:
 		return m.IsDefault()
+	case enterprise.FieldRootCertPath:
+		return m.RootCertPath()
+	case enterprise.FieldRootPrivatePath:
+		return m.RootPrivatePath()
+	case enterprise.FieldRootExpiresAt:
+		return m.RootExpiresAt()
 	}
 	return nil, false
 }
@@ -1934,6 +2099,12 @@ func (m *EnterpriseMutation) OldField(ctx context.Context, name string) (ent.Val
 		return m.OldIdcard(ctx)
 	case enterprise.FieldIsDefault:
 		return m.OldIsDefault(ctx)
+	case enterprise.FieldRootCertPath:
+		return m.OldRootCertPath(ctx)
+	case enterprise.FieldRootPrivatePath:
+		return m.OldRootPrivatePath(ctx)
+	case enterprise.FieldRootExpiresAt:
+		return m.OldRootExpiresAt(ctx)
 	}
 	return nil, fmt.Errorf("unknown Enterprise field %s", name)
 }
@@ -1999,6 +2170,27 @@ func (m *EnterpriseMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetIsDefault(v)
 		return nil
+	case enterprise.FieldRootCertPath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRootCertPath(v)
+		return nil
+	case enterprise.FieldRootPrivatePath:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRootPrivatePath(v)
+		return nil
+	case enterprise.FieldRootExpiresAt:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRootExpiresAt(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Enterprise field %s", name)
 }
@@ -2038,6 +2230,15 @@ func (m *EnterpriseMutation) ClearedFields() []string {
 	if m.FieldCleared(enterprise.FieldIdcard) {
 		fields = append(fields, enterprise.FieldIdcard)
 	}
+	if m.FieldCleared(enterprise.FieldRootCertPath) {
+		fields = append(fields, enterprise.FieldRootCertPath)
+	}
+	if m.FieldCleared(enterprise.FieldRootPrivatePath) {
+		fields = append(fields, enterprise.FieldRootPrivatePath)
+	}
+	if m.FieldCleared(enterprise.FieldRootExpiresAt) {
+		fields = append(fields, enterprise.FieldRootExpiresAt)
+	}
 	return fields
 }
 
@@ -2060,6 +2261,15 @@ func (m *EnterpriseMutation) ClearField(name string) error {
 		return nil
 	case enterprise.FieldIdcard:
 		m.ClearIdcard()
+		return nil
+	case enterprise.FieldRootCertPath:
+		m.ClearRootCertPath()
+		return nil
+	case enterprise.FieldRootPrivatePath:
+		m.ClearRootPrivatePath()
+		return nil
+	case enterprise.FieldRootExpiresAt:
+		m.ClearRootExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Enterprise nullable field %s", name)
@@ -2092,6 +2302,15 @@ func (m *EnterpriseMutation) ResetField(name string) error {
 		return nil
 	case enterprise.FieldIsDefault:
 		m.ResetIsDefault()
+		return nil
+	case enterprise.FieldRootCertPath:
+		m.ResetRootCertPath()
+		return nil
+	case enterprise.FieldRootPrivatePath:
+		m.ResetRootPrivatePath()
+		return nil
+	case enterprise.FieldRootExpiresAt:
+		m.ResetRootExpiresAt()
 		return nil
 	}
 	return fmt.Errorf("unknown Enterprise field %s", name)
