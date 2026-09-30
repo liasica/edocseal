@@ -56,9 +56,6 @@ func Boot() {
 		zap.L().Fatal("数据库连接失败", zap.Error(err))
 	}
 
-	// 初始化证书
-	rootCrt := g.NewCertificate()
-
 	// 初始化snca
 	snca.Setup(g.GetSnca())
 
@@ -66,7 +63,6 @@ func Boot() {
 		"edocseal 初始化完成",
 		zap.String("configFile", g.GetConfigFile()),
 		zap.String("rpcBind", g.GetRPCBind()),
-		zap.Bool("rootCrt", rootCrt.GetCertificate() != nil && rootCrt.GetPrivateKey() != nil),
 		zap.String("signerVersion", string(b)),
 	)
 }

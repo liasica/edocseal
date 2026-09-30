@@ -54,8 +54,9 @@ func (t *FileTask) do() {
 	}
 
 	// 查询前一天数据
-	yesterdayBeginTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().AddDate(0, 0, -1).Day(), 0, 0, 0, 0, time.Local)
-	yesterdayEndTime := time.Date(time.Now().Year(), time.Now().Month(), time.Now().Day(), 0, 0, 0, 0, time.Local)
+	yesterday := time.Now().AddDate(0, 0, -1)
+	yesterdayBeginTime := time.Date(yesterday.Year(), yesterday.Month(), yesterday.Day(), 0, 0, 0, 0, time.Local)
+	yesterdayEndTime := yesterdayBeginTime.AddDate(0, 0, 1)
 	var docs []*ent.Document
 	docs, err = ent.NewDatabase().Document.Query().
 		Where(

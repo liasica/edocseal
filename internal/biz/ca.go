@@ -6,23 +6,18 @@ package biz
 
 import (
 	"context"
+	"crypto/rsa"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
-	"go.uber.org/zap"
-	"resty.dev/v3"
-
-	"auroraride.com/edocseal"
 	"auroraride.com/edocseal/ca"
 	"auroraride.com/edocseal/internal/ent"
 	"auroraride.com/edocseal/internal/ent/certification"
 	"auroraride.com/edocseal/internal/g"
+	"auroraride.com/edocseal/internal/model"
 	"auroraride.com/edocseal/third/snca"
 )
 
@@ -30,24 +25,46 @@ func CertificatePaths(idcard string) (keypath string, capath string) {
 	return filepath.Join(g.GetCertificateDir(), idcard+"_key.pem"), filepath.Join(g.GetCertificateDir(), idcard+"_cert.pem")
 }
 
-// RequestCertificae 申请证书
-func RequestCertificae(name, province, city, address, phone, idcard string) (cert *ent.Certification, err error) {
+// ResolveCertificateIssuer 证书生成方式为空时按配置 selfSign 决定
+func ResolveCertificateIssuer(issuer string) string {
+	if issuer != "" {
+		return issuer
+	}
+
+	if g.IsSelfSign() {
+		return model.CertificateIssuerSelf
+	}
+	return model.CertificateIssuerSnca
+}
+
+// RequestCertificae 按证书生成方式申请个人证书，自签时由签约企业的根证书签发
+func RequestCertificae(
+	issuer string,
+	ep *ent.Enterprise,
+	name string,
+	province string,
+	city string,
+	address string,
+	phone string,
+	idcard string,
+) (cert *ent.Certification, err error) {
+	// 未过期的证书直接复用，不区分签发方式
 	cert = queryCertification(idcard)
 	if cert != nil {
 		return
 	}
 
 	var crt, key []byte
-	if g.IsSelfSign() {
-		crt, key, err = selfIssueCertificate(name, province, city, address, phone, idcard)
-		if err != nil {
-			return
-		}
-	} else {
+	switch issuer {
+	case model.CertificateIssuerSelf:
+		crt, key, err = selfIssueCertificate(ep, name, province, city, idcard)
+	case model.CertificateIssuerSnca:
 		crt, key, err = agencyIssueCertificate(name, province, city, address, phone, idcard)
-		if err != nil {
-			return
-		}
+	default:
+		err = fmt.Errorf("不支持的证书生成方式: %s", issuer)
+	}
+	if err != nil {
+		return
 	}
 
 	kp, cp := CertificatePaths(idcard)
@@ -70,21 +87,31 @@ func RequestCertificae(name, province, city, address, phone, idcard string) (cer
 		SetPrivatePath(kp).
 		SetCertPath(cp).
 		SetExpiresAt(time.Now().Add(time.Hour*24 - time.Minute*10)). // 防止证书过期，有效期减少10分钟
+		SetIssuer(issuer).
 		OnConflictColumns(certification.FieldIDCardNumber).
 		UpdateNewValues().
 		Save(context.Background())
 }
 
-// 自签发证书
-func selfIssueCertificate(name, province, city, address, phone, idcard string) (crt, key []byte, err error) {
-	// 获取根证书
-	rootCrt := g.NewCertificate()
-	if rootCrt == nil {
-		return nil, nil, errors.New("根证书不存在")
+// 使用签约企业的根证书签发个人证书
+func selfIssueCertificate(
+	ep *ent.Enterprise,
+	name string,
+	province string,
+	city string,
+	idcard string,
+) (crt, key []byte, err error) {
+	var (
+		rootCrt *x509.Certificate
+		rootKey *rsa.PrivateKey
+	)
+
+	rootCrt, rootKey, err = EnterpriseRoot(ep)
+	if err != nil {
+		return
 	}
 
-	// 签发证书
-	crt, key, _, err = ca.CreateInterCertificate(rootCrt.GetPrivateKey(), rootCrt.GetCertificate(), pkix.Name{
+	crt, key, _, err = ca.CreateInterCertificate(rootKey, rootCrt, pkix.Name{
 		Country:            []string{"CN"},
 		Province:           []string{province},
 		Locality:           []string{city},
@@ -92,9 +119,6 @@ func selfIssueCertificate(name, province, city, address, phone, idcard string) (
 		OrganizationalUnit: []string{idcard},
 		CommonName:         idcard,
 	})
-	if err != nil {
-		return
-	}
 	return
 }
 
@@ -137,133 +161,4 @@ func agencyIssueCertificate(name, province, city, address, phone, idcard string)
 	)
 
 	return
-}
-
-// requestFromSnca 从SNCA申请证书
-// 返回私钥、证书内容和证书对象
-func requestFromSnca() (keyBytes []byte, crtBytes []byte, err error) {
-	cfg := g.GetEnterpriseConfig()
-
-	priKey := ca.GenerateRsaPrivateKey()
-	keyBytes, _ = x509.MarshalPKCS8PrivateKey(priKey)
-
-	// 生成CSR请求
-	var csr []byte
-	csr, err = ca.GenerateRequest(priKey, pkix.Name{
-		Country:    []string{"CN"},
-		CommonName: cfg.Name,
-	})
-	if err != nil {
-		return
-	}
-
-	// 签发证书
-	crtBytes, err = snca.New().RequestCACert(
-		snca.CertTypeEnterprise,
-		csr,
-		cfg.Name,
-		cfg.PersonName,
-		cfg.Phone,
-		cfg.Idcard,
-		cfg.Province,
-		cfg.City,
-		cfg.CreditCode,
-	)
-
-	return
-}
-
-// requestFromUrl 从指定URL获取证书和私钥
-func requestFromUrl(url string, name, serial string) (keyBytes []byte, crtBytes []byte, err error) {
-	// 若URL为空，则直接返回未找到企业证书错误
-	if url == "" {
-		return nil, nil, edocseal.ErrEnterpriseCertificateNotFound
-	}
-
-	// 发送HTTP请求获取证书和私钥
-	var result edocseal.EnterpriseCertificate
-	var resp *resty.Response
-	resp, err = resty.New().R().
-		SetResult(&result).
-		SetQueryParam("name", name).
-		SetQueryParam("serial", serial).
-		Get(url)
-	if err != nil {
-		return
-	}
-
-	if resp.IsSuccess() && (result.Key == "" || result.Cert == "") {
-		return
-	}
-
-	// 解析返回的证书和私钥
-	keyBytes = []byte(result.Key)
-	crtBytes = []byte(result.Cert)
-	return
-}
-
-// RequestEnterpriseCertAndUpdateConfig 申请企业证书并更新配置
-func RequestEnterpriseCertAndUpdateConfig() (err error) {
-	cfg := g.GetEnterpriseConfig()
-
-	var (
-		keyBytes []byte
-		crtBytes []byte
-		crt      *x509.Certificate
-	)
-
-	// 尝试从url中获取证书和私钥
-	keyBytes, crtBytes, err = requestFromUrl(cfg.Url, cfg.Name, cfg.GetCertificate().SerialNumber.String())
-	if err != nil {
-		// 如果返回错误是企业证书未找到，则尝试从SNCA申请
-		if !errors.Is(err, edocseal.ErrEnterpriseCertificateNotFound) {
-			keyBytes, crtBytes, err = requestFromSnca()
-		}
-	}
-
-	// 如果申请证书失败，则返回错误
-	if err != nil {
-		return
-	}
-
-	// 如果keyBytes和crtBytes都为nil，则表示无需更新
-	if keyBytes == nil && crtBytes == nil {
-		zap.L().Info("无需更新企业证书", zap.String("name", cfg.Name))
-		return
-	}
-
-	// 读取证书
-	crt, err = x509.ParseCertificate(crtBytes)
-	if err != nil {
-		return
-	}
-
-	zap.L().Info("申请企业证书成功", zap.String("name", cfg.Name), zap.Int64("serialNumber", crt.SerialNumber.Int64()), zap.Time("notBefore", crt.NotBefore), zap.Time("notAfter", crt.NotAfter))
-
-	dir := filepath.Dir(g.GetConfigFile())
-
-	// 私钥路径
-	kf := filepath.Join(dir, fmt.Sprintf("%s_%d_key.pem", cfg.Name, crt.SerialNumber))
-	err = ca.SaveToFile(kf, keyBytes, ca.BlocTypePrivateKey)
-	if err != nil {
-		return
-	}
-
-	// 证书路径
-	cf := filepath.Join(dir, fmt.Sprintf("%s_%d_cert.pem", cfg.Name, crt.SerialNumber))
-	err = ca.SaveToFile(cf, crtBytes, ca.BlocTypeCertificate)
-	if err != nil {
-		return
-	}
-
-	c, _ := os.ReadFile(g.GetConfigFile())
-	str := string(c)
-	str = strings.ReplaceAll(str, cfg.PrivateKey, kf)
-	str = strings.ReplaceAll(str, cfg.Certificate, cf)
-
-	priKey, _ := ca.ParsePrivateKey(keyBytes)
-
-	g.UpdateEnterpriseConfig(kf, cf, crt, crtBytes, priKey, keyBytes)
-
-	return os.WriteFile(g.GetConfigFile(), []byte(str), os.ModePerm)
 }

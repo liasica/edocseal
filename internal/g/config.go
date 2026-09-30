@@ -5,27 +5,17 @@
 package g
 
 import (
-	"crypto/rsa"
-	"crypto/x509"
-	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/spf13/viper"
-
-	"auroraride.com/edocseal"
-	"auroraride.com/edocseal/ca"
 )
 
 var (
 	cfg        *Config
 	configFile string
 )
-
-type CertificatePath struct {
-	Certificate string
-	PrivateKey  string
-}
 
 type AliyunOss struct {
 	AccessKeyId     string
@@ -42,60 +32,10 @@ type Snca struct {
 	CustomerType string
 }
 
+// Enterprise 企业证书拉取配置，企业资料与证书均存储在数据库
 type Enterprise struct {
-	Seal        string // 企业签章图片
-	Certificate string // 企业证书
-	PrivateKey  string // 企业私钥
-	PersonName  string // 代办姓名
-	Phone       string // 代办电话
-	Idcard      string // 代办身份证
-	Province    string // 省份
-	City        string // 城市
-	CreditCode  string // 统一社会信用代码
-	Name        string // 企业名称
-	Url         string // 企业证书加载地址, 若为空则自动申请证书
-	Token       string // 企业证书提供token
-
-	certificate *x509.Certificate // 企业证书对象
-	privateKey  *rsa.PrivateKey   // 企业私钥对象
-	certBytes   []byte            // 企业证书字节
-	keyBytes    []byte            // 企业私钥字节
-}
-
-func (cfg *Enterprise) GetCertificate() *x509.Certificate {
-	return cfg.certificate
-}
-
-func (cfg *Enterprise) GetCertificateBytes() []byte {
-	return cfg.certBytes
-}
-
-func (cfg *Enterprise) GetPrivateKey() *rsa.PrivateKey {
-	return cfg.privateKey
-}
-
-func (cfg *Enterprise) GetPrivateKeyBytes() []byte {
-	return cfg.keyBytes
-}
-
-func (cfg *Enterprise) Load() (err error) {
-	cfg.certBytes, err = os.ReadFile(cfg.Certificate)
-	if err != nil {
-		return
-	}
-
-	cfg.certificate, err = ca.ParseCertificate(cfg.certBytes)
-	if err != nil {
-		return
-	}
-
-	cfg.keyBytes, err = os.ReadFile(cfg.PrivateKey)
-	if err != nil {
-		return
-	}
-
-	cfg.privateKey, err = ca.ParsePrivateKey(cfg.keyBytes)
-	return
+	Url   string // 陕西CA 企业证书拉取地址，配置后不直接向陕西CA 申请企业证书
+	Token string // 对外提供企业证书接口的令牌，为空时不提供
 }
 
 type Config struct {
@@ -125,6 +65,7 @@ type Config struct {
 		Runtime     string // 运行时目录
 		Document    string // 文档目录
 		Certificate string // 证书目录
+		Seal        string // 企业签章目录，文件名为统一社会信用代码，为空时使用配置文件所在目录
 	}
 
 	// 文档配置
@@ -132,11 +73,8 @@ type Config struct {
 		BucketPath string // OSS存储路径
 	}
 
-	// 根证书和私钥，用于签发证书
-	RootCertificate CertificatePath
-
-	// 企业证书，用于签署协议
-	Enterprise *Enterprise
+	// 企业证书拉取配置
+	Enterprise Enterprise
 
 	// 日志配置
 	Logger struct {
@@ -179,27 +117,7 @@ func readConfig() (err error) {
 	}
 
 	cfg = &Config{}
-	err = viper.Unmarshal(cfg)
-	if err != nil {
-		return
-	}
-
-	// 获取企业签名文件完整路径
-	if !edocseal.FileExists(cfg.Enterprise.Seal) {
-		return errors.New("企业签章图片不存在")
-	}
-	if !edocseal.FileExists(cfg.Enterprise.PrivateKey) {
-		return errors.New("企业私钥不存在")
-	}
-	if !edocseal.FileExists(cfg.Enterprise.Certificate) {
-		return errors.New("企业证书不存在")
-	}
-
-	err = cfg.Enterprise.Load()
-	if err != nil {
-		return fmt.Errorf("企业证书加载失败: %s", err)
-	}
-	return
+	return viper.Unmarshal(cfg)
 }
 
 // LoadConfig 加载配置文件
@@ -241,19 +159,9 @@ func GetDocumentTaskNum() int {
 	return cfg.Task.Document
 }
 
-// GetEnterpriseConfig 获取企业配置
-func GetEnterpriseConfig() *Enterprise {
+// GetEnterpriseConfig 获取企业证书拉取配置
+func GetEnterpriseConfig() Enterprise {
 	return cfg.Enterprise
-}
-
-// UpdateEnterpriseConfig 更新企业配置
-func UpdateEnterpriseConfig(key, cert string, crt *x509.Certificate, certBytes []byte, privateKey *rsa.PrivateKey, keyBytes []byte) {
-	cfg.Enterprise.PrivateKey = key
-	cfg.Enterprise.Certificate = cert
-	cfg.Enterprise.certificate = crt
-	cfg.Enterprise.certBytes = certBytes
-	cfg.Enterprise.privateKey = privateKey
-	cfg.Enterprise.keyBytes = keyBytes
 }
 
 // GetShortUrlPrefix 获取短链接前缀
@@ -304,6 +212,14 @@ func GetDocumentDir() string {
 // GetCertificateDir 获取根证书路径
 func GetCertificateDir() string {
 	return cfg.Dir.Certificate
+}
+
+// GetSealDir 获取企业签章目录
+func GetSealDir() string {
+	if cfg.Dir.Seal != "" {
+		return cfg.Dir.Seal
+	}
+	return filepath.Dir(configFile)
 }
 
 // GetAliyunOss 获取阿里云OSS配置

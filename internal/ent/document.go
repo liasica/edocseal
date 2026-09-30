@@ -8,10 +8,10 @@ import (
 	"strings"
 	"time"
 
-	"entgo.io/ent"
-	"entgo.io/ent/dialect/sql"
 	"auroraride.com/edocseal/internal/ent/document"
 	"auroraride.com/edocseal/internal/model"
+	"entgo.io/ent"
+	"entgo.io/ent/dialect/sql"
 )
 
 // Document is the model entity for the Document schema.
@@ -61,7 +61,7 @@ func (*Document) scanValues(columns []string) ([]any, error) {
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
 // to the Document fields.
-func (d *Document) assignValues(columns []string, values []any) error {
+func (_m *Document) assignValues(columns []string, values []any) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
@@ -71,55 +71,55 @@ func (d *Document) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id", values[i])
 			} else if value.Valid {
-				d.ID = value.String
+				_m.ID = value.String
 			}
 		case document.FieldHash:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field hash", values[i])
 			} else if value.Valid {
-				d.Hash = value.String
+				_m.Hash = value.String
 			}
 		case document.FieldStatus:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field status", values[i])
 			} else if value.Valid {
-				d.Status = document.Status(value.String)
+				_m.Status = document.Status(value.String)
 			}
 		case document.FieldTemplateID:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field template_id", values[i])
 			} else if value.Valid {
-				d.TemplateID = value.String
+				_m.TemplateID = value.String
 			}
 		case document.FieldIDCardNumber:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field id_card_number", values[i])
 			} else if value.Valid {
-				d.IDCardNumber = value.String
+				_m.IDCardNumber = value.String
 			}
 		case document.FieldExpiresAt:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field expires_at", values[i])
 			} else if value.Valid {
-				d.ExpiresAt = value.Time
+				_m.ExpiresAt = value.Time
 			}
 		case document.FieldSignedURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field signed_url", values[i])
 			} else if value.Valid {
-				d.SignedURL = value.String
+				_m.SignedURL = value.String
 			}
 		case document.FieldUnsignedURL:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field unsigned_url", values[i])
 			} else if value.Valid {
-				d.UnsignedURL = value.String
+				_m.UnsignedURL = value.String
 			}
 		case document.FieldPaths:
 			if value, ok := values[i].(*[]byte); !ok {
 				return fmt.Errorf("unexpected type %T for field paths", values[i])
 			} else if value != nil && len(*value) > 0 {
-				if err := json.Unmarshal(*value, &d.Paths); err != nil {
+				if err := json.Unmarshal(*value, &_m.Paths); err != nil {
 					return fmt.Errorf("unmarshal field paths: %w", err)
 				}
 			}
@@ -127,10 +127,10 @@ func (d *Document) assignValues(columns []string, values []any) error {
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field create_at", values[i])
 			} else if value.Valid {
-				d.CreateAt = value.Time
+				_m.CreateAt = value.Time
 			}
 		default:
-			d.selectValues.Set(columns[i], values[i])
+			_m.selectValues.Set(columns[i], values[i])
 		}
 	}
 	return nil
@@ -138,59 +138,59 @@ func (d *Document) assignValues(columns []string, values []any) error {
 
 // Value returns the ent.Value that was dynamically selected and assigned to the Document.
 // This includes values selected through modifiers, order, etc.
-func (d *Document) Value(name string) (ent.Value, error) {
-	return d.selectValues.Get(name)
+func (_m *Document) Value(name string) (ent.Value, error) {
+	return _m.selectValues.Get(name)
 }
 
 // Update returns a builder for updating this Document.
 // Note that you need to call Document.Unwrap() before calling this method if this Document
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (d *Document) Update() *DocumentUpdateOne {
-	return NewDocumentClient(d.config).UpdateOne(d)
+func (_m *Document) Update() *DocumentUpdateOne {
+	return NewDocumentClient(_m.config).UpdateOne(_m)
 }
 
 // Unwrap unwraps the Document entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (d *Document) Unwrap() *Document {
-	_tx, ok := d.config.driver.(*txDriver)
+func (_m *Document) Unwrap() *Document {
+	_tx, ok := _m.config.driver.(*txDriver)
 	if !ok {
 		panic("ent: Document is not a transactional entity")
 	}
-	d.config.driver = _tx.drv
-	return d
+	_m.config.driver = _tx.drv
+	return _m
 }
 
 // String implements the fmt.Stringer.
-func (d *Document) String() string {
+func (_m *Document) String() string {
 	var builder strings.Builder
 	builder.WriteString("Document(")
-	builder.WriteString(fmt.Sprintf("id=%v, ", d.ID))
+	builder.WriteString(fmt.Sprintf("id=%v, ", _m.ID))
 	builder.WriteString("hash=")
-	builder.WriteString(d.Hash)
+	builder.WriteString(_m.Hash)
 	builder.WriteString(", ")
 	builder.WriteString("status=")
-	builder.WriteString(fmt.Sprintf("%v", d.Status))
+	builder.WriteString(fmt.Sprintf("%v", _m.Status))
 	builder.WriteString(", ")
 	builder.WriteString("template_id=")
-	builder.WriteString(d.TemplateID)
+	builder.WriteString(_m.TemplateID)
 	builder.WriteString(", ")
 	builder.WriteString("id_card_number=")
-	builder.WriteString(d.IDCardNumber)
+	builder.WriteString(_m.IDCardNumber)
 	builder.WriteString(", ")
 	builder.WriteString("expires_at=")
-	builder.WriteString(d.ExpiresAt.Format(time.ANSIC))
+	builder.WriteString(_m.ExpiresAt.Format(time.ANSIC))
 	builder.WriteString(", ")
 	builder.WriteString("signed_url=")
-	builder.WriteString(d.SignedURL)
+	builder.WriteString(_m.SignedURL)
 	builder.WriteString(", ")
 	builder.WriteString("unsigned_url=")
-	builder.WriteString(d.UnsignedURL)
+	builder.WriteString(_m.UnsignedURL)
 	builder.WriteString(", ")
 	builder.WriteString("paths=")
-	builder.WriteString(fmt.Sprintf("%v", d.Paths))
+	builder.WriteString(fmt.Sprintf("%v", _m.Paths))
 	builder.WriteString(", ")
 	builder.WriteString("create_at=")
-	builder.WriteString(d.CreateAt.Format(time.ANSIC))
+	builder.WriteString(_m.CreateAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

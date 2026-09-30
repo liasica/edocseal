@@ -9,8 +9,8 @@ import (
 	// required by schema hooks.
 	_ "auroraride.com/edocseal/internal/ent/runtime"
 
-	"entgo.io/ent/dialect/sql/schema"
 	"auroraride.com/edocseal/internal/ent/migrate"
+	"entgo.io/ent/dialect/sql/schema"
 )
 
 type (

@@ -27,6 +27,7 @@ func (Certification) Fields() []ent.Field {
 		field.String("private_path").MaxLen(255).Comment("私钥路径"),
 		field.String("cert_path").MaxLen(255).Comment("证书路径"),
 		field.Time("expires_at").Comment("证书过期时间"),
+		field.String("issuer").MaxLen(32).Default("SNCA").Comment("证书生成方式"),
 	}
 }
 

@@ -62,7 +62,6 @@ func GenerateRootCertificate(priKey *rsa.PrivateKey, subject pkix.Name) ([]byte,
 		BasicConstraintsValid: true,
 		IsCA:                  true,
 		MaxPathLenZero:        true,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		KeyUsage: x509.KeyUsageDigitalSignature |
 			x509.KeyUsageContentCommitment |
 			x509.KeyUsageKeyEncipherment |
@@ -176,5 +175,38 @@ func CreateInterCertificate(priKey *rsa.PrivateKey, ca *x509.Certificate, subjec
 	}
 
 	interKey, _ = x509.MarshalPKCS8PrivateKey(key)
+	return
+}
+
+// CreateSigningCertificate 签发用于文档签名的非 CA 证书，返回 DER 编码的证书与 PKCS8 编码的私钥
+func CreateSigningCertificate(
+	issuerKey *rsa.PrivateKey,
+	issuer *x509.Certificate,
+	subject pkix.Name,
+	years int,
+) (crt, key []byte, serial *big.Int, err error) {
+	signerKey := GenerateRsaPrivateKey()
+
+	serial, err = rand.Int(rand.Reader, new(big.Int).Lsh(big.NewInt(1), 63))
+	if err != nil {
+		return
+	}
+
+	now := time.Now()
+	certificate := x509.Certificate{
+		Subject:               subject,
+		SerialNumber:          serial,
+		NotBefore:             now,
+		NotAfter:              now.AddDate(years, 0, 0),
+		BasicConstraintsValid: true,
+		KeyUsage:              x509.KeyUsageDigitalSignature | x509.KeyUsageContentCommitment,
+	}
+
+	crt, err = x509.CreateCertificate(rand.Reader, &certificate, issuer, signerKey.Public(), issuerKey)
+	if err != nil {
+		return
+	}
+
+	key, err = x509.MarshalPKCS8PrivateKey(signerKey)
 	return
 }

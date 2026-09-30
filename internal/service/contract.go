@@ -15,7 +15,7 @@ import (
 	"auroraride.com/edocseal/pb"
 )
 
-// GracefulStartGrpcServer TODO: 优雅启动和停止grpc服务
+// GracefulStartGrpcServer TODO：优雅启动和停止grpc服务
 func GracefulStartGrpcServer() {
 }
 
@@ -66,12 +66,13 @@ func (*ContractService) Sign(_ context.Context, req *pb.ContractServiceSignReque
 			fields := []zap.Field{
 				zap.String("docId", req.DocId),
 				zap.Reflect("payload", map[string]string{
-					"name":     req.Name,
-					"province": req.Province,
-					"city":     req.City,
-					"address":  req.Address,
-					"phone":    req.Phone,
-					"idcard":   req.Idcard,
+					"name":              req.Name,
+					"province":          req.Province,
+					"city":              req.City,
+					"address":           req.Address,
+					"phone":             req.Phone,
+					"idcard":            req.Idcard,
+					"certificateIssuer": req.CertificateIssuer,
 				}),
 				zap.Reflect("response", res),
 			}

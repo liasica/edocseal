@@ -8,12 +8,12 @@ import (
 	"fmt"
 	"time"
 
+	"auroraride.com/edocseal/internal/ent/document"
+	"auroraride.com/edocseal/internal/model"
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
-	"auroraride.com/edocseal/internal/ent/document"
-	"auroraride.com/edocseal/internal/model"
 )
 
 // DocumentCreate is the builder for creating a Document entity.
@@ -25,103 +25,103 @@ type DocumentCreate struct {
 }
 
 // SetHash sets the "hash" field.
-func (dc *DocumentCreate) SetHash(s string) *DocumentCreate {
-	dc.mutation.SetHash(s)
-	return dc
+func (_c *DocumentCreate) SetHash(v string) *DocumentCreate {
+	_c.mutation.SetHash(v)
+	return _c
 }
 
 // SetStatus sets the "status" field.
-func (dc *DocumentCreate) SetStatus(d document.Status) *DocumentCreate {
-	dc.mutation.SetStatus(d)
-	return dc
+func (_c *DocumentCreate) SetStatus(v document.Status) *DocumentCreate {
+	_c.mutation.SetStatus(v)
+	return _c
 }
 
 // SetNillableStatus sets the "status" field if the given value is not nil.
-func (dc *DocumentCreate) SetNillableStatus(d *document.Status) *DocumentCreate {
-	if d != nil {
-		dc.SetStatus(*d)
+func (_c *DocumentCreate) SetNillableStatus(v *document.Status) *DocumentCreate {
+	if v != nil {
+		_c.SetStatus(*v)
 	}
-	return dc
+	return _c
 }
 
 // SetTemplateID sets the "template_id" field.
-func (dc *DocumentCreate) SetTemplateID(s string) *DocumentCreate {
-	dc.mutation.SetTemplateID(s)
-	return dc
+func (_c *DocumentCreate) SetTemplateID(v string) *DocumentCreate {
+	_c.mutation.SetTemplateID(v)
+	return _c
 }
 
 // SetIDCardNumber sets the "id_card_number" field.
-func (dc *DocumentCreate) SetIDCardNumber(s string) *DocumentCreate {
-	dc.mutation.SetIDCardNumber(s)
-	return dc
+func (_c *DocumentCreate) SetIDCardNumber(v string) *DocumentCreate {
+	_c.mutation.SetIDCardNumber(v)
+	return _c
 }
 
 // SetExpiresAt sets the "expires_at" field.
-func (dc *DocumentCreate) SetExpiresAt(t time.Time) *DocumentCreate {
-	dc.mutation.SetExpiresAt(t)
-	return dc
+func (_c *DocumentCreate) SetExpiresAt(v time.Time) *DocumentCreate {
+	_c.mutation.SetExpiresAt(v)
+	return _c
 }
 
 // SetSignedURL sets the "signed_url" field.
-func (dc *DocumentCreate) SetSignedURL(s string) *DocumentCreate {
-	dc.mutation.SetSignedURL(s)
-	return dc
+func (_c *DocumentCreate) SetSignedURL(v string) *DocumentCreate {
+	_c.mutation.SetSignedURL(v)
+	return _c
 }
 
 // SetNillableSignedURL sets the "signed_url" field if the given value is not nil.
-func (dc *DocumentCreate) SetNillableSignedURL(s *string) *DocumentCreate {
-	if s != nil {
-		dc.SetSignedURL(*s)
+func (_c *DocumentCreate) SetNillableSignedURL(v *string) *DocumentCreate {
+	if v != nil {
+		_c.SetSignedURL(*v)
 	}
-	return dc
+	return _c
 }
 
 // SetUnsignedURL sets the "unsigned_url" field.
-func (dc *DocumentCreate) SetUnsignedURL(s string) *DocumentCreate {
-	dc.mutation.SetUnsignedURL(s)
-	return dc
+func (_c *DocumentCreate) SetUnsignedURL(v string) *DocumentCreate {
+	_c.mutation.SetUnsignedURL(v)
+	return _c
 }
 
 // SetNillableUnsignedURL sets the "unsigned_url" field if the given value is not nil.
-func (dc *DocumentCreate) SetNillableUnsignedURL(s *string) *DocumentCreate {
-	if s != nil {
-		dc.SetUnsignedURL(*s)
+func (_c *DocumentCreate) SetNillableUnsignedURL(v *string) *DocumentCreate {
+	if v != nil {
+		_c.SetUnsignedURL(*v)
 	}
-	return dc
+	return _c
 }
 
 // SetPaths sets the "paths" field.
-func (dc *DocumentCreate) SetPaths(m *model.Paths) *DocumentCreate {
-	dc.mutation.SetPaths(m)
-	return dc
+func (_c *DocumentCreate) SetPaths(v *model.Paths) *DocumentCreate {
+	_c.mutation.SetPaths(v)
+	return _c
 }
 
 // SetCreateAt sets the "create_at" field.
-func (dc *DocumentCreate) SetCreateAt(t time.Time) *DocumentCreate {
-	dc.mutation.SetCreateAt(t)
-	return dc
+func (_c *DocumentCreate) SetCreateAt(v time.Time) *DocumentCreate {
+	_c.mutation.SetCreateAt(v)
+	return _c
 }
 
 // SetID sets the "id" field.
-func (dc *DocumentCreate) SetID(s string) *DocumentCreate {
-	dc.mutation.SetID(s)
-	return dc
+func (_c *DocumentCreate) SetID(v string) *DocumentCreate {
+	_c.mutation.SetID(v)
+	return _c
 }
 
 // Mutation returns the DocumentMutation object of the builder.
-func (dc *DocumentCreate) Mutation() *DocumentMutation {
-	return dc.mutation
+func (_c *DocumentCreate) Mutation() *DocumentMutation {
+	return _c.mutation
 }
 
 // Save creates the Document in the database.
-func (dc *DocumentCreate) Save(ctx context.Context) (*Document, error) {
-	dc.defaults()
-	return withHooks(ctx, dc.sqlSave, dc.mutation, dc.hooks)
+func (_c *DocumentCreate) Save(ctx context.Context) (*Document, error) {
+	_c.defaults()
+	return withHooks(ctx, _c.sqlSave, _c.mutation, _c.hooks)
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (dc *DocumentCreate) SaveX(ctx context.Context) *Document {
-	v, err := dc.Save(ctx)
+func (_c *DocumentCreate) SaveX(ctx context.Context) *Document {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -129,68 +129,68 @@ func (dc *DocumentCreate) SaveX(ctx context.Context) *Document {
 }
 
 // Exec executes the query.
-func (dc *DocumentCreate) Exec(ctx context.Context) error {
-	_, err := dc.Save(ctx)
+func (_c *DocumentCreate) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dc *DocumentCreate) ExecX(ctx context.Context) {
-	if err := dc.Exec(ctx); err != nil {
+func (_c *DocumentCreate) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (dc *DocumentCreate) defaults() {
-	if _, ok := dc.mutation.Status(); !ok {
+func (_c *DocumentCreate) defaults() {
+	if _, ok := _c.mutation.Status(); !ok {
 		v := document.DefaultStatus
-		dc.mutation.SetStatus(v)
+		_c.mutation.SetStatus(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (dc *DocumentCreate) check() error {
-	if _, ok := dc.mutation.Hash(); !ok {
+func (_c *DocumentCreate) check() error {
+	if _, ok := _c.mutation.Hash(); !ok {
 		return &ValidationError{Name: "hash", err: errors.New(`ent: missing required field "Document.hash"`)}
 	}
-	if _, ok := dc.mutation.Status(); !ok {
+	if _, ok := _c.mutation.Status(); !ok {
 		return &ValidationError{Name: "status", err: errors.New(`ent: missing required field "Document.status"`)}
 	}
-	if v, ok := dc.mutation.Status(); ok {
+	if v, ok := _c.mutation.Status(); ok {
 		if err := document.StatusValidator(v); err != nil {
 			return &ValidationError{Name: "status", err: fmt.Errorf(`ent: validator failed for field "Document.status": %w`, err)}
 		}
 	}
-	if _, ok := dc.mutation.TemplateID(); !ok {
+	if _, ok := _c.mutation.TemplateID(); !ok {
 		return &ValidationError{Name: "template_id", err: errors.New(`ent: missing required field "Document.template_id"`)}
 	}
-	if _, ok := dc.mutation.IDCardNumber(); !ok {
+	if _, ok := _c.mutation.IDCardNumber(); !ok {
 		return &ValidationError{Name: "id_card_number", err: errors.New(`ent: missing required field "Document.id_card_number"`)}
 	}
-	if v, ok := dc.mutation.IDCardNumber(); ok {
+	if v, ok := _c.mutation.IDCardNumber(); ok {
 		if err := document.IDCardNumberValidator(v); err != nil {
 			return &ValidationError{Name: "id_card_number", err: fmt.Errorf(`ent: validator failed for field "Document.id_card_number": %w`, err)}
 		}
 	}
-	if _, ok := dc.mutation.ExpiresAt(); !ok {
+	if _, ok := _c.mutation.ExpiresAt(); !ok {
 		return &ValidationError{Name: "expires_at", err: errors.New(`ent: missing required field "Document.expires_at"`)}
 	}
-	if _, ok := dc.mutation.Paths(); !ok {
+	if _, ok := _c.mutation.Paths(); !ok {
 		return &ValidationError{Name: "paths", err: errors.New(`ent: missing required field "Document.paths"`)}
 	}
-	if _, ok := dc.mutation.CreateAt(); !ok {
+	if _, ok := _c.mutation.CreateAt(); !ok {
 		return &ValidationError{Name: "create_at", err: errors.New(`ent: missing required field "Document.create_at"`)}
 	}
 	return nil
 }
 
-func (dc *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
-	if err := dc.check(); err != nil {
+func (_c *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
+	if err := _c.check(); err != nil {
 		return nil, err
 	}
-	_node, _spec := dc.createSpec()
-	if err := sqlgraph.CreateNode(ctx, dc.driver, _spec); err != nil {
+	_node, _spec := _c.createSpec()
+	if err := sqlgraph.CreateNode(ctx, _c.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{msg: err.Error(), wrap: err}
 		}
@@ -203,54 +203,54 @@ func (dc *DocumentCreate) sqlSave(ctx context.Context) (*Document, error) {
 			return nil, fmt.Errorf("unexpected Document.ID type: %T", _spec.ID.Value)
 		}
 	}
-	dc.mutation.id = &_node.ID
-	dc.mutation.done = true
+	_c.mutation.id = &_node.ID
+	_c.mutation.done = true
 	return _node, nil
 }
 
-func (dc *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec) {
+func (_c *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Document{config: dc.config}
+		_node = &Document{config: _c.config}
 		_spec = sqlgraph.NewCreateSpec(document.Table, sqlgraph.NewFieldSpec(document.FieldID, field.TypeString))
 	)
-	_spec.OnConflict = dc.conflict
-	if id, ok := dc.mutation.ID(); ok {
+	_spec.OnConflict = _c.conflict
+	if id, ok := _c.mutation.ID(); ok {
 		_node.ID = id
 		_spec.ID.Value = id
 	}
-	if value, ok := dc.mutation.Hash(); ok {
+	if value, ok := _c.mutation.Hash(); ok {
 		_spec.SetField(document.FieldHash, field.TypeString, value)
 		_node.Hash = value
 	}
-	if value, ok := dc.mutation.Status(); ok {
+	if value, ok := _c.mutation.Status(); ok {
 		_spec.SetField(document.FieldStatus, field.TypeEnum, value)
 		_node.Status = value
 	}
-	if value, ok := dc.mutation.TemplateID(); ok {
+	if value, ok := _c.mutation.TemplateID(); ok {
 		_spec.SetField(document.FieldTemplateID, field.TypeString, value)
 		_node.TemplateID = value
 	}
-	if value, ok := dc.mutation.IDCardNumber(); ok {
+	if value, ok := _c.mutation.IDCardNumber(); ok {
 		_spec.SetField(document.FieldIDCardNumber, field.TypeString, value)
 		_node.IDCardNumber = value
 	}
-	if value, ok := dc.mutation.ExpiresAt(); ok {
+	if value, ok := _c.mutation.ExpiresAt(); ok {
 		_spec.SetField(document.FieldExpiresAt, field.TypeTime, value)
 		_node.ExpiresAt = value
 	}
-	if value, ok := dc.mutation.SignedURL(); ok {
+	if value, ok := _c.mutation.SignedURL(); ok {
 		_spec.SetField(document.FieldSignedURL, field.TypeString, value)
 		_node.SignedURL = value
 	}
-	if value, ok := dc.mutation.UnsignedURL(); ok {
+	if value, ok := _c.mutation.UnsignedURL(); ok {
 		_spec.SetField(document.FieldUnsignedURL, field.TypeString, value)
 		_node.UnsignedURL = value
 	}
-	if value, ok := dc.mutation.Paths(); ok {
+	if value, ok := _c.mutation.Paths(); ok {
 		_spec.SetField(document.FieldPaths, field.TypeJSON, value)
 		_node.Paths = value
 	}
-	if value, ok := dc.mutation.CreateAt(); ok {
+	if value, ok := _c.mutation.CreateAt(); ok {
 		_spec.SetField(document.FieldCreateAt, field.TypeTime, value)
 		_node.CreateAt = value
 	}
@@ -273,10 +273,10 @@ func (dc *DocumentCreate) createSpec() (*Document, *sqlgraph.CreateSpec) {
 //			SetHash(v+v).
 //		}).
 //		Exec(ctx)
-func (dc *DocumentCreate) OnConflict(opts ...sql.ConflictOption) *DocumentUpsertOne {
-	dc.conflict = opts
+func (_c *DocumentCreate) OnConflict(opts ...sql.ConflictOption) *DocumentUpsertOne {
+	_c.conflict = opts
 	return &DocumentUpsertOne{
-		create: dc,
+		create: _c,
 	}
 }
 
@@ -286,10 +286,10 @@ func (dc *DocumentCreate) OnConflict(opts ...sql.ConflictOption) *DocumentUpsert
 //	client.Document.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dc *DocumentCreate) OnConflictColumns(columns ...string) *DocumentUpsertOne {
-	dc.conflict = append(dc.conflict, sql.ConflictColumns(columns...))
+func (_c *DocumentCreate) OnConflictColumns(columns ...string) *DocumentUpsertOne {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &DocumentUpsertOne{
-		create: dc,
+		create: _c,
 	}
 }
 
@@ -669,16 +669,16 @@ type DocumentCreateBulk struct {
 }
 
 // Save creates the Document entities in the database.
-func (dcb *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
-	if dcb.err != nil {
-		return nil, dcb.err
+func (_c *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
+	if _c.err != nil {
+		return nil, _c.err
 	}
-	specs := make([]*sqlgraph.CreateSpec, len(dcb.builders))
-	nodes := make([]*Document, len(dcb.builders))
-	mutators := make([]Mutator, len(dcb.builders))
-	for i := range dcb.builders {
+	specs := make([]*sqlgraph.CreateSpec, len(_c.builders))
+	nodes := make([]*Document, len(_c.builders))
+	mutators := make([]Mutator, len(_c.builders))
+	for i := range _c.builders {
 		func(i int, root context.Context) {
-			builder := dcb.builders[i]
+			builder := _c.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 				mutation, ok := m.(*DocumentMutation)
@@ -692,12 +692,12 @@ func (dcb *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 				var err error
 				nodes[i], specs[i] = builder.createSpec()
 				if i < len(mutators)-1 {
-					_, err = mutators[i+1].Mutate(root, dcb.builders[i+1].mutation)
+					_, err = mutators[i+1].Mutate(root, _c.builders[i+1].mutation)
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
-					spec.OnConflict = dcb.conflict
+					spec.OnConflict = _c.conflict
 					// Invoke the actual operation on the latest mutation in the chain.
-					if err = sqlgraph.BatchCreate(ctx, dcb.driver, spec); err != nil {
+					if err = sqlgraph.BatchCreate(ctx, _c.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{msg: err.Error(), wrap: err}
 						}
@@ -717,7 +717,7 @@ func (dcb *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 		}(i, ctx)
 	}
 	if len(mutators) > 0 {
-		if _, err := mutators[0].Mutate(ctx, dcb.builders[0].mutation); err != nil {
+		if _, err := mutators[0].Mutate(ctx, _c.builders[0].mutation); err != nil {
 			return nil, err
 		}
 	}
@@ -725,8 +725,8 @@ func (dcb *DocumentCreateBulk) Save(ctx context.Context) ([]*Document, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (dcb *DocumentCreateBulk) SaveX(ctx context.Context) []*Document {
-	v, err := dcb.Save(ctx)
+func (_c *DocumentCreateBulk) SaveX(ctx context.Context) []*Document {
+	v, err := _c.Save(ctx)
 	if err != nil {
 		panic(err)
 	}
@@ -734,14 +734,14 @@ func (dcb *DocumentCreateBulk) SaveX(ctx context.Context) []*Document {
 }
 
 // Exec executes the query.
-func (dcb *DocumentCreateBulk) Exec(ctx context.Context) error {
-	_, err := dcb.Save(ctx)
+func (_c *DocumentCreateBulk) Exec(ctx context.Context) error {
+	_, err := _c.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (dcb *DocumentCreateBulk) ExecX(ctx context.Context) {
-	if err := dcb.Exec(ctx); err != nil {
+func (_c *DocumentCreateBulk) ExecX(ctx context.Context) {
+	if err := _c.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
@@ -761,10 +761,10 @@ func (dcb *DocumentCreateBulk) ExecX(ctx context.Context) {
 //			SetHash(v+v).
 //		}).
 //		Exec(ctx)
-func (dcb *DocumentCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocumentUpsertBulk {
-	dcb.conflict = opts
+func (_c *DocumentCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocumentUpsertBulk {
+	_c.conflict = opts
 	return &DocumentUpsertBulk{
-		create: dcb,
+		create: _c,
 	}
 }
 
@@ -774,10 +774,10 @@ func (dcb *DocumentCreateBulk) OnConflict(opts ...sql.ConflictOption) *DocumentU
 //	client.Document.Create().
 //		OnConflict(sql.ConflictColumns(columns...)).
 //		Exec(ctx)
-func (dcb *DocumentCreateBulk) OnConflictColumns(columns ...string) *DocumentUpsertBulk {
-	dcb.conflict = append(dcb.conflict, sql.ConflictColumns(columns...))
+func (_c *DocumentCreateBulk) OnConflictColumns(columns ...string) *DocumentUpsertBulk {
+	_c.conflict = append(_c.conflict, sql.ConflictColumns(columns...))
 	return &DocumentUpsertBulk{
-		create: dcb,
+		create: _c,
 	}
 }
 

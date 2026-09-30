@@ -16,6 +16,7 @@ var (
 		{Name: "private_path", Type: field.TypeString, Size: 255, Comment: "私钥路径"},
 		{Name: "cert_path", Type: field.TypeString, Size: 255, Comment: "证书路径"},
 		{Name: "expires_at", Type: field.TypeTime, Comment: "证书过期时间"},
+		{Name: "issuer", Type: field.TypeString, Size: 32, Comment: "证书生成方式", Default: "SNCA"},
 	}
 	// CertificationTable holds the schema information for the "certification" table.
 	CertificationTable = &schema.Table{
@@ -64,10 +65,55 @@ var (
 			},
 		},
 	}
+	// EnterpriseColumns holds the columns for the "enterprise" table.
+	EnterpriseColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "credit_code", Type: field.TypeString, Unique: true, Size: 18, Comment: "统一社会信用代码"},
+		{Name: "name", Type: field.TypeString, Size: 100, Comment: "企业名称"},
+		{Name: "province", Type: field.TypeString, Size: 20, Comment: "省份"},
+		{Name: "city", Type: field.TypeString, Size: 20, Comment: "城市"},
+		{Name: "person_name", Type: field.TypeString, Nullable: true, Size: 50, Comment: "代办人姓名，向陕西CA 申请证书时使用"},
+		{Name: "phone", Type: field.TypeString, Nullable: true, Size: 20, Comment: "代办人手机号，向陕西CA 申请证书时使用"},
+		{Name: "idcard", Type: field.TypeString, Nullable: true, Size: 18, Comment: "代办人身份证号，向陕西CA 申请证书时使用"},
+		{Name: "is_default", Type: field.TypeBool, Comment: "是否为当前签约企业", Default: false},
+		{Name: "root_cert_path", Type: field.TypeString, Nullable: true, Size: 255, Comment: "自签根证书路径"},
+		{Name: "root_private_path", Type: field.TypeString, Nullable: true, Size: 255, Comment: "自签根证书私钥路径"},
+		{Name: "root_expires_at", Type: field.TypeTime, Nullable: true, Comment: "自签根证书过期时间"},
+	}
+	// EnterpriseTable holds the schema information for the "enterprise" table.
+	EnterpriseTable = &schema.Table{
+		Name:       "enterprise",
+		Columns:    EnterpriseColumns,
+		PrimaryKey: []*schema.Column{EnterpriseColumns[0]},
+	}
+	// EnterpriseCertificationColumns holds the columns for the "enterprise_certification" table.
+	EnterpriseCertificationColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "credit_code", Type: field.TypeString, Size: 18, Comment: "统一社会信用代码"},
+		{Name: "issuer", Type: field.TypeString, Size: 32, Comment: "证书生成方式"},
+		{Name: "private_path", Type: field.TypeString, Size: 255, Comment: "私钥路径"},
+		{Name: "cert_path", Type: field.TypeString, Size: 255, Comment: "证书路径"},
+		{Name: "expires_at", Type: field.TypeTime, Comment: "证书过期时间"},
+	}
+	// EnterpriseCertificationTable holds the schema information for the "enterprise_certification" table.
+	EnterpriseCertificationTable = &schema.Table{
+		Name:       "enterprise_certification",
+		Columns:    EnterpriseCertificationColumns,
+		PrimaryKey: []*schema.Column{EnterpriseCertificationColumns[0]},
+		Indexes: []*schema.Index{
+			{
+				Name:    "enterprisecertification_credit_code_issuer",
+				Unique:  true,
+				Columns: []*schema.Column{EnterpriseCertificationColumns[1], EnterpriseCertificationColumns[2]},
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
 		CertificationTable,
 		DocumentTable,
+		EnterpriseTable,
+		EnterpriseCertificationTable,
 	}
 )
 
@@ -77,5 +123,11 @@ func init() {
 	}
 	DocumentTable.Annotation = &entsql.Annotation{
 		Table: "document",
+	}
+	EnterpriseTable.Annotation = &entsql.Annotation{
+		Table: "enterprise",
+	}
+	EnterpriseCertificationTable.Annotation = &entsql.Annotation{
+		Table: "enterprise_certification",
 	}
 }

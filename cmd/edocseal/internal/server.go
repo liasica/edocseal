@@ -32,8 +32,8 @@ func serverCommand() *cobra.Command {
 			// 启动文档删除定时任务
 			go task.NewFileTask().Run()
 
-			// 启动定时更新企业证书任务
-			go task.NewEnterpriseTask().Run()
+			// 启动企业证书自动续签定时任务
+			go task.NewCertificateTask().Run()
 
 			// 启动http服务
 			go service.StartHttpServer()
@@ -55,6 +55,7 @@ func serverCommand() *cobra.Command {
 			defer s.GracefulStop()
 
 			pb.RegisterContractServiceServer(s, &service.ContractService{})
+			pb.RegisterEnterpriseServiceServer(s, &service.EnterpriseService{})
 			zap.L().Info("RPC启动", zap.String("bind", g.GetRPCBind()))
 
 			// 启动服务
