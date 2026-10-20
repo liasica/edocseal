@@ -367,6 +367,57 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 		return
 	}
 
+	// 获取当前签约企业
+	var ep *ent.Enterprise
+	ep, err = QueryEnterprise("")
+	if err != nil {
+		return
+	}
+
+	var img []byte
+	img, err = signWithEnterprise(doc, req, ep, ResolveCertificateIssuer(req.CertificateIssuer))
+	if err != nil {
+		return
+	}
+
+	// 上传至阿里云
+	if upload {
+		// 读取合同
+		var b []byte
+		b, err = os.ReadFile(doc.Paths.Signed)
+		if err != nil {
+			return
+		}
+
+		// 上传合同
+		url, err = UploadDocument(doc.Paths.OssSigned, b)
+		if err != nil {
+			return
+		}
+
+		// 上传签名图片
+		ao, _ := oss()
+		_ = ao.UploadBytes(doc.Paths.OssImage, img)
+	}
+
+	zap.L().Info("签名成功", zap.String("docId", req.DocId), zap.String("url", url))
+
+	// 更新数据库
+	err = doc.Update().SetStatus(document.StatusSigned).SetSignedURL(url).Exec(context.Background())
+	if err != nil {
+		zap.L().Error("更新文档状态失败 → 签约成功", zap.Error(err), zap.String("docId", req.DocId), zap.String("url", url))
+	}
+	return
+}
+
+// signWithEnterprise 以指定签约企业与签署人签署未签约文档，返回签署人签名图片
+// 企业证书按 enterpriseIssuer 选取，个人证书按请求中的证书生成方式签发
+func signWithEnterprise(
+	doc *ent.Document,
+	req *pb.ContractServiceSignRequest,
+	ep *ent.Enterprise,
+	enterpriseIssuer string,
+) (img []byte, err error) {
 	// 获取模板
 	var tmpl *model.Template
 	tmpl, err = GetTemplate(doc.TemplateID)
@@ -376,11 +427,11 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 
 	// 获取未签名文档
 	if !edocseal.FileExists(doc.Paths.UnSigned) {
-		return "", errors.New("未找到未签约文档")
+		err = errors.New("未找到未签约文档")
+		return
 	}
 
 	// 保存签名
-	var img []byte
 	img, err = base64.StdEncoding.DecodeString(req.Image)
 	if err != nil {
 		return
@@ -392,15 +443,9 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 
 	issuer := ResolveCertificateIssuer(req.CertificateIssuer)
 
-	// 获取当前签约企业、企业证书与签章
-	var ep *ent.Enterprise
-	ep, err = QueryEnterprise("")
-	if err != nil {
-		return
-	}
-
+	// 获取企业证书与签章
 	var ec *ent.EnterpriseCertification
-	ec, err = EnterpriseCertificate(ep, issuer)
+	ec, err = EnterpriseCertificate(ep, enterpriseIssuer)
 	if err != nil {
 		return
 	}
@@ -465,35 +510,6 @@ func SignDocument(req *pb.ContractServiceSignRequest, upload bool) (url string, 
 	out, err = edocseal.Exec(g.GetSigner(), "--config", cfgPath)
 	if err != nil {
 		zap.L().Error("签名失败", zap.Error(err), zap.Reflect("payload", req), zap.String("output", string(out)))
-		return
-	}
-
-	// 上传至阿里云
-	if upload {
-		// 读取合同
-		var b []byte
-		b, err = os.ReadFile(doc.Paths.Signed)
-		if err != nil {
-			return
-		}
-
-		// 上传合同
-		url, err = UploadDocument(doc.Paths.OssSigned, b)
-		if err != nil {
-			return
-		}
-
-		// 上传签名图片
-		ao, _ := oss()
-		_ = ao.UploadBytes(doc.Paths.OssImage, img)
-	}
-
-	zap.L().Info("签名成功", zap.String("docId", req.DocId), zap.String("url", url))
-
-	// 更新数据库
-	err = doc.Update().SetStatus(document.StatusSigned).SetSignedURL(url).Exec(context.Background())
-	if err != nil {
-		zap.L().Error("更新文档状态失败 → 签约成功", zap.Error(err), zap.String("docId", req.DocId), zap.String("url", url))
 	}
 	return
 }

@@ -50,6 +50,7 @@ func RunCommand() {
 		tmpl.Command(),
 		shorturlCommand(),
 		enterpriseCommand(),
+		contractCommand(),
 	)
 
 	_ = cmd.Execute()
